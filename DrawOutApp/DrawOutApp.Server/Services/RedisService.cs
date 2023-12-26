@@ -15,6 +15,7 @@ namespace DrawOutApp.Server.Services
 
         public Task AddCustomWordsAsync(string roomId, IEnumerable<string> words)
         {
+            //key = roomId value = words
             throw new NotImplementedException();
         }
 
