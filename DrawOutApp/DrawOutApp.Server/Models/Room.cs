@@ -18,7 +18,7 @@ namespace DrawOutApp.Server.Models
         [BsonElement("playerCount")]
         public int PlayerCount { get; set; }
         [BsonElement("roomAdmin")]
-        public Player RoomAdmin { get; set; } = null!;
+        public Player? RoomAdmin { get; set; }
         [BsonElement("players")]
         public List<Player>? Players { get; set; }
         [BsonElement("customWords")]
