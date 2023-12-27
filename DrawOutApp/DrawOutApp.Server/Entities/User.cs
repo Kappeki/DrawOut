@@ -1,13 +1,12 @@
-﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
-using System.Collections;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace DrawOutApp.Server.Models
+namespace DrawOutApp.Server.Entities
 {
     public enum Role { Player, Painter, RoomAdmin, TeamLeader }
-    public class Player
+    public class User
     {
-        
-        public String SessionId { get; set; } = null!; //kljuc
+        [Required]
+        public String SessionId { get; set; } = $"user:{Guid.NewGuid().ToString()}";
 
         public String? GameSessionId { get; set; }
 
@@ -19,7 +18,7 @@ namespace DrawOutApp.Server.Models
 
         public int TeamId { get; set; } = 0;
 
-        public Player() 
+        public User()
         {
             Roles = new HashSet<Role>();
         }

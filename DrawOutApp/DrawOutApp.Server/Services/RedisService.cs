@@ -1,5 +1,5 @@
 ﻿
-using DrawOutApp.Server.DataLayer;
+using DrawOutApp.Server.Settings;
 using StackExchange.Redis;
 
 namespace DrawOutApp.Server.Services

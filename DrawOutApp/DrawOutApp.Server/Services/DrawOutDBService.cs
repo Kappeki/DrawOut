@@ -1,4 +1,4 @@
-﻿using DrawOutApp.Server.DataLayer;
+﻿using DrawOutApp.Server.Settings;
 using DrawOutApp.Server.Models;
 using MongoDB.Driver;
 

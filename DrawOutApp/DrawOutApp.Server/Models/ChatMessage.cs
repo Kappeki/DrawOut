@@ -2,13 +2,10 @@
 {
     public class ChatMessage
     { 
-
         public String Sender { get; set; }
 
         public String Content { get; set; }
 
-        public DateTime Timestamp { get; set; }
-
-
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 }

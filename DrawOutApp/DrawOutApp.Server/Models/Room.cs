@@ -1,5 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Security.Permissions;
+using System.Text.Json.Serialization;
 
 namespace DrawOutApp.Server.Models
 {
@@ -7,51 +9,27 @@ namespace DrawOutApp.Server.Models
 
     public enum RoundTime { Short = 40, Medium = 60, Long = 80 }
 
-    [BsonIgnoreExtraElements]
     public class Room
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
+       
         public int Id { get; set; }
-
-        [BsonElement("roomId")]
         public String RoomId { get; set; } = null!;
-
-        [BsonElement("roomName")]
         public String RoomName { get; set; } = null!;
-
-        [BsonElement("password")]
         public String Password { get; set; } = String.Empty;
-
-        [BsonElement("playerCount")]
         public int PlayerCount { get; set; }
-
-        [BsonElement("roomAdmin")]
-        public Player? RoomAdmin { get; set; }
-
-        [BsonElement("players")]
-        public List<Player>? Players { get; set; }
-
-        [BsonElement("customWords")]
+        public UserModel? RoomAdmin { get; set; }
+        public List<UserModel>? Players { get; set; }
         public List<String>? CustomWords { get; set; }
-
-        [BsonElement("chatMessages")]
-        public List<ChatMessage>? ChatMessages { get; set; }
-
-        [BsonElement("wordPackId")]
+        public List<ChatMessage>? RoomChat { get; set; }
         public ObjectId SelectedWordPack { get; set; }
-
-        [BsonElement("gameState")]
         public GameState GameState { get; set; }
-
         public Dictionary<String, int> TeamScores { get; set; } //nadograditi
-
         public RoundTime RoundTime { get; set; } //selektuje room admin
 
         public Room()
         {
-            Players = new List<Player>();
-            ChatMessages = new List<ChatMessage>();
+            Players = new List<UserModel>();
+            RoomChat = new List<ChatMessage>();
             TeamScores = new Dictionary<String, int>();
             GameState = GameState.Waiting;
             RoundTime = RoundTime.Medium;
@@ -59,12 +37,39 @@ namespace DrawOutApp.Server.Models
 
         public void ClearChat() 
         { 
-            ChatMessages?.Clear(); 
+            RoomChat?.Clear(); 
         }
 
         public bool IsReady() //proverava da li prvo ima dovoljno igraca, a onda da li su timovi izjednaceni, tj da li je svako izabrao tim
         {
-            throw new NotImplementedException();
+            if(Players!.Count < 4)
+            {
+                return false;
+            }
+            else
+            {
+                int redTeamCount = 0;
+                int blueTeamCount = 0;
+                foreach (UserModel player in Players)
+                {
+                    if (player.TeamId == 1)
+                    {
+                        redTeamCount++;
+                    }
+                    else if (player.TeamId == 2)
+                    {
+                        blueTeamCount++;
+                    }
+                }
+                if (redTeamCount > 2 && blueTeamCount > 2) 
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
         
     }

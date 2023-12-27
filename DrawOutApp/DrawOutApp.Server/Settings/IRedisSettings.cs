@@ -1,4 +1,4 @@
-﻿namespace DrawOutApp.Server.DataLayer
+﻿namespace DrawOutApp.Server.Settings
 {
     public interface IRedisSettings
     {

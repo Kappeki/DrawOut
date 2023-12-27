@@ -1,10 +1,35 @@
 ﻿namespace DrawOutApp.Server.Models
 {
-    public class Drawing
+    public enum ToolType
     {
-        public String DrawingId { get; set; }
+        Brush,
+        FillBucket
+    }
 
+    public enum ActionType
+    {
+        Draw,
+        Fill,
+        Undo,
+        Clear
+    }
 
+    public class DrawingAction
+    {
+        public ToolType Tool { get; set; }
+        public ActionType Action { get; set; }
+        public String Color { get; set; }
+        public int BrushSize { get; set; }
+        public List<(int X, int Y)> StrokePath { get; set; }
+        public bool IsFilled { get; set; }
+        public bool ClearCanvas { get; set; }
 
+        public DrawingAction()
+        {
+            StrokePath = new List<(int X, int Y)>();
+            Color = "#000000";
+        }
+
+        // Constructor and any necessary methods would go here
     }
 }
