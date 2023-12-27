@@ -1699,23 +1699,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Korisnik\\.nuget\\packages\\": {},
+    "C:\\Users\\Dusan-PC\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Korisnik\\Desktop\\DrawOut\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
+      "projectUniqueName": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
       "projectName": "DrawOutApp.Server",
-      "projectPath": "C:\\Users\\Korisnik\\Desktop\\DrawOut\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
-      "packagesPath": "C:\\Users\\Korisnik\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Korisnik\\Desktop\\DrawOut\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\obj\\",
+      "projectPath": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
+      "packagesPath": "C:\\Users\\Dusan-PC\\.nuget\\packages\\",
+      "outputPath": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Korisnik\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Dusan-PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1736,6 +1736,9 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "default"
       }
     },
     "frameworks": {
