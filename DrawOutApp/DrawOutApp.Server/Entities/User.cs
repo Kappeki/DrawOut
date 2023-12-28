@@ -1,8 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DrawOutApp.Server.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace DrawOutApp.Server.Entities
 {
-    public enum Role { Player, Painter, RoomAdmin, TeamLeader }
     public class User
     {
         [Required]

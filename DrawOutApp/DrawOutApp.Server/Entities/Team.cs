@@ -1,7 +1,10 @@
-﻿namespace DrawOutApp.Server.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DrawOutApp.Server.Entities
 {
     public class Team
     {
+        [Required]
         public string TeamId { get; set; } = $"team:{Guid.NewGuid().ToString()}";
         public List<string> TeammateIds { get; set; } 
         public string TeamLeaderId { get; set; }

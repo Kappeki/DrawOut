@@ -10,29 +10,40 @@ namespace DrawOutApp.Server.Repositories
     {
         private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
-        private const string ChatMessageKeyPrefix = "chatMessage:";
+        private const string RoomChatKeyPrefix = "roomChat:";
+        private const string RoundChatKeyPrefix = "roundChat:";
 
         public ChatMessageRepository(IRedisSettings settings)
         {
             _redis = ConnectionMultiplexer.Connect(settings.ConnectionString);
             _database = _redis.GetDatabase();
         }
-
-        public async Task AddChatMessageAsync(ChatMessage chatMessage, string roomId)
+        public async Task AddMessageToRoomChatAsync(ChatMessage message, string roomId)
         {
-            string key = $"{ChatMessageKeyPrefix}{roomId}";
-            string serializedMessage = JsonConvert.SerializeObject(chatMessage);
-
-            // Add the serialized chat message to the list associated with the room
+            string key = $"{RoomChatKeyPrefix}{roomId}";
+            string serializedMessage = JsonConvert.SerializeObject(message);
             await _database.ListRightPushAsync(key, serializedMessage);
         }
 
-        public async Task<List<ChatMessage>> GetChatMessagesAsync(string roomId, int count = 50)
+        public async Task<IEnumerable<ChatMessage?>> GetRoomChatAsync(string roomId)
         {
-            string key = $"{ChatMessageKeyPrefix}{roomId}";
-            var messages = await _database.ListRangeAsync(key, -count, -1);
+            string key = $"{RoomChatKeyPrefix}{roomId}";
+            var serializedMessages = await _database.ListRangeAsync(key);
+            return serializedMessages.Select(msg => JsonConvert.DeserializeObject<ChatMessage>(msg!));
+        }
 
-            return messages.Select(m => JsonConvert.DeserializeObject<ChatMessage>(m)).ToList();
+        public async Task AddMessageToRoundChatAsync(ChatMessage message, string roundId)
+        {
+            string key = $"{RoundChatKeyPrefix}{roundId}";
+            string serializedMessage = JsonConvert.SerializeObject(message);
+            await _database.ListRightPushAsync(key, serializedMessage);
+        }
+
+        public async Task<IEnumerable<ChatMessage?>> GetRoundChatAsync(string roundId)
+        {
+            string key = $"{RoundChatKeyPrefix}{roundId}";
+            var serializedMessages = await _database.ListRangeAsync(key);
+            return serializedMessages.Select(msg => JsonConvert.DeserializeObject<ChatMessage>(msg!));
         }
     }
 }

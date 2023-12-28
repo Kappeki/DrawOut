@@ -10,6 +10,8 @@
 
         public int Score { get; set; }
 
+        public string GameSessionId { get; set; }
+
         //postoji JEDAN JEDINI teamchat koji prvo koristi tim koji crta, dok ga drugi tim ne vidi. Kada istekne vreme, onda tim koji krade vidi taj cet naravno obrisan skroz, dok sada tim koji je crtao ne vidi cet
 
         public TeamModel()

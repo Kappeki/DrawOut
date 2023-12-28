@@ -5,24 +5,24 @@ using System.Text.Json.Serialization;
 
 namespace DrawOutApp.Server.Entities
 {
-    public enum GameState { Waiting, InGame }
-    public enum RoundTime { Short = 40, Medium = 60, Long = 80 }
-
     [BsonIgnoreExtraElements]
     public class Room
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [BsonElement("roomId")]
-        public String RoomId { get; set; } = null!;
+        public string RoomId { get; set; } = null!;
 
         [BsonElement("roomName")]
-        public String RoomName { get; set; } = null!;
+        public string RoomName { get; set; } = null!;
 
         [BsonElement("password")]
-        public String Password { get; set; } = String.Empty;
+        public string Password { get; set; } = String.Empty;
+
+        [BsonElement("roomURL")]
+        public string RoomURL { get; set; }
 
         [BsonElement("playerCount")]
         public int PlayerCount { get; set; }
@@ -36,7 +36,7 @@ namespace DrawOutApp.Server.Entities
 
         [BsonElement("customWords")]
         [JsonPropertyName("customWords")]
-        public List<String>? CustomWords { get; set; }
+        public List<string>? CustomWords { get; set; }
 
         [BsonElement("chatMessages")]
         [JsonPropertyName("chatMessages")]
@@ -48,7 +48,7 @@ namespace DrawOutApp.Server.Entities
         [BsonElement("gameState")]
         public GameState GameState { get; set; }
 
-        public Dictionary<String, int> TeamScores { get; set; } //nadograditi
+        public Dictionary<string, int> TeamScores { get; set; } //nadograditi
 
         [BsonElement("roundTime")]
         public RoundTime RoundTime { get; set; } //selektuje room admin
@@ -57,7 +57,7 @@ namespace DrawOutApp.Server.Entities
         {
             Players = new List<User>();
             RoomChat = new List<ChatMessage>();
-            TeamScores = new Dictionary<String, int>();
+            TeamScores = new Dictionary<string, int>();
             GameState = GameState.Waiting;
             RoundTime = RoundTime.Medium;
         }

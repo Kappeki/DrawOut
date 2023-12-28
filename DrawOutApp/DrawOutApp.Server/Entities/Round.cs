@@ -17,10 +17,5 @@ namespace DrawOutApp.Server.Entities
         public List<ChatMessage> RoundChat { get; set; } // Chat messages for this round
         public RoundState State { get; set; } // State of the round (e.g., InProgress, Finished)
         public List<DrawingAction> DrawingActions { get; set; } // Drawing actions that occurred during this round
-        
-        public Round()
-        {
-            RoundId = $"round:{GameSessionId}:{RoundNumber}";
-        }
     }
 }

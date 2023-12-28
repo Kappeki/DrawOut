@@ -397,3 +397,6 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 *.vsidx
+DrawOutApp/.vs/DrawOutApp/v17/.suo
+DrawOutApp/.vs/DrawOutApp/v17/.futdcache.v2
+DrawOutApp/.vs/DrawOutApp/DesignTimeBuild/.dtbcache.v2

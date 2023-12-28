@@ -7,8 +7,7 @@ namespace DrawOutApp.Server.Models
     public enum Role { Player, Painter, RoomAdmin, TeamLeader }
     public class UserModel
     {
-        [Required]
-        public String SessionId { get; set; } = $"user:{Guid.NewGuid().ToString()}";
+        public String SessionId { get; set; }
 
         public String? GameSessionId { get; set; }
 

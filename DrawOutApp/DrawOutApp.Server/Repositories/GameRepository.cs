@@ -26,11 +26,60 @@ namespace DrawOutApp.Server.Repositories
             return null;
         }
 
-        public async Task AddGameAsync(Game game)
+        public async Task<bool> AddGameAsync(Game game)
         {
             if (game == null) throw new ArgumentNullException(nameof(game));
-            var gameJson = JsonConvert.SerializeObject(game);
-            await _database.StringSetAsync(game.GameSessionId, gameJson);
+
+            // Initialize a list to keep track of all the keys that we will be creating
+            // This will be used for cleanup in case something fails
+            var createdKeys = new List<RedisKey>();
+
+            try
+            {
+                game.RoundIds = new List<string>();
+
+                // Use a Redis transaction (it does not support rollback, but we can use it to execute all commands atomically)
+                var tran = _database.CreateTransaction();
+
+                for (int i = 1; i <= 8; i++)
+                {
+                    var round = new Round
+                    {
+                        GameSessionId = game.GameSessionId,
+                        RoundNumber = i,
+                    };
+
+                    round.RoundId = $"round:{game.GameSessionId}:{i}";
+                    game.RoundIds.Add(round.RoundId);
+
+                    // Serialize round and add to transaction
+                    var roundJson = JsonConvert.SerializeObject(round);
+                    createdKeys.Add(round.RoundId);
+                    tran.StringSetAsync(round.RoundId, roundJson);
+                }
+
+                var gameJson = JsonConvert.SerializeObject(game);
+                createdKeys.Add(game.GameSessionId);
+                tran.StringSetAsync(game.GameSessionId, gameJson);
+
+                // Execute the transaction
+                var committed = await tran.ExecuteAsync();
+
+                if (!committed)
+                {
+                    // If the transaction was not committed successfully, attempt to clean up
+                    await DeleteKeysAsync(createdKeys);
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here using your preferred logging framework
+                await DeleteKeysAsync(createdKeys);
+                throw; // Re-throw the exception to be handled further up the call stack
+            }
         }
 
         public async Task UpdateGameAsync(string gameSessionId, Game game)
@@ -45,6 +94,14 @@ namespace DrawOutApp.Server.Repositories
         {
             if (!_database.KeyExists(gameSessionId)) { throw new ArgumentException("GameSessionId does not exist"); }
             await _database.KeyDeleteAsync(gameSessionId);
+        }
+
+        private async Task DeleteKeysAsync(IEnumerable<RedisKey> keys)
+        {
+            foreach (var key in keys)
+            {
+                await _database.KeyDeleteAsync(key);
+            }
         }
     }
 }
