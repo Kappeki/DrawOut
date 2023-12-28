@@ -1,6 +1,8 @@
-using DrawOutApp.Server.DataLayer;
+using DrawOutApp.Server.Settings;
 using DrawOutApp.Server.Services;
 using Microsoft.Extensions.Options;
+using DrawOutApp.Server.Repositories.Contracts;
+using DrawOutApp.Server.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,19 +16,22 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<MongoDBSettings>(
     builder.Configuration.GetSection("MongoDBSettings"));
-
 builder.Services.AddSingleton<IMongoDBSettings>(sp =>
     sp.GetRequiredService<IOptions<MongoDBSettings>>().Value);
 
-builder.Services.AddScoped<IDrawOutDBService, DrawOutDBService>();
-
+builder.Services.AddScoped<IRoomRepo, RoomRepository>();
 
 builder.Services.Configure<RedisSettings>(
     builder.Configuration.GetSection("RedisSettings"));
 builder.Services.AddSingleton<IRedisSettings>(sp =>
     sp.GetRequiredService<IOptions<RedisSettings>>().Value);
 
-builder.Services.AddSingleton<IRedisService, RedisService>();
+builder.Services.AddScoped<IChatMessageRepo, ChatMessageRepository>();
+builder.Services.AddScoped<ITeamRepo, TeamRepository>();
+builder.Services.AddScoped<IRoundRepo, RoundRepository>();
+builder.Services.AddScoped<IGameRepo, GameRepository>();
+builder.Services.AddScoped<IUserRepo, UserRepository>();
+
 
 var app = builder.Build();
 

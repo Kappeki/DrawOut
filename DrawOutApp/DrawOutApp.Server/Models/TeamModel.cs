@@ -1,26 +1,25 @@
 ﻿namespace DrawOutApp.Server.Models
 {
-    public class Team
+    public class TeamModel
     {
-        public String TeamId { get; set; }
+        public String TeamId { get; set; } 
 
-        public List<Player> Teammates { get; set; }
+        public List<UserModel> Teammates { get; set; }
 
-        public Player TeamLeader { get; set; }
+        public UserModel TeamLeader { get; set; }
 
         public int Score { get; set; }
 
-        public List<ChatMessage> TeamChat { get; set; }
+        public string GameSessionId { get; set; }
 
         //postoji JEDAN JEDINI teamchat koji prvo koristi tim koji crta, dok ga drugi tim ne vidi. Kada istekne vreme, onda tim koji krade vidi taj cet naravno obrisan skroz, dok sada tim koji je crtao ne vidi cet
 
-        public Team()
+        public TeamModel()
         {
-            Teammates = new List<Player>();
-            TeamChat = new List<ChatMessage>();
+            Teammates = new List<UserModel>();
         }
         
-        public Team(string teamId, List<Player> teammates, Player teamLeader, int score) //ako treba
+        public TeamModel(string teamId, List<UserModel> teammates, UserModel teamLeader, int score) //ako treba
         {
             TeamId = teamId;
             Teammates = teammates;
@@ -32,6 +31,11 @@
         {
             Random rnd = new Random();
             Teammates = Teammates.OrderBy(x => rnd.Next()).ToList();
+        }
+        //zove se kad se izadje iz sobe
+        public void ClearTeam()
+        {
+            Teammates.Clear();
         }
     }
 }

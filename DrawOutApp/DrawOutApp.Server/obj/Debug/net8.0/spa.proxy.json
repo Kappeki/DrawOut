@@ -3,7 +3,7 @@
 "ServerUrl": "https://localhost:4200",
 "RedirectUrl": "",
 "LaunchCommand": "npm start",
-"WorkingDirectory": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\..\\drawoutapp.client",
+"WorkingDirectory": "C:\\Users\\Korisnik\\Desktop\\DrawOut\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\..\\drawoutapp.client",
 "MaxTimeoutInSeconds": "120",
 "KeepRunning": "false"
 }
