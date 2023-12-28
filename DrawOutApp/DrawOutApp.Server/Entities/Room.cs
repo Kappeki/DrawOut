@@ -9,7 +9,7 @@ namespace DrawOutApp.Server.Entities
     public enum RoundTime { Short = 40, Medium = 60, Long = 80 }
 
     [BsonIgnoreExtraElements]
-    public class RoomModel
+    public class Room
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -53,7 +53,7 @@ namespace DrawOutApp.Server.Entities
         [BsonElement("roundTime")]
         public RoundTime RoundTime { get; set; } //selektuje room admin
 
-        public RoomModel()
+        public Room()
         {
             Players = new List<User>();
             RoomChat = new List<ChatMessage>();

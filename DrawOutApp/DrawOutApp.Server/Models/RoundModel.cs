@@ -1,6 +1,6 @@
 ﻿namespace DrawOutApp.Server.Models
 {
-    public enum RoundState { InProgress, Finished, StealingOnThose }
+    public enum RoundState { InProgress, Finished, Steal }
 
     public class RoundModel
     {
@@ -12,9 +12,9 @@
         public Timer RoundTimer { get; set; }
         public Timer StealTimer { get; set; }
         public bool IsStealOpportunityActive { get; set; }
-        public List<ChatMessage>? RoundChat { get; set; }
+        public List<ChatMessageModel>? RoundChat { get; set; }
         public RoundState State { get; set; }
-        public List<DrawingAction>? DrawingActions { get; set; }
+        public List<DrawingActionModel>? DrawingActions { get; set; }
 
         //jedinstveni cet za svaki krug, kada istekne vreme, onda se brise
         public RoundModel()
@@ -24,8 +24,8 @@
         public RoundModel(int roundNumber, string gameSessionId)
         {
             RoundNumber = roundNumber;
-            RoundChat = new List<ChatMessage>();
-            DrawingActions = new List<DrawingAction>();
+            RoundChat = new List<ChatMessageModel>();
+            DrawingActions = new List<DrawingActionModel>();
             State = RoundState.InProgress; // or other appropriate initial state
             GameSessionId = gameSessionId;
         }

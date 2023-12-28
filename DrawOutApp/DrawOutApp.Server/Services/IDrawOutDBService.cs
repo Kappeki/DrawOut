@@ -5,10 +5,10 @@ namespace DrawOutApp.Server.Services
 {
     public interface IDrawOutDBService
     {
-        Task<List<Room>> GetAllRooms();
-        Room GetRoomById(int roomId);
-        Room CreateRoom(Room room);
-        void UpdateRoom(int roomId, Room room);
+        Task<List<RoomModel>> GetAllRooms();
+        RoomModel GetRoomById(int roomId);
+        RoomModel CreateRoom(RoomModel room);
+        void UpdateRoom(int roomId, RoomModel room);
         void RemoveRoom(int roomId);
 
     }

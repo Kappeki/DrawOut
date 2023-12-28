@@ -7,24 +7,24 @@ namespace DrawOutApp.Server.Services
     public class DrawOutDBService : IDrawOutDBService
     {
 
-        private readonly IMongoCollection<Room> _roomsCollection;
+        private readonly IMongoCollection<RoomModel> _roomsCollection;
 
         public DrawOutDBService(IMongoDBSettings settings, IMongoClient mongoClient)
         {
             var database = mongoClient.GetDatabase(settings.DatabaseName);
-            _roomsCollection = database.GetCollection<Room>(settings.RoomsCollectionName);
+            _roomsCollection = database.GetCollection<RoomModel>(settings.RoomsCollectionName);
         }
-        public Room CreateRoom(Room room)
+        public RoomModel CreateRoom(RoomModel room)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<Room>> GetAllRooms()
+        public Task<List<RoomModel>> GetAllRooms()
         {
             throw new NotImplementedException();
         }
 
-        public Room GetRoomById(int roomId)
+        public RoomModel GetRoomById(int roomId)
         {
             throw new NotImplementedException();
         }
@@ -34,7 +34,7 @@ namespace DrawOutApp.Server.Services
             throw new NotImplementedException();
         }
 
-        public void UpdateRoom(int roomId, Room room)
+        public void UpdateRoom(int roomId, RoomModel room)
         {
             throw new NotImplementedException();
         }

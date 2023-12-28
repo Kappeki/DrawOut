@@ -1,15 +1,30 @@
-﻿namespace DrawOutApp.Server.Entities
+﻿using DrawOutApp.Server.Models;
+
+namespace DrawOutApp.Server.Entities
 {
     public class ChatMessage
     {
-        public string ChatMessageId { get; set; }
-        public String SenderId { get; set; }
+        public String Sender { get; set; }
         public String Content { get; set; }
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public long Timestamp { get; set; } // Use Unix timestamp for simplicity
 
-        public ChatMessage()
+        public ChatMessage() { }
+
+        public ChatMessage(ChatMessageModel message)
         {
-            ChatMessageId = $"chatMessage:{SenderId}:{Guid.NewGuid().ToString()}";
+            Sender = message.Sender;
+            Content = message.Content;
+            Timestamp = new DateTimeOffset(message.Timestamp).ToUnixTimeSeconds();
+        }
+
+        public ChatMessageModel ToBusinessModel()
+        {
+            return new ChatMessageModel
+            {
+                Sender = this.Sender,
+                Content = this.Content,
+                Timestamp = DateTimeOffset.FromUnixTimeSeconds(this.Timestamp).DateTime
+            };
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace DrawOutApp.Server.Models
 {
-    public class ChatMessage
+    public class ChatMessageModel
     { 
         public String Sender { get; set; }
 

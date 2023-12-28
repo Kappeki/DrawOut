@@ -14,7 +14,7 @@
         Clear
     }
 
-    public class DrawingAction
+    public class DrawingActionModel
     {
         public ToolType Tool { get; set; }
         public ActionType Action { get; set; }
@@ -24,7 +24,7 @@
         public bool IsFilled { get; set; }
         public bool ClearCanvas { get; set; }
 
-        public DrawingAction()
+        public DrawingActionModel()
         {
             StrokePath = new List<(int X, int Y)>();
             Color = "#000000";

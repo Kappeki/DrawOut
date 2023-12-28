@@ -2,10 +2,9 @@
 
 namespace DrawOutApp.Server.Models
 {
-    public class GameSession
+    public class GameModel
     {
-        [Required]
-        public String GameSessionId { get; set; } = $"gameSession:{Guid.NewGuid().ToString()}";
+        public String GameSessionId { get; set; }
         public TeamModel RedTeam { get; set; }
         public TeamModel BlueTeam { get; set; }
         public int TotalRounds { get; private set; } = 8;
@@ -13,7 +12,7 @@ namespace DrawOutApp.Server.Models
         public int CurrentRoundIndex { get; private set; }
         public RoundModel CurrentRound => Rounds[CurrentRoundIndex];
 
-        public GameSession()
+        public GameModel()
         {
             RedTeam = new TeamModel();
             BlueTeam = new TeamModel();

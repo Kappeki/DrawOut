@@ -9,7 +9,7 @@ namespace DrawOutApp.Server.Models
 
     public enum RoundTime { Short = 40, Medium = 60, Long = 80 }
 
-    public class Room
+    public class RoomModel
     {
        
         public int Id { get; set; }
@@ -20,16 +20,16 @@ namespace DrawOutApp.Server.Models
         public UserModel? RoomAdmin { get; set; }
         public List<UserModel>? Players { get; set; }
         public List<String>? CustomWords { get; set; }
-        public List<ChatMessage>? RoomChat { get; set; }
+        public List<ChatMessageModel>? RoomChat { get; set; }
         public ObjectId SelectedWordPack { get; set; }
         public GameState GameState { get; set; }
         public Dictionary<String, int> TeamScores { get; set; } //nadograditi
         public RoundTime RoundTime { get; set; } //selektuje room admin
 
-        public Room()
+        public RoomModel()
         {
             Players = new List<UserModel>();
-            RoomChat = new List<ChatMessage>();
+            RoomChat = new List<ChatMessageModel>();
             TeamScores = new Dictionary<String, int>();
             GameState = GameState.Waiting;
             RoundTime = RoundTime.Medium;
