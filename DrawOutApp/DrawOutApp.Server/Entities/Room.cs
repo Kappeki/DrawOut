@@ -48,10 +48,14 @@ namespace DrawOutApp.Server.Entities
         [BsonElement("gameState")]
         public GameState GameState { get; set; }
 
-        public Dictionary<string, int> TeamScores { get; set; } //nadograditi
+        public Dictionary<string, int> TeamScores { get; set; }
 
         [BsonElement("roundTime")]
         public RoundTime RoundTime { get; set; } //selektuje room admin
+
+        [BsonElement("timeElapsed")]
+        public DateTime TimeElapsed { get; set; }
+        
 
         public Room()
         {
@@ -60,6 +64,7 @@ namespace DrawOutApp.Server.Entities
             TeamScores = new Dictionary<string, int>();
             GameState = GameState.Waiting;
             RoundTime = RoundTime.Medium;
+            TimeElapsed = DateTime.UtcNow;
         }
     }
 }

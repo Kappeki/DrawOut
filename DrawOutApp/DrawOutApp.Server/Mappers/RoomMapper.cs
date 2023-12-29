@@ -20,7 +20,7 @@ namespace DrawOutApp.Server.Mappers
                 Players = entity.Players?.Select(UserMapper.ToModel).ToList(),
                 CustomWords = entity.CustomWords,
                 RoomChat = entity.RoomChat?.Select(rc=>rc.ToBusinessModel()).ToList(),
-                SelectedWordPack = entity.SelectedWordPack,
+               // SelectedWordPack = entity.SelectedWordPack,
                 GameState = entity.GameState,
                 TeamScores = entity.TeamScores,
                 RoundTime = entity.RoundTime
@@ -43,7 +43,7 @@ namespace DrawOutApp.Server.Mappers
                 Players = model.Players?.Select(UserMapper.ToEntity).ToList(),
                 CustomWords = model.CustomWords,
                 RoomChat = model.RoomChat?.Select(rc=>new ChatMessage(rc)).ToList(),
-                SelectedWordPack = model.SelectedWordPack,
+                //SelectedWordPack = model.SelectedWordPack,
                 GameState = model.GameState,
                 TeamScores = model.TeamScores,
                 RoundTime = model.RoundTime

@@ -7,7 +7,7 @@ namespace DrawOutApp.Server.Models
     public enum Role { Player, Painter, RoomAdmin, TeamLeader }
     public class UserModel
     {
-        public String SessionId { get; set; }
+        public String? SessionId { get; set; }
 
         public String? GameSessionId { get; set; }
 

@@ -1,13 +1,13 @@
 {
   "Version": 1,
-  "Hash": "Ikw6t1ZSm2jBje7cl2Q6zIObYKenNnHx4cfkwB8ECOE=",
+  "Hash": "r/FrI2FnRCZQRk/MHJN7QzHU0AZLysDKmJiBkmTTu1Y=",
   "Source": "DrawOutApp.Server",
   "BasePath": "_content/DrawOutApp.Server",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [
     {
-      "Identity": "C:\\Users\\Korisnik\\Desktop\\DrawOut\\DrawOut\\DrawOutApp\\drawoutapp.client\\drawoutapp.client.esproj",
+      "Identity": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\drawoutapp.client\\drawoutapp.client.esproj",
       "Version": 2,
       "Source": "drawoutapp.client",
       "GetPublishAssetsTargets": "GetCurrentProjectPublishStaticWebAssetItems",

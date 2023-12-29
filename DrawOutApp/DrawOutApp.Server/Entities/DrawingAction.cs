@@ -10,7 +10,7 @@ namespace DrawOutApp.Server.Entities
         public string Action { get; set; }
         public String Color { get; set; }
         public int BrushSize { get; set; }
-        public string StrokePathSerialized { get; set; } // JSON serialization of StrokePath
+        public string StrokePathSerialized { get; set; } 
         public bool IsFilled { get; set; }
         public bool ClearCanvas { get; set; }
 

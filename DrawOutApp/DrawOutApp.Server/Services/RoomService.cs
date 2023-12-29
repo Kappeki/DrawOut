@@ -30,7 +30,8 @@ namespace DrawOutApp.Server.Services
             {
                 await _userService.AddRole(creatingUserId, Role.RoomAdmin);
             }
-
+            roomModel.Players.Add(adminUser);
+            roomModel.PlayerCount++;
             var roomEntity = RoomMapper.ToEntity(roomModel);
             await _roomRepository.CreateRoomAsync(roomEntity);
             return RoomMapper.ToModel(roomEntity);
