@@ -9,8 +9,8 @@
 
 ## Contributors
 
-- [@ElvapAnt](https://www.github.com/ElvapAnt) - Pavle Antonijević 18077 
 - [@Kappeki](https://www.github.com/Kappeki) - Dušan Petrović 18329
+- [@ElvapAnt](https://www.github.com/ElvapAnt) - Pavle Antonijević 18077 
 
 <a href="https://github.com/Kappeki/DrawOut/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Kappeki/DrawOut" />
@@ -18,8 +18,8 @@
 
 ## Tech Stack
 
-**Front-End:** Angular ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+**Front-End:** Angular    ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
 
-**Back-End:** .NET ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
+**Back-End:** .NET    ![.Net](https://img.shields.io/badge/.NET-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
 
-**Database:** MongoDB, Redis![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?&style=for-the-badge&logo=redis&logoColor=white)
+**Database:** MongoDB, Redis    ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?&style=for-the-badge&logo=redis&logoColor=white)
