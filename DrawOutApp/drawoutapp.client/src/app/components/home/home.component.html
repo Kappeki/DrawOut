@@ -1,0 +1,36 @@
+<div class="background-container">
+  <div class="home-container">
+    <div class="title-container">
+      <h1 class="title">DrawOut</h1>
+      <h2>Draw and guess words with friends!</h2>
+    </div>
+
+    <div class="panel-container">
+      <div class="panel-left"></div>
+
+      <div class="panel-main">
+
+        <div class="icon-selector">
+          <label for="icon-select">Choose an icon:</label>
+          <select id="icon-select" [(ngModel)]="selectedIcon">
+            <option value="icon1">Icon 1</option>
+            <option value="icon2">Icon 2</option>
+            <option value="icon3">Icon 3</option>
+            <!-- Add more icons as needed -->
+          </select>
+        </div>
+          
+        <button (click)="playGame()">Play</button>
+
+        <div class="nickname-input">
+          <label for="nickname-input">Nickname:</label>
+          <input type="text" [(ngModel)]="nickname" placeholder="Enter your nickname" />
+        </div>
+
+      </div>
+      
+      <div class="panel-right"></div>
+    </div>
+
+  </div>
+</div>

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "k+kJpWBL9/QgIMMEQwbJ6HZoepc441dOFcWetChJV9tSwshqVZ+/gZuHdFIIsrN8/mOsRTTyIwDidADL5Amoxg==",
+  "dgSpecHash": "JlUR1FEviEEzJIbB2fBfZl6KFWpAUVqvrIt55QsDK6KnEn5eFoJzptBX6tP2S+J3SaoZC9dICcRLSTH8fkwlgw==",
   "success": true,
-  "projectFilePath": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
+  "projectFilePath": "G:\\Elfak\\IV godina\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\awssdk.core\\3.7.100.14\\awssdk.core.3.7.100.14.nupkg.sha512",
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\awssdk.securitytoken\\3.7.100.14\\awssdk.securitytoken.3.7.100.14.nupkg.sha512",

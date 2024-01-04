@@ -1,0 +1,53 @@
+  .background-container {
+    background-image: url("/assets/backgroundOnlyRed.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    position: absolute; /* Added to ensure it covers the full page */
+    top: 0;
+    left: 0;
+    /* z-index: -1; Ensures that content goes on top of the background */
+  }
+
+  .home-container {
+    text-align: center;
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title-container {
+    /* display: flex; */
+    margin-bottom: 50px;
+  }
+
+  .panel-container {
+    display: flex;
+    width: 100%;
+  }
+
+  .panel-left, .panel-right {
+    margin-right: 8px;
+    flex: 1 1 50%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+  
+  .nickname-input input {
+    margin: 20px 0;
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  .icon-selector {
+    margin: 20px 0;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+  }

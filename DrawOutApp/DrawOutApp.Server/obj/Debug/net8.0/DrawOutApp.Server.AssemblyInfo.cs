@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DrawOutApp.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6be9f728a018a18de13cfdaeddc630e0ea2efb8a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
 [assembly: System.Reflection.AssemblyProductAttribute("DrawOutApp.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DrawOutApp.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
