@@ -1,5 +1,6 @@
 <div class="background-container">
   <div class="home-container">
+
     <div class="title-container">
       <h1 class="title">DrawOut</h1>
       <h2>Draw and guess words with friends!</h2>
@@ -10,21 +11,39 @@
 
       <div class="panel-main">
 
-        <div class="icon-selector">
-          <label for="icon-select">Choose an icon:</label>
-          <select id="icon-select" [(ngModel)]="selectedIcon">
-            <option value="icon1">Icon 1</option>
-            <option value="icon2">Icon 2</option>
-            <option value="icon3">Icon 3</option>
-            <!-- Add more icons as needed -->
-          </select>
-        </div>
+        <div class="nickname-container">
           
-        <button (click)="playGame()">Play</button>
+          <div class="nickname-input">
+            <!-- <label>Nickname:</label> -->
+            <input type="text" [(ngModel)]="currentNickname" placeholder="Enter your nickname" />
+          </div> 
 
-        <div class="nickname-input">
-          <label for="nickname-input">Nickname:</label>
-          <input type="text" [(ngModel)]="nickname" placeholder="Enter your nickname" />
+          <div class="nickname-random" (click)="randomizeNickname()"></div>
+
+        </div>
+
+        <div class="icon-container">
+
+          <!-- <div class="icon-label"> 
+            <label>Choose an icon:</label>
+          </div> -->
+          
+          <div class="icon-random"></div>
+
+          <div class="icon-panel">
+            <div class="arrow-left"></div>
+            <img class="icon" alt='icon'/>
+            <div class="arrow-right"></div>
+          </div>
+
+        </div>
+        
+        <div class="button-container">
+
+          <button (click)="joinRandomRoom()">Play</button> <!-- join random room -->
+          <button routerLink="/rooms">Rooms</button> <!-- ode na str lista soba -->
+          <button (click)="createRoom()">Create Room</button> <!-- ode na str za kreiranje sobe -->
+
         </div>
 
       </div>

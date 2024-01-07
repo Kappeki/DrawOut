@@ -1,2 +1,3 @@
 C:\Users\Korisnik\Desktop\DrawOut\DrawOut\DrawOutApp\drawoutapp.client\obj\Debug\drawoutapp.client.esproj.CoreCompileInputs.cache
 D:\Elfak\VII semestar\Arhitektura i projektovanje softvera\DrawOut\DrawOutApp\drawoutapp.client\obj\Debug\drawoutapp.client.esproj.CoreCompileInputs.cache
+G:\Elfak\IV godina\Arhitektura i projektovanje softvera\DrawOut\DrawOutApp\drawoutapp.client\obj\Debug\drawoutapp.client.esproj.CoreCompileInputs.cache
