@@ -1,6 +1,7 @@
 import { Component, OnInit} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DrawoutApiService } from '../../services/drawout-api.service';
+// import { SignalrService } from '../services/signalr.service';
 
 @Component({
   selector: 'app-room-detail',
@@ -9,21 +10,41 @@ import { DrawoutApiService } from '../../services/drawout-api.service';
 })
 export class RoomDetailComponent {
 
-  constructor(private route: ActivatedRoute) {}
+  roomId?: string; //IZMENA
+  isRoomAdmin: boolean = true;
+  mockRoom = {
+    id: 'room123',
+    name: 'Drawing Fun',
+    users: [
+      { id: 'user1', name: 'Alice', team: 'red' },
+      { id: 'user2', name: 'Bob', team: 'blue' },
+    ],
+    admin: 'user1', // User ID of the room administrator
+    isGameStarted: false,
+    // ... other room properties ...
+  };
 
-  ngOnInit() {
-  this.route.params.subscribe(params => {
-    const roomId = params['id'];
-    // Use the roomId to load room details from your service
-    });
+  constructor(
+    private route: ActivatedRoute,
+    private drawoutApiService: DrawoutApiService
+  ) {}
+
+  // ngOnInit() {
+  //   this.roomId = this.route.snapshot.paramMap.get('id'); //IZMENA
+  //   if (this.roomId) {
+  //     this.loadRoomDetails(this.roomId);
+  //   } else {
+  //     //mozda redirekcija
+  //     console.log("No room ID provided.");
+  //   }
+  // }
+
+  loadRoomDetails(roomId: string) {
+    console.log(this.mockRoom);
   }
 
-  // loadRoomDetails(roomId: string) {
-  //   this.drawoutApiService.getRoomDetails(roomId).subscribe(roomDetails => {
-  //     // Do something with the room details
-  //   },
-  //   error => {
-  //     console.log(error);
-  //   });
-  // }
+  joinTeam(teamColor: 'red' | 'blue') {
+    // Logic to join a team
+    // Call API to update the team of the current user in this room
+  }
 }

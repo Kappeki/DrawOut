@@ -1,1 +1,43 @@
-<p>room-detail works!</p>
+<div class="background-container">
+    <div class="room-container">
+        
+        <div class="title-container">
+
+            <header>DrawOut</header>
+
+            <button *ngIf="isRoomAdmin" class="settings-button">Settings</button>
+
+        </div>
+
+        <div class="top-container">
+            <button class="red-button" (click)="joinTeam('red')">Join Red Team</button>
+            <h1 class="room-name">{{mockRoom.name}}</h1>
+            <button class="blue-button" (click)="joinTeam('red')">Join Blue Team</button>
+        </div>
+
+        <div class="main-container">
+            
+            <div class="red-container">
+                <p>Red Team</p>
+                
+                <!-- Lista usera -->
+            </div>
+
+            <div class="chat-container">
+                <app-chat [roomId]="roomId"></app-chat> <!-- IZMENA -->
+            </div>
+
+            <div class="blue-container">
+                <p>Blue Team</p>
+
+                <!-- Lista usera -->
+            </div>
+
+        </div>
+        
+        <!-- <div class="drawing-container">
+            <app-drawing></app-drawing>
+        </div> -->
+
+    </div>
+</div>

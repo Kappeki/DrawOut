@@ -4,6 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { FabricModule  } from 'ngx-fabric-wrapper';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,6 +20,8 @@ import { TeamComponent } from './components/team/team.component';
 import { UserComponent } from './components/user/user.component';
 import { PaginatonComponent } from './components/paginaton/paginaton.component';
 import { LayoutModule } from '@angular/cdk/layout';
+import { DrawingComponent } from './components/drawing/drawing.component';
+import { ChatComponent } from './components/chat/chat.component';
 
 @NgModule({
   declarations: [
@@ -31,12 +34,15 @@ import { LayoutModule } from '@angular/cdk/layout';
     RoomDetailComponent,
     TeamComponent,
     UserComponent,
-    PaginatonComponent
+    PaginatonComponent,
+    DrawingComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule, HttpClientModule,
     AppRoutingModule, FormsModule, BrowserAnimationsModule,
-    MatSliderModule, LayoutModule, MatPaginatorModule
+    MatSliderModule, LayoutModule, MatPaginatorModule,
+    FabricModule
     //NgxSliderModule ne radi jer Anuglar Material ima problema sa Angular 17 verzijom i dual sliderom
   ],
   providers: [],
