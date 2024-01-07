@@ -19,6 +19,7 @@ namespace DrawOutApp.Server.Repositories
         public async Task AddUserAsync(User user)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
+            user.SessionId = Guid.NewGuid().ToString();
             var userJson = JsonConvert.SerializeObject(user);
             await _database.StringSetAsync(user.SessionId, userJson);
         }
@@ -37,7 +38,7 @@ namespace DrawOutApp.Server.Repositories
         public async Task<User?> GetUserAsync(string sessionId)
         {
             var userJson = await _database.StringGetAsync(sessionId);
-            if (userJson.IsNullOrEmpty)
+            if (!userJson.IsNullOrEmpty)
             {
                 return JsonConvert.DeserializeObject<User>(userJson);
             }

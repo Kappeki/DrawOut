@@ -11,8 +11,8 @@ namespace DrawOutApp.Server.Models
 
     public class RoomModel
     {
-        public string Id { get; set; }
-        public string RoomId { get; set; } = null!;
+        public string? Id { get; set; }
+        public string? RoomId { get; set; } = null!;
         public string RoomName { get; set; } = null!;
         public string Password { get; set; } = String.Empty;
         public int PlayerCount { get; set; }   
@@ -20,9 +20,9 @@ namespace DrawOutApp.Server.Models
         public List<UserModel>? Players { get; set; }
         public List<string>? CustomWords { get; set; }
         public List<ChatMessageModel>? RoomChat { get; set; }
-        public ObjectId SelectedWordPack { get; set; }
+        //public ObjectId SelectedWordPack { get; set; }
         public GameState GameState { get; set; }
-        public Dictionary<string, int> TeamScores { get; set; } //nadograditi
+        public Dictionary<string, int>? TeamScores { get; set; } //nadograditi
         public RoundTime RoundTime { get; set; } //selektuje room admin
 
         public RoomModel()

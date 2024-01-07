@@ -1,0 +1,84 @@
+<div class="background-container">
+    <div class="rooms-container">
+
+        <div class="search-and-sort-container">
+
+            <div class="title-container">
+                <h1>Rooms</h1>
+            </div>
+
+            <div class="search-container">
+                <input type="text" [(ngModel)]="searchTerm" (input)="updateFilters()" placeholder="Search rooms" /> <!-- mozda promeniti input na change da se ne bi stalno slao zahtev -->
+            </div>
+
+            <div class="sorting-container">
+                <label class="sort-label">Sort by:</label>
+                <select [(ngModel)]="sortOption" (change)="updateFilters()">
+                    <option value="nameAs">Name Ascending</option>
+                    <option value="nameDe">Name Descending</option>
+                    <option value="playersAs">Player Count Ascending</option>
+                    <option value="playersDe">Player Count Descending</option>
+                    <option value="timeAs">Time Ascending</option>
+                    <option value="timeDe">Time Descending</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="filter-and-list-container">
+
+            <div class="filter-container">
+
+                <h2 class="filters-title">Filters</h2>
+
+                <div class="locked-filter">
+                    <label>
+                        <input type="checkbox" [(ngModel)]="lockedFilter" (change)="updateFilters()" />
+                        Locked
+                    </label>
+                </div>
+
+                <div class="players-filter">
+                    <label>Number of Players:</label>
+                    <mat-slider class="players-sliders" min="1" max="8">
+                        <input matSliderStartThumb [(ngModel)]="playerFilter.min" (change)="updateFilters()">
+                        <input matSliderEndThumb [(ngModel)]="playerFilter.max" (change)="updateFilters()">
+                    </mat-slider>
+                </div>
+                <div class="players-values">
+                    <span>Min: {{ playerFilter.min }}</span>
+                    <span>Max: {{ playerFilter.max }}</span>
+                </div>
+
+                <div class="time-filter">
+                    <label>Time left:</label>
+                    <mat-slider class="time-sliders" min="0" max="5">
+                        <input matSliderStartThumb [(ngModel)]="timeFilter.min" (change)="updateFilters()">
+                        <input matSliderEndThumb [(ngModel)]="timeFilter.max" (change)="updateFilters()">
+                    </mat-slider>
+                </div>
+                <div class="time-values">
+                    <span>Min: {{ timeFilter.min }}</span>
+                    <span>Max: {{ timeFilter.max }}</span>
+                </div>
+
+            </div>
+
+            <div class="roomslist-container">
+
+            <app-room-item *ngFor="let room of rooms" [room]="room" (join)="onJoinRoom(room)"></app-room-item>
+            
+            <mat-paginator 
+                [length]="totalRooms" 
+                [pageSize]="pageSize" 
+                [pageSizeOptions]="[15, 20, 25]"
+                (page)="handlePageEvent($event)" 
+                aria-label="Select page">
+            </mat-paginator>
+            
+            </div>
+        
+        </div>
+
+    </div>
+</div>

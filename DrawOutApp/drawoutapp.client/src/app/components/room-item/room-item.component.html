@@ -1,0 +1,25 @@
+<div class="room-item-background">
+    <div class="room-item-container">
+
+        <div class="name-container">
+            <h2>{{ room.name }}</h2>
+        </div>
+
+        <div class="players-container">
+            <p>{{ room.playerCount }} / {{ 8 }}</p>
+        </div>
+        
+        <div class="locked-container">
+            <p>{{ room.isLocked }}</p>
+        </div>
+
+        <div class="time-container">
+            <p>{{ room.timeLeft }}</p>
+        </div>
+
+        <div class="button-container">
+            <button class="join-button"(click)="join.emit(room)">Join</button>
+        </div>
+    </div>
+
+</div>

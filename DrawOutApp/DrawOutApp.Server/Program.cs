@@ -3,6 +3,9 @@ using DrawOutApp.Server.Services;
 using Microsoft.Extensions.Options;
 using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Repositories;
+using DrawOutApp.Server.Services.Contracts;
+using MongoDB.Driver;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,20 +22,37 @@ builder.Services.Configure<MongoDBSettings>(
 builder.Services.AddSingleton<IMongoDBSettings>(sp =>
     sp.GetRequiredService<IOptions<MongoDBSettings>>().Value);
 
-builder.Services.AddScoped<IRoomRepo, RoomRepository>();
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<MongoDBSettings>>().Value;
+    return new MongoClient(settings.ConnectionString);
+});
+
+builder.Services.AddTransient<IRoomRepo, RoomRepository>();
+
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 builder.Services.Configure<RedisSettings>(
     builder.Configuration.GetSection("RedisSettings"));
 builder.Services.AddSingleton<IRedisSettings>(sp =>
     sp.GetRequiredService<IOptions<RedisSettings>>().Value);
 
-builder.Services.AddScoped<IChatMessageRepo, ChatMessageRepository>();
-builder.Services.AddScoped<ITeamRepo, TeamRepository>();
-builder.Services.AddScoped<IRoundRepo, RoundRepository>();
-builder.Services.AddScoped<IGameRepo, GameRepository>();
-builder.Services.AddScoped<IUserRepo, UserRepository>();
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<RedisSettings>>().Value;
+    return ConnectionMultiplexer.Connect(settings.ConnectionString);
+});
 
+builder.Services.AddTransient<IChatMessageRepo, ChatMessageRepository>();
+builder.Services.AddTransient<ITeamRepo, TeamRepository>();
+builder.Services.AddTransient<IRoundRepo, RoundRepository>();
+builder.Services.AddTransient<IGameRepo, GameRepository>();
+builder.Services.AddTransient<IUserRepo, UserRepository>();
+
+builder.Services.AddScoped<IUserService, UserService>();;
+builder.Services.AddScoped<ITeamService,TeamService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 var app = builder.Build();
 
 app.UseDefaultFiles();

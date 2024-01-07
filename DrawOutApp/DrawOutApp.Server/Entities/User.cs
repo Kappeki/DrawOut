@@ -14,7 +14,7 @@ namespace DrawOutApp.Server.Entities
 
         public HashSet<Role> Roles { get; set; }
 
-        public String? Icon { get; set; } //na kraj
+        public String? Icon { get; set; } 
 
         public int TeamId { get; set; } = 0;
 
