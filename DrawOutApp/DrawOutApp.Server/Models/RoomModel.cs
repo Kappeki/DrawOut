@@ -39,37 +39,49 @@ namespace DrawOutApp.Server.Models
             RoomChat?.Clear(); 
         }
 
-        public bool IsReady() //proverava da li prvo ima dovoljno igraca, a onda da li su timovi izjednaceni, tj da li je svako izabrao tim
+        public bool IsReady()
         {
-            if(Players!.Count < 4)
+            // Ensure there are at least 4 players
+            if (Players == null || Players.Count < 4)
             {
                 return false;
             }
-            else
+
+            // Identify unique team IDs
+            HashSet<string> uniqueTeamIds = new HashSet<string>();
+            foreach (var player in Players)
             {
-                int redTeamCount = 0;
-                int blueTeamCount = 0;
-                foreach (UserModel player in Players)
-                {
-                    if (player.TeamId == 1)
-                    {
-                        redTeamCount++;
-                    }
-                    else if (player.TeamId == 2)
-                    {
-                        blueTeamCount++;
-                    }
-                }
-                if (redTeamCount > 2 && blueTeamCount > 2) 
-                {
-                    return true;
-                }
-                else
+                uniqueTeamIds.Add(player.TeamId!);
+                if (uniqueTeamIds.Count > 2) // More than two unique teams are not allowed
                 {
                     return false;
                 }
             }
+
+            // If there are not exactly two teams, the game is not ready
+            if (uniqueTeamIds.Count != 2)
+            {
+                return false;
+            }
+
+            var teamCounts = new Dictionary<string, int>();
+            foreach (var teamId in uniqueTeamIds)
+            {
+                teamCounts[teamId] = 0;
+            }
+
+            // Count the number of players in each team
+            foreach (var player in Players)
+            {
+                if (teamCounts.ContainsKey(player.TeamId!))
+                {
+                    teamCounts[player.TeamId]++;
+                }
+            }
+
+            // Check if both teams have more than 2 players
+            return teamCounts.All(kvp => kvp.Value > 2);
         }
-        
+
     }
 }

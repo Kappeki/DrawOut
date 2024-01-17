@@ -7,18 +7,17 @@ namespace DrawOutApp.Server.Models
     public enum Role { Player, Painter, RoomAdmin, TeamLeader }
     public class UserModel
     {
-        public String? SessionId { get; set; }
+        public string? SessionId { get; set; }
 
-        public String? GameSessionId { get; set; }
+        public string? GameSessionId { get; set; }
 
-        public String? Nickname { get; set; }
+        public string? Nickname { get; set; }
 
         public HashSet<Role> Roles { get; set; } 
 
-        public String? Icon { get; set; } //na kraj
+        public string? Icon { get; set; } //na kraj
 
-        public int TeamId { get; set; } = 0;
-
+        public string? TeamId { get; set; }
         public UserModel() 
         {
             Roles = new HashSet<Role>();
