@@ -6,7 +6,7 @@ namespace DrawOutApp.Server.Repositories.Contracts
     {
         Task<Game?> GetGameAsync(string gameSessionId);
         Task<bool> AddGameAsync(Game game);
-        Task UpdateGameAsync(string gameSessionId, Game game);
+        Task<bool> UpdateGameAsync(string gameSessionId, Game game);
         Task DeleteGameAsync(string gameSessionId);
     }
 }

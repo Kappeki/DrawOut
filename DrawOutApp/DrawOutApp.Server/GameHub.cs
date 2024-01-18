@@ -13,6 +13,7 @@ namespace DrawOutApp.Server
 
         public async Task SendGuess(string guess)
         {
+            
             await Clients.All.SendAsync("ReceiveGuess", guess, Context.ConnectionId);
         }
 

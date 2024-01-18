@@ -12,7 +12,8 @@
 
         public string GameSessionId { get; set; }
 
-        //postoji JEDAN JEDINI teamchat koji prvo koristi tim koji crta, dok ga drugi tim ne vidi. Kada istekne vreme, onda tim koji krade vidi taj cet naravno obrisan skroz, dok sada tim koji je crtao ne vidi cet
+        //postoji JEDAN JEDINI teamchat koji prvo koristi tim koji crta, dok ga drugi tim ne vidi.
+        //Kada istekne vreme, onda tim koji krade vidi taj cet naravno obrisan skroz, dok sada tim koji je crtao ne vidi cet
 
         public TeamModel()
         {
@@ -26,7 +27,12 @@
             TeamLeader = teamLeader;
             Score = score;
         }
-
+        public bool IsFull()
+        {
+            if(Teammates.Count == 4)
+                return true;
+            return false;
+        }
         public void RandomizePlayerOrder()
         {
             Random rnd = new Random();

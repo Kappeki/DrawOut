@@ -32,9 +32,10 @@ namespace DrawOutApp.Server.Repositories
             return await _roomsCollection.Find(_ => true).ToListAsync();
         }
 
-        public async Task UpdateRoomAsync(Room room)
+        public async Task<bool> UpdateRoomAsync(Room room)
         {
             await _roomsCollection.ReplaceOneAsync(r => r.RoomId == room.RoomId, room);
+            return true;
         }
 
         public async Task DeleteRoomAsync(string roomId)

@@ -4,13 +4,13 @@
 
     public class RoundModel
     {
-        public string RoundId { get; set; }
+        public string? RoundId { get; set; }
         public string GameSessionId { get; set; } = null!;
         public int RoundNumber { get; set; }
-        public string ActiveWord { get; set; }
-        public UserModel CurrentPainter { get; set; }
-        public Timer RoundTimer { get; set; }
-        public Timer StealTimer { get; set; }
+        public string? ActiveWord { get; set; }
+        public UserModel? CurrentPainter { get; set; }
+        public Timer? RoundTimer { get; set; }
+        public Timer? StealTimer { get; set; }
         public bool IsStealOpportunityActive { get; set; }
         public List<ChatMessageModel>? RoundChat { get; set; }
         public RoundState State { get; set; }

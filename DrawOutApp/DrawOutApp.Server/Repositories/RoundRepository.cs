@@ -46,7 +46,6 @@ namespace DrawOutApp.Server.Repositories
             await _database.StringSetAsync(roundId, roundJson);
         }
 
-
         //nema potrebe za drawing action repo jer se sve radi u round repo
         public async Task<List<DrawingAction>> GetDrawingActionsForRoundAsync(string roundId)
         {

@@ -82,12 +82,14 @@ namespace DrawOutApp.Server.Repositories
             }
         }
 
-        public async Task UpdateGameAsync(string gameSessionId, Game game)
+        public async Task<bool> UpdateGameAsync(string gameSessionId, Game game)
         {
-            if(game == null) throw new ArgumentNullException(nameof(game));
+            if(game == null || string.IsNullOrEmpty(gameSessionId)) return false;
             if (gameSessionId != game.GameSessionId) throw new ArgumentException("GameSessionId does not match");
+       
             var gameJson = JsonConvert.SerializeObject(game);
             await _database.StringSetAsync(gameSessionId, gameJson);
+            return true;
         }
 
         public async Task DeleteGameAsync(string gameSessionId)
