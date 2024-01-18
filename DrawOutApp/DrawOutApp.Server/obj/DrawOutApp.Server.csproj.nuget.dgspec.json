@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj": {}
+    "G:\\Elfak\\IV godina\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj": {}
   },
   "projects": {
-    "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj": {
+    "G:\\Elfak\\IV godina\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
+        "projectUniqueName": "G:\\Elfak\\IV godina\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
         "projectName": "DrawOutApp.Server",
-        "projectPath": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
+        "projectPath": "G:\\Elfak\\IV godina\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
         "packagesPath": "C:\\Users\\Dusan-PC\\.nuget\\packages\\",
-        "outputPath": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\obj\\",
+        "outputPath": "G:\\Elfak\\IV godina\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
           "C:\\Users\\Dusan-PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -38,9 +34,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "default"
         }
       },
       "frameworks": {

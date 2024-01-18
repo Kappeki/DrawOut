@@ -3,6 +3,6 @@
   <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Import Project="$(NuGetPackageRoot)microsoft.extensions.apidescription.server\6.0.5\build\Microsoft.Extensions.ApiDescription.Server.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.apidescription.server\6.0.5\build\Microsoft.Extensions.ApiDescription.Server.targets')" />
     <Import Project="$(NuGetPackageRoot)microsoft.extensions.options\8.0.0\buildTransitive\net6.0\Microsoft.Extensions.Options.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.options\8.0.0\buildTransitive\net6.0\Microsoft.Extensions.Options.targets')" />
-    <Import Project="$(NuGetPackageRoot)microsoft.aspnetcore.spaproxy\8.0.0\build\Microsoft.AspNetCore.SpaProxy.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.aspnetcore.spaproxy\8.0.0\build\Microsoft.AspNetCore.SpaProxy.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.aspnetcore.spaproxy\8.0.1\build\Microsoft.AspNetCore.SpaProxy.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.aspnetcore.spaproxy\8.0.1\build\Microsoft.AspNetCore.SpaProxy.targets')" />
   </ImportGroup>
 </Project>

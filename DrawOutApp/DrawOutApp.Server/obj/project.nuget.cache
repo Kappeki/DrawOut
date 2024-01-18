@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "k+kJpWBL9/QgIMMEQwbJ6HZoepc441dOFcWetChJV9tSwshqVZ+/gZuHdFIIsrN8/mOsRTTyIwDidADL5Amoxg==",
+  "dgSpecHash": "JlUR1FEviEEzJIbB2fBfZl6KFWpAUVqvrIt55QsDK6KnEn5eFoJzptBX6tP2S+J3SaoZC9dICcRLSTH8fkwlgw==",
   "success": true,
-  "projectFilePath": "D:\\Elfak\\VII semestar\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
+  "projectFilePath": "G:\\Elfak\\IV godina\\Arhitektura i projektovanje softvera\\DrawOut\\DrawOutApp\\DrawOutApp.Server\\DrawOutApp.Server.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\awssdk.core\\3.7.100.14\\awssdk.core.3.7.100.14.nupkg.sha512",
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\awssdk.securitytoken\\3.7.100.14\\awssdk.securitytoken.3.7.100.14.nupkg.sha512",
@@ -10,7 +10,7 @@
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\messagepack\\2.5.108\\messagepack.2.5.108.nupkg.sha512",
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\messagepack.annotations\\2.5.108\\messagepack.annotations.2.5.108.nupkg.sha512",
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\microsoft.aspnetcore.signalr.stackexchangeredis\\8.0.0\\microsoft.aspnetcore.signalr.stackexchangeredis.8.0.0.nupkg.sha512",
-    "C:\\Users\\Dusan-PC\\.nuget\\packages\\microsoft.aspnetcore.spaproxy\\8.0.0\\microsoft.aspnetcore.spaproxy.8.0.0.nupkg.sha512",
+    "C:\\Users\\Dusan-PC\\.nuget\\packages\\microsoft.aspnetcore.spaproxy\\8.0.1\\microsoft.aspnetcore.spaproxy.8.0.1.nupkg.sha512",
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
     "C:\\Users\\Dusan-PC\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
