@@ -1,6 +1,8 @@
 ﻿using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using MongoDB.Driver.Core.Authentication;
 
 namespace DrawOutApp.Server.Controllers
 {
@@ -9,10 +11,12 @@ namespace DrawOutApp.Server.Controllers
     public class RoomController : ControllerBase
     {
         private readonly IRoomService _roomService;
+        private readonly IHubContext<RoomHub> _roomHub;
 
-        public RoomController(IRoomService roomService)
+        public RoomController(IRoomService roomService, IHubContext<RoomHub> roomHub)
         {
             _roomService = roomService;
+            _roomHub = roomHub;
         }
 
         //znaci na front mora se stavi samo da treba da se unese ime sobe i da se klikne na create room
@@ -110,6 +114,21 @@ namespace DrawOutApp.Server.Controllers
             var (isError, success, error) = await _roomService.UpdateRoomAsync(roomModel);
             if(isError)
                 return BadRequest($"Error while updating room : {error}");
+            
+            var roomSettings = new RoomModel
+            {
+                RoomName = roomModel.RoomName,
+                RoomAdmin = roomModel.RoomAdmin,
+                CustomWords = roomModel.CustomWords,
+                PlayerCount = roomModel.PlayerCount,
+                Players = roomModel.Players,
+                GameState = roomModel.GameState,
+                RoundTime = roomModel.RoundTime
+                //RoomUrl = roomModel.RoomUrl
+            };
+
+            await _roomHub.Clients.Group(roomModel.RoomId!).SendAsync("RoomUpdated", roomSettings);
+
             return Ok("Room updated!");
         }
 

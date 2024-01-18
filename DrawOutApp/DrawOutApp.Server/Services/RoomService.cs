@@ -3,6 +3,7 @@ using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Repositories;
 using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Services.Contracts;
+using Microsoft.AspNetCore.SignalR;
 
 
 namespace DrawOutApp.Server 
@@ -21,7 +22,12 @@ namespace DrawOutApp.Server.Services
         private readonly IRoomRepo _roomRepository;
         private readonly IUserService _userService;
         private readonly IGameService _gameService;
-        public RoomService(IRoomRepo roomRepository, IUserService userService, ITeamService teamService, IGameService gameService)
+       
+        public RoomService(
+            IRoomRepo roomRepository, 
+            IUserService userService, 
+            ITeamService teamService, 
+            IGameService gameService)
         {
             _roomRepository = roomRepository ?? throw new ArgumentNullException(nameof(roomRepository)); 
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
@@ -90,7 +96,7 @@ namespace DrawOutApp.Server.Services
                     //await _userService.AddRole(sessionId, Role.Player);
                     username.Value = userModel.Data!.Nickname;
                     var (isError, success, error) = await UpdateRoomAsync(roomModel.Data!);
-                    if(!success)
+                    if (!success)
                         return $"Error updating room. : {error}";
 
                 }
@@ -195,7 +201,9 @@ namespace DrawOutApp.Server.Services
                     //await _userService.RemoveRole(sessionId, Role.Player);
                     var success = await UpdateRoomAsync(roomModel.Data!);
                     if (success.Data)
+                    {
                         return username;
+                    }
                     else
                         return "Error removing player from room!";
                 }

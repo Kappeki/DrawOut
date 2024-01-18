@@ -5,12 +5,9 @@ namespace DrawOutApp.Server.Entities
 {
     public class ChatMessage
     {
-        [Required]
         public String Sender { get; set; }
-        [Required]
         [MaxLength(100)]
         public String Content { get; set; }
-        [Required]
         public long Timestamp { get; set; }
 
         public ChatMessage() { }

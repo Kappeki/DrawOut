@@ -53,7 +53,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     var redisSettings = builder.Configuration.GetSection("RedisSettings").Get<RedisSettings>();
-    options.Configuration = redisSettings.ConnectionString;
+    options.Configuration = redisSettings!.ConnectionString;
     options.InstanceName = redisSettings.InstanceName;
 });
 
@@ -92,12 +92,14 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseSession();
 
