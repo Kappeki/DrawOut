@@ -4,54 +4,54 @@ using DrawOutApp.Server.Mappers;
 using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Services.Contracts;
+using StackExchange.Redis;
 
 namespace DrawOutApp.Server.Services
 {
     public class GameService : IGameService
     {
         private readonly IGameRepo _gameRepo;
-        private readonly ITeamService _teamService;
-        //private readonly IRoundService _roundService;
-        public GameService(IGameRepo gameRepo, ITeamService teamService)
+        private readonly ITeamRepo _teamRepo;
+        public GameService(IGameRepo gameRepo, ITeamRepo teamRepo)
         {
             _gameRepo = gameRepo;
-            _teamService = teamService;
+            _teamRepo = teamRepo;
         }
 
         public async Task<Result<GameModel,string>> CreateGameAsync(string roomId)
         {
+            var tran = _gameRepo.BeginTransaction();
             try
             {
-                var redTeam = await _teamService.CreateTeamAsync();
-
-                var blueTeam = await _teamService.CreateTeamAsync();
-
-                var game = new Game
+                var game = new Game()
                 {
                     RoomId = roomId,
-                    RedTeamId = redTeam.TeamId,
-                    BlueTeamId = blueTeam.TeamId,
-                    TotalRounds = 8,
+                    TotalRounds = 0,
                     CurrentRoundIndex = 0
                 };
-
-                var error = await _gameRepo.AddGameAsync(game);
-                if (error)
-                    return "Error occured while creating game! Transaction failed!";
-
-                await _teamService.AssignGameSession(redTeam, game.GameSessionId);
-
-                await _teamService.AssignGameSession(blueTeam, game.GameSessionId);
-
-                //mozda treba da se doda nesto za runde 
-                return new GameModel
+                var blueTeam = new Team()
                 {
-                    GameSessionId = game.GameSessionId,
-                    RoomId = game.RoomId,
-                    RedTeam = redTeam,
-                    BlueTeam = blueTeam,
-                    CurrentRoundIndex = game.CurrentRoundIndex
+                    GameSessionId = game._cacheKey,
+                    Score = 0
                 };
+                var redTeam = new Team()
+                {
+                    GameSessionId = game._cacheKey,
+                    Score = 0
+                };
+                game.BlueTeamId = blueTeam._cacheKey;
+                game.RedTeamId = redTeam._cacheKey;
+
+                await _teamRepo.AddOrUpdateTeamAsync(blueTeam, tran);
+                await _teamRepo.AddOrUpdateTeamAsync(redTeam, tran);
+                await _gameRepo.AddGameAsync(game, tran);
+
+                bool success = await tran.ExecuteAsync();
+                if (!success) return "Error creating game.";
+
+                return GameMapper.ToModel(game, 
+                    TeamMapper.ToModel(blueTeam),
+                    TeamMapper.ToModel(redTeam));
             }
             catch (Exception ex)
             {
@@ -74,13 +74,13 @@ namespace DrawOutApp.Server.Services
                 if (game == null)
                     return "Game not found!";
 
-                var redTeam = await _teamService.GetTeamAsync(game.RedTeamId);
-                if(redTeam.IsError) return $"Error getting red team. : {redTeam.Error}";
-                var blueTeam = await _teamService.GetTeamAsync(game.BlueTeamId);
-                if(blueTeam.IsError) return $"Error getting blue team. : {blueTeam.Error}";
-                //for now skipping the round implementation
-                var rounds = new List<RoundModel>();
-                gameModel =  GameMapper.ToModel(game, blueTeam.Data!, redTeam.Data!, rounds);
+                var blueTeam = await _teamRepo.GetTeamAsync(game.BlueTeamId!);
+                var redTeam = await _teamRepo.GetTeamAsync(game.RedTeamId!);
+
+                gameModel = GameMapper.ToModel(game, 
+                            TeamMapper.ToModel(blueTeam!),
+                            TeamMapper.ToModel(redTeam!));
+
             }
             catch (Exception ex)
             {
@@ -90,7 +90,7 @@ namespace DrawOutApp.Server.Services
             return gameModel;
         }
 
-        public async Task<Result<bool, string>> UpdateGameAsync(string gameSessionId, GameModel gameModel)
+        /*public async Task<Result<bool, string>> UpdateGameAsync(string gameSessionId, GameModel gameModel)
         {
             try 
             { 
@@ -104,6 +104,6 @@ namespace DrawOutApp.Server.Services
                 string error = ErrorHandler.HandleError(ex);
                 return $"Error updating game. : {error}";
             }
-        }
+        }*/
     }
 }

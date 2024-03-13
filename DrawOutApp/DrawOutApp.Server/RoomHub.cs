@@ -23,6 +23,7 @@ namespace DrawOutApp.Server
         }
         public async Task LeaveRoom(string roomId, string nickname)
         {
+            //Context.GetHttpContext().Request.Query.TryGetValue("roomId", out var roomId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId);
             await Clients.Group(roomId).SendAsync("UserLeft", $"{nickname} has left the room!");
         }

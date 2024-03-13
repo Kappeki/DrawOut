@@ -31,6 +31,7 @@ namespace DrawOutApp.Server.Controllers
             //mozda da dodamo nekako da se vidi kom timu se pridruzuje?
             return Ok($"You've joined the team! {teamId}");
         }
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("{teamId}/remove")]
@@ -58,7 +59,6 @@ namespace DrawOutApp.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("{teamId}/score")]
-    
         public async Task<IActionResult> UpdateTeamScore(string teamId, [FromBody] int score)
         {
             var data = await _teamService.UpdateTeamScoreAsync(teamId, score);
@@ -70,7 +70,6 @@ namespace DrawOutApp.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("{teamId}/leader")]
-     
         public async Task<IActionResult> SetTeamLeader(string teamId)
         {
             var sessionId = Request.Cookies["UserSessionId"];

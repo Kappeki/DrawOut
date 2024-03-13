@@ -31,7 +31,7 @@ namespace DrawOutApp.Server.Mappers
                 GameSessionId = model.GameSessionId,
                 RoundNumber = model.RoundNumber,
                 ActiveWord = model.ActiveWord,
-                CurrentPainterId = model.CurrentPainter?.SessionId, 
+                CurrentPainterId = model.CurrentPainter?.SeshKey, 
                 IsStealOpportunityActive = model.IsStealOpportunityActive,
                 RoundChat = model.RoundChat?.Select(rc=>new ChatMessage(rc)).ToList(),
                 State = model.State,

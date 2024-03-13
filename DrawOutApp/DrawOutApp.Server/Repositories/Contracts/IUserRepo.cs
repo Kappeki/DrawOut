@@ -6,8 +6,9 @@ namespace DrawOutApp.Server.Repositories.Contracts
     {
         Task<User?> GetUserAsync(string sessionId);
         Task<IEnumerable<User>> GetAllUsersAsync();
-        Task AddUserAsync(User user);
-        Task UpdateUserAsync(string sessionId, User user);
+        Task AddToHashSet<T>(string setKey, Func<T, string> keySelector, T value, TimeSpan expiry);
+        Task AddOrUpdateUserAsync(User user, TimeSpan? expiry = null);
+        Task UpdateUserInRoomAsync(string roomId, User user, Dictionary<string, object> updates);
         Task DeleteUserAsync(string sessionId);
     }
 }

@@ -8,28 +8,28 @@ namespace DrawOutApp.Server.Models
     public enum GameState { Waiting, InGame }
 
     public enum RoundTime { Short = 40, Medium = 60, Long = 80 }
+    public record class RoomRequest(string RoomName, string? Password);
+    public record class JoinRoomRequest(string RoomId, string? Password);
 
     public class RoomModel
     {
-        public string? Id { get; set; }
-        public string? RoomId { get; set; } = null!;
         public string RoomName { get; set; } = null!;
-        public string Password { get; set; } = String.Empty;
+        public string? PasswordHash { get; set; }
+        public string? RoomURL { get; set; }
         public int PlayerCount { get; set; }   
-        public UserModel? RoomAdmin { get; set; }
+        public UserModel RoomAdmin { get; set; }
         public List<UserModel>? Players { get; set; }
         public List<string>? CustomWords { get; set; }
         public List<ChatMessageModel>? RoomChat { get; set; }
         //public ObjectId SelectedWordPack { get; set; }
+        public string? SelectedWordPack { get; set; }
         public GameState GameState { get; set; }
-        public Dictionary<string, int>? TeamScores { get; set; } //nadograditi
         public RoundTime RoundTime { get; set; } //selektuje room admin
 
         public RoomModel()
         {
             Players = new List<UserModel>();
             RoomChat = new List<ChatMessageModel>();
-            TeamScores = new Dictionary<string, int>();
             GameState = GameState.Waiting;
             RoundTime = RoundTime.Medium;
         }

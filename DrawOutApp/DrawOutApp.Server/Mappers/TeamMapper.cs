@@ -6,14 +6,18 @@ namespace DrawOutApp.Server.Mappers
 {
     public static class TeamMapper
     {
-        public static TeamModel ToModel(Team entity, UserModel teamLeader, List<UserModel> teammates)
+        public static TeamModel ToModel(Team entity, UserModel? teamLeader = null, List<UserModel>? teammates = null)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
+            if(teammates == null)
+            {
+                teammates = new List<UserModel>();
+            }
+
             return new TeamModel
             {
-                TeamId = entity.TeamId,
-                GameSessionId = entity.GameSessionId,
+                GameSessionId = entity.GameSessionId!,
                 Teammates = teammates, 
                 TeamLeader = teamLeader,
                 Score = entity.Score
@@ -26,9 +30,8 @@ namespace DrawOutApp.Server.Mappers
 
             return new Team
             {
-                TeamId = model.TeamId,
-                TeammateIds = model.Teammates.Select(tm => tm.SessionId).ToList(),
-                TeamLeaderId = model.TeamLeader?.SessionId,
+                TeammateIds = model.Teammates!.Select(tm => tm.SeshKey).ToList(),
+                TeamLeaderId = model.TeamLeader?.SeshKey,
                 Score = model.Score,
                 GameSessionId = model.GameSessionId
             };

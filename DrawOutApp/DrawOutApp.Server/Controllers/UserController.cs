@@ -21,7 +21,7 @@ namespace DrawOutApp.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserModel userModel)
         {
-            var data = await _userService.CreateUserAsync(userModel);
+            var data = await _userService.CreateUserSessionAsync(userModel);
             if(data.IsError)
                 return BadRequest(data.Error);
             var cookieOptions = new CookieOptions
@@ -29,33 +29,28 @@ namespace DrawOutApp.Server.Controllers
                 HttpOnly = true,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             };
-            Response.Cookies.Append("UserSessionId", data.Data!.SessionId, cookieOptions);
-            return CreatedAtAction(nameof(GetUser), new { sessionId = data.Data!.SessionId }, data.Data);
+            Response.Cookies.Append("UserSessionId", data.Data!.SeshKey, cookieOptions);
+            return CreatedAtAction(nameof(GetUser), new { sessionKey = data.Data!.SeshKey }, data.Data);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("session")]
-    
         public async Task<IActionResult> GetSession()
         {
-            // Check if the session cookie exists
-            var sessionId = Request.Cookies["UserSessionId"];
-            if (string.IsNullOrEmpty(sessionId))
+            var sessionKey = Request.Cookies["UserSessionId"];
+            if (string.IsNullOrEmpty(sessionKey))
             {
                 return NotFound("Session not found");
             }
 
-            // Retrieve user details using the session ID
-            var (isError,user,error) = await _userService.GetUserAsync(sessionId);
+            var (isError,user,error) = await _userService.GetUserAsync(sessionKey);
             if (isError)
             {
-                // Consider deleting the cookie if the session doesn't exist in the backend
                 Response.Cookies.Delete("UserSessionId");
                 return NotFound(error);
             }
 
-            // Return the user details
             return Ok(user);
         }
         
@@ -64,7 +59,6 @@ namespace DrawOutApp.Server.Controllers
         [HttpGet("{sessionId}")]
         public async Task<IActionResult> GetUser(string sessionId)
         {
-          
             var (isError, user, error) = await _userService.GetUserAsync(sessionId);
             if (isError)
             {
@@ -84,6 +78,7 @@ namespace DrawOutApp.Server.Controllers
             try
             {
                 await _userService.DeleteUserAsync(sessionId);
+                Response.Cookies.Delete("UserSessionId");
                 return NoContent();
             }
             catch (Exception ex)
@@ -97,7 +92,7 @@ namespace DrawOutApp.Server.Controllers
         [HttpPut("{sessionId}")]
         public async Task<IActionResult> UpdateUser(string sessionId, [FromBody] UserModel userModel)
         {
-            var (isError, success, error) = await _userService.UpdateUserAsync(sessionId, userModel);
+            var (isError, success, error) = await _userService.UpdateUserPrefsAsync(sessionId, userModel);
             if (isError)
             {
                 return BadRequest(error);

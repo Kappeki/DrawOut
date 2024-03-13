@@ -2,15 +2,12 @@
 {
     public class TeamModel
     {
-        public String TeamId { get; set; } 
 
-        public List<UserModel> Teammates { get; set; }
-
-        public UserModel TeamLeader { get; set; }
-
-        public int Score { get; set; }
-
+        public string CacheKey { get; set; }
         public string GameSessionId { get; set; }
+        public List<UserModel>? Teammates { get; set; }
+        public UserModel? TeamLeader { get; set; }
+        public int Score { get; set; }
 
         //postoji JEDAN JEDINI teamchat koji prvo koristi tim koji crta, dok ga drugi tim ne vidi.
         //Kada istekne vreme, onda tim koji krade vidi taj cet naravno obrisan skroz, dok sada tim koji je crtao ne vidi cet
@@ -20,9 +17,9 @@
             Teammates = new List<UserModel>();
         }
         
-        public TeamModel(string teamId, List<UserModel> teammates, UserModel teamLeader, int score) //ako treba
+        public TeamModel(string cacheKey, List<UserModel> teammates, UserModel teamLeader, int score) //ako treba
         {
-            TeamId = teamId;
+            CacheKey = cacheKey;
             Teammates = teammates;
             TeamLeader = teamLeader;
             Score = score;

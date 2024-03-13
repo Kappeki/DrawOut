@@ -12,8 +12,8 @@ namespace DrawOutApp.Server.Mappers
 
             return new UserModel
             {
-                SessionId = entity.SessionId,
-                GameSessionId = entity.GameSessionId,
+                SeshKey = entity._sessionKey,
+                MongoId = entity.ObjectId,
                 Nickname = entity.Nickname,
                 Roles = new HashSet<Role>(entity.Roles),
                 Icon = entity.Icon,
@@ -28,8 +28,7 @@ namespace DrawOutApp.Server.Mappers
 
             return new User
             {
-                SessionId = model.SessionId,
-                GameSessionId = model.GameSessionId,
+                _sessionKey = model.SeshKey,
                 Nickname = model.Nickname,
                 Roles = new HashSet<Role>(model.Roles),
                 Icon = model.Icon,

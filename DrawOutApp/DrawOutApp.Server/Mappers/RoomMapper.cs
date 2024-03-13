@@ -1,5 +1,6 @@
 ﻿using DrawOutApp.Server.Entities;
 using DrawOutApp.Server.Models;
+using System.Text.RegularExpressions;
 
 namespace DrawOutApp.Server.Mappers
 {
@@ -11,18 +12,16 @@ namespace DrawOutApp.Server.Mappers
 
             return new RoomModel
             {
-                Id = entity.Id,
-                RoomId = entity.RoomId,
                 RoomName = entity.RoomName,
-                Password = entity.Password,
+                PasswordHash = entity.Password,
+                RoomURL = entity.RoomURL,
                 PlayerCount = entity.PlayerCount,
-                RoomAdmin = UserMapper.ToModel(entity.RoomAdmin),
+                RoomAdmin = UserMapper.ToModel(entity.RoomAdmin!),
                 Players = entity.Players?.Select(UserMapper.ToModel).ToList(),
                 CustomWords = entity.CustomWords,
                 RoomChat = entity.RoomChat?.Select(rc=>rc.ToBusinessModel()).ToList(),
-               // SelectedWordPack = entity.SelectedWordPack,
+                SelectedWordPack = entity.SelectedWordPack,
                 GameState = entity.GameState,
-                TeamScores = entity.TeamScores,
                 RoundTime = entity.RoundTime
             };
         }
@@ -34,20 +33,24 @@ namespace DrawOutApp.Server.Mappers
 
             return new Room
             {
-                Id = model.Id,
-                RoomId = model.RoomId,
                 RoomName = model.RoomName,
-                Password = model.Password,
+                RoomURL = model.RoomURL,
                 PlayerCount = model.PlayerCount,
-                RoomAdmin = UserMapper.ToEntity(model.RoomAdmin),
+                RoomAdmin = UserMapper.ToEntity(model.RoomAdmin!),
                 Players = model.Players?.Select(UserMapper.ToEntity).ToList(),
                 CustomWords = model.CustomWords,
                 RoomChat = model.RoomChat?.Select(rc=>new ChatMessage(rc)).ToList(),
-                //SelectedWordPack = model.SelectedWordPack,
+                SelectedWordPack = model.SelectedWordPack,
                 GameState = model.GameState,
-                TeamScores = model.TeamScores,
                 RoundTime = model.RoundTime
             };
+        }
+
+        public static string GenerateRoomURL(string roomName)
+        {
+            var sanitizedRoomName = Regex.Replace(roomName.ToLower(), @"[^a-z0-9]", "-");
+            var uniquePart = Guid.NewGuid().ToString().Substring(0, 8); // Use part of a GUID for uniqueness
+            return $"{sanitizedRoomName}-{uniquePart}";
         }
     }
 }

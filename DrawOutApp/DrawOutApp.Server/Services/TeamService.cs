@@ -9,83 +9,22 @@ namespace DrawOutApp.Server.Services
     public class TeamService : ITeamService
     {
         private readonly ITeamRepo _teamRepository;
-        private readonly IUserService _userService;
+        private readonly IUserRepo _userRepository;
 
-        public TeamService(ITeamRepo teamRepository, IUserService userService)
+        public TeamService(ITeamRepo teamRepository, IUserRepo userRepo)
         {
             _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _userRepository = userRepo ?? throw new ArgumentNullException(nameof(teamRepository));
         }
-
-        public async Task<Result<bool, string>> AddTeammateAsync(string teamId, string teammateId)
-        {
-            try 
-            { 
-                var (isErrorTeam, teamModel, errorTeam) = await GetTeamAsync(teamId);
-                var (isErrorUser, teammateModel, errorUser) = await _userService.GetUserAsync(teammateId);
-
-                if (isErrorTeam)
-                    return $"Could not retrieve team with error : {errorTeam}";
-
-                if (isErrorUser)
-                    return $"Teammate not found with error {errorUser}";
-
-                //ovo ne bi trebalo nikad da se desi, jer nestaje dugme nakon sto se klikne join na taj team
-                if (teamModel!.Teammates.Contains(teammateModel!))
-                    return "Teammate already in the team.";
-
-                //isto nikad jer za taj pun team se ne vidi dugme za join
-                if (teamModel.IsFull())
-                   return "Team is full.";
-            
-                if(teammateModel!.Roles.Contains(Role.Player) && !string.IsNullOrEmpty(teammateModel.TeamId))
-                {
-                    await RemoveTeammateAsync(teammateModel.TeamId, teammateId);
-                }
-
-                teamModel.Teammates.Add(teammateModel);
-                teammateModel.TeamId = teamId;
-
-                var (isUpdateError, success, error) = await _userService.UpdateUserAsync(teammateId, teammateModel);
-                if(isUpdateError)
-                    return $"Could not update user data. : {error}";
-
-                if (success) {
-                    await _userService.AddRole(teammateId, Role.Player);
-                    await _teamRepository.UpdateTeamAsync(teamId, TeamMapper.ToEntity(teamModel));
-                    return true;
-                }
-                else
-                {
-                    teamModel.Teammates.Remove(teammateModel);
-                    await _userService.RemoveRole(teammateId, Role.Player);
-                    throw new Exception("Couldn't update user");
-                }
-            }
-            catch (Exception ex)
-            {
-                string error = ErrorHandler.HandleError(ex);
-                return $"Error adding teammate. : {error}";
-            }
-            return false;
-        }
-
-        public async Task<TeamModel> CreateTeamAsync()
+        public async Task<TeamModel> CreateTeamAsync(string gameSeshId, TimeSpan? expiry = null)
         {
             var team = new Team
             {
-                TeammateIds = new List<string>(),
-                GameSessionId = String.Empty,
+                GameSessionId = gameSeshId,
                 Score = 0
             };
-            await _teamRepository.AddTeamAsync(team);
-            return new TeamModel
-            {
-                TeamId = team.TeamId,
-                GameSessionId = team.GameSessionId,
-                Teammates = new List<UserModel>(),
-                Score = 0
-            };
+            await _teamRepository.AddOrUpdateTeamAsync(team, expiry);
+            return TeamMapper.ToModel(team);
         }
 
         public async Task<Result<TeamModel?, string>> GetTeamAsync(string teamId)
@@ -95,26 +34,23 @@ namespace DrawOutApp.Server.Services
             try
             {
                 var team = await _teamRepository.GetTeamAsync(teamId);
-                var (isError,teamLeader,error) = await _userService.GetUserAsync(team!.TeamLeaderId);
-                if (isError)
-                    return $"Could not retrieve team leader with error : {error}";
-                teamModel = new TeamModel
-                {
-                    TeamId = team.TeamId,
-                    GameSessionId = team.GameSessionId,
-                    Score = team.Score,
-                    TeamLeader = teamLeader!,
-                    Teammates = new List<UserModel>()
-                };
+                if(team == null)
+                    return "Team not found!";
+                var user = await _userRepository.GetUserAsync(team.TeamLeaderId!);
+                if(user == null)
+                    errors += "Team leader not assigned!\n";
 
-                foreach (var teammateId in team.TeammateIds)
+                var teammates = new List<UserModel>();
+
+                foreach (var tid in team.TeammateIds!)
                 {
-                    var (isErrorUser,teammate,errorUser) = await _userService.GetUserAsync(teammateId);
-                    if (isErrorUser)
-                        errors += $"Could not retrieve teammate with error : {errorUser}";
-                    else
-                        teamModel.Teammates.Add(teammate!);
+                    var teammate = await _userRepository.GetUserAsync(tid);
+                    if(teammate == null)
+                        errors += $"Teammate with id {tid} not found!\n";
+                    teammates.Add(UserMapper.ToModel(teammate!));
                 }
+
+                teamModel = TeamMapper.ToModel(team, UserMapper.ToModel(user!), teammates);
             }
             catch(Exception ex)
             {
@@ -124,56 +60,77 @@ namespace DrawOutApp.Server.Services
             return teamModel;
         }
 
-        public async Task RemoveTeammateAsync(string teamId, string teammateId)
-        {
-            var teamModel = await GetTeamAsync(teamId);
-            var userModel = await _userService.GetUserAsync(teammateId);
-            if (teamModel.IsError)
-                throw new ArgumentException("Team not found.");
-            if(userModel.IsError)
-                throw new ArgumentException("Teammate not found.");
-            
-            teamModel.Data!.Teammates.Remove(userModel.Data!);
-            userModel.Data!.TeamId = String.Empty;
-
-            await _userService.UpdateUserAsync(teammateId, userModel.Data!);
-            await _userService.RemoveRole(teammateId, Role.Player);
-
-            await _teamRepository.UpdateTeamAsync(teamId, TeamMapper.ToEntity(teamModel.Data));
-        }
-
-        public async Task<Result<bool, string>> SetTeamLeaderAsync(string teamId, string tleaderId)
+        public async Task<Result<bool, string>> AddTeammateAsync(string teamId, string teammateId)
         {
             try
             {
-                var teamModel = await GetTeamAsync(teamId);
-                var leaderModel = await _userService.GetUserAsync(tleaderId);
-                if (teamModel.IsError)
-                    return $"Team not found : {teamModel.Error}";
-                if (leaderModel.IsError)
-                    return $"User not found : {leaderModel.Error}";
-
-                //ova dva ne bi trebalo jer dugme za set leader nestaje nakon sto se klikne na njega
-                if (teamModel.Data!.TeamLeader != null)
-                    return "Team already has a leader!";
-
-                //mora da prvo igrac bude u tim da bi se postavio kao lider
-                if (!teamModel.Data.Teammates.Contains(leaderModel.Data!))
-                    return "User is not in the team.";
+                var team = await _teamRepository.GetTeamAsync(teamId);
+                if (team == null)
+                    return "Team not found!";
+                var user = await _userRepository.GetUserAsync(teammateId);
+                if (user == null)
+                    return "User not found!";
 
 
-                teamModel.Data.TeamLeader = leaderModel.Data!;
-                await _userService.AddRole(tleaderId, Role.TeamLeader);
-                await _teamRepository.UpdateTeamAsync(teamId, TeamMapper.ToEntity(teamModel.Data));
+                if(team.TeammateIds!.Count == 4)
+                    return "Team is full.";
+               
+                await _teamRepository.AddTeammateAsync(teamId, teammateId);
+                return true;
+
+            }
+            catch(Exception ex)
+            {
+                string error = ErrorHandler.HandleError(ex);
+                return $"Error adding teammate. : {error}";
+            }
+
+            return false;
+        }
+        
+        public async Task<Result<bool,string>> RemoveTeammateAsync(string teamId, string teammateId)
+        {
+            try
+            {
+                var team = await _teamRepository.GetTeamAsync(teamId);
+                if (team == null)
+                    return "Team not found!";
+                if (team.TeammateIds!.Contains(teammateId))
+                {
+                    await _teamRepository.RemoveTeammateAsync(teamId, teammateId);
+                }
+                else
+                {
+                    return $"User is not in the team with id : {teamId}.";
+                }
 
                 return true;
             }
             catch (Exception ex)
             {
                 string error = ErrorHandler.HandleError(ex);
-                return $"Error setting team leader. : {error}";
+                return $"Error adding teammate. : {error}";
             }
             return false;
+        }
+
+        public async Task<Result<bool, string>> SetTeamLeaderAsync(string teamId, string tleaderId)
+        {
+            try
+            {
+                var team = await _teamRepository.GetTeamAsync(teamId);
+                if (team != null)
+                {
+                    await _teamRepository.UpdateTeamLeaderAsync(teamId, tleaderId);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                string error = ErrorHandler.HandleError(ex);
+                return $"Error setting team leader. : {error}";
+            }
         }
 
         public async Task<Result<bool, string>> UpdateTeamScoreAsync(string teamId, int score)
@@ -183,9 +140,8 @@ namespace DrawOutApp.Server.Services
                 var team = await _teamRepository.GetTeamAsync(teamId);
                 if (team != null)
                 {
-                    team.Score = score;
-                    await _teamRepository.UpdateTeamAsync(teamId, team);
-                    return true;
+                   await _teamRepository.UpdateScoreAsync(teamId, score);
+                   return true;
                 }
                 return false;
             }
@@ -194,12 +150,6 @@ namespace DrawOutApp.Server.Services
                 string error = ErrorHandler.HandleError(ex);
                 return $"Error updating team score. : {error}";
             }
-        }
-
-        public async Task AssignGameSession(TeamModel team, string gameSessionId)
-        {
-            team.GameSessionId = gameSessionId;
-            await _teamRepository.UpdateTeamAsync(team.TeamId, TeamMapper.ToEntity(team));
         }
     }
 }

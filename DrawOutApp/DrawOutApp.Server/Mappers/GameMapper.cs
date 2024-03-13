@@ -5,37 +5,32 @@ namespace DrawOutApp.Server.Mappers
 {
     public class GameMapper
     {
-        public static GameModel ToModel(Game entity, TeamModel blueTeam, TeamModel redTeam, List<RoundModel> rounds)
+        public static GameModel ToModel(Game entity, TeamModel blueTeam, TeamModel redTeam)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             var model = new GameModel
             {
-                GameSessionId = entity.GameSessionId,
                 RoomId = entity.RoomId,
                 RedTeam = redTeam,
                 BlueTeam = blueTeam,
-                Rounds = rounds,
+                TotalRounds = entity.TotalRounds,
                 CurrentRoundIndex = entity.CurrentRoundIndex
             };
 
             return model;
         }
 
-        public static Game ToEntity(GameModel model)
+        public static Game ToEntity(GameModel model, string redTeamId, string blueTeamId)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
-           
-            var roundIds = model.Rounds.Select(r => r.RoundId).ToList();
-            
+
             var entity = new Game
             {
-                GameSessionId = model.GameSessionId,
                 RoomId = model.RoomId,
-                RedTeamId = model.RedTeam.TeamId,
-                BlueTeamId = model.BlueTeam.TeamId,
+                RedTeamId = redTeamId,
+                BlueTeamId = blueTeamId,
                 TotalRounds = model.TotalRounds,
-                RoundIds = roundIds,
                 CurrentRoundIndex = model.CurrentRoundIndex
             };
 

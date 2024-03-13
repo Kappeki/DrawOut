@@ -1,8 +1,12 @@
 ﻿using DrawOutApp.Server.Entities;
+using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Settings;
 using StackExchange.Redis;
 using Newtonsoft.Json;
+using MongoDB.Bson;
+using MongoDB.Driver;
+using System.Reflection;
 
 namespace DrawOutApp.Server.Repositories
 {
@@ -10,24 +14,50 @@ namespace DrawOutApp.Server.Repositories
     {
         private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
-        public UserRepository(IRedisSettings settings)
+        private readonly IRoomRepo _roomRepo;
+        public UserRepository(IRedisSettings settings, IRoomRepo roomRepo)
         {
             _redis = ConnectionMultiplexer.Connect(settings.ConnectionString);
+
             _database = _redis.GetDatabase();
+            _roomRepo = roomRepo;
         }
 
-        public async Task AddUserAsync(User user)
+        public async Task AddOrUpdateUserAsync(User user, TimeSpan? expiry = null)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
-            user.SessionId = Guid.NewGuid().ToString();
-            var userJson = JsonConvert.SerializeObject(user);
-            await _database.StringSetAsync(user.SessionId, userJson);
+
+            await _database.HashSetAsync(user._sessionKey,[
+                new("Nickname", user.Nickname ?? string.Empty),
+                new("Icon", user.Icon ?? string.Empty),
+                new("MongoId", user.ObjectId ?? string.Empty)
+            ]);
+
+            if (expiry.HasValue)
+            {
+                await _database.KeyExpireAsync(user._sessionKey, expiry);
+            }
         }
 
-        public async Task DeleteUserAsync(string sessionId)
+        //pomocna funkcija za dodavanje fielda u user hashu 
+        public async Task AddToHashSet<T>(string setKey, Func<T, string> keySelector, T value, TimeSpan expiry)
         {
-            if (!_database.KeyExists(sessionId)) throw new ArgumentException($"User does not exist with ID {sessionId}");
-            await _database.KeyDeleteAsync(sessionId);
+            string serializedObject = JsonConvert.SerializeObject(value);
+            await _database.HashSetAsync(setKey, [new HashEntry(keySelector(value), serializedObject)]);
+            await _database.KeyExpireAsync(setKey, expiry);
+        }
+        
+        public async Task<T?> GetFromHashSet<T>(string setKey, string valueKey)
+        {
+            var value = await _database.HashGetAsync(setKey, valueKey);
+
+            return value.IsNullOrEmpty ? default(T) : JsonConvert.DeserializeObject<T>(value);
+        }
+
+        public async Task DeleteUserAsync(string sessionKey)
+        {
+            if (!_database.KeyExists(sessionKey)) throw new ArgumentException($"User does not exist with ID {sessionKey}");
+            await _database.KeyDeleteAsync(sessionKey);
         }
 
         public Task<IEnumerable<User>> GetAllUsersAsync()
@@ -35,21 +65,49 @@ namespace DrawOutApp.Server.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<User?> GetUserAsync(string sessionId)
+        public async Task<User?> GetUserAsync(string key)
         {
-            var userJson = await _database.StringGetAsync(sessionId);
-            if (!userJson.IsNullOrEmpty)
+            var hashEntries = await _database.HashGetAllAsync(key);
+            if (hashEntries.Length == 0)
             {
-                return JsonConvert.DeserializeObject<User>(userJson);
+                return null; 
             }
-            return null;
+
+            User user = new User();
+            foreach (var entry in hashEntries)
+            {
+                string propName = entry.Name.ToString();
+                PropertyInfo? propInfo = typeof(User).GetProperty(propName);
+
+                if (propInfo != null && propInfo.CanWrite)
+                {
+                    object? propValue = JsonConvert.DeserializeObject(entry.Value!, propInfo.PropertyType);
+                    propInfo.SetValue(user, propValue);
+                }
+            }
+
+            user._id = ObjectId.Parse(GetFromHashSet<string>(key, "MongoId").Result);
+
+            return user;
         }
 
-        public async Task UpdateUserAsync(string sessionId, User user)
+        public async Task UpdateUserInRoomAsync(string roomId, User user, Dictionary<string, object> updates)
         {
-            if (sessionId != user.SessionId) throw new ArgumentException("SessionId does not match");
-            var userJson = JsonConvert.SerializeObject(user);
-            await _database.StringSetAsync(sessionId, userJson);
+            var roomObjectId = ObjectId.Parse(roomId);
+
+            var filter = Builders<Room>.Filter.And(
+                Builders<Room>.Filter.Eq("_id", roomObjectId),
+                Builders<Room>.Filter.ElemMatch(r => r.Players, u => u._id == user._id)
+            );
+
+            var updateDefinitions = new List<UpdateDefinition<Room>>();
+            foreach (var update in updates)
+            {
+                var updateDefinition = Builders<Room>.Update.Set($"Users.$.{update.Key}", update.Value);
+                updateDefinitions.Add(updateDefinition);
+            }
+            var combinedUpdate = Builders<Room>.Update.Combine(updateDefinitions);
+            await _roomRepo.UpdateRoomAsync(filter, combinedUpdate);
         }
     }
 }

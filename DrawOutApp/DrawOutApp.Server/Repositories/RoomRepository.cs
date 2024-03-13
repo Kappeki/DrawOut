@@ -2,18 +2,61 @@
 using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Settings;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Linq.Expressions;
 
 namespace DrawOutApp.Server.Repositories
 {
+    /// <summary>
+    /// Refaktorisan repozitorijum za sobe.
+    /// Ideja je dodavanje nestovanih objekata/entiteta u sobi, kao sto su igraci, igra, reci i poruke.
+    /// </summary>
     public class RoomRepository : IRoomRepo
     {
         private readonly IMongoCollection<Room> _roomsCollection;
+        private readonly IMongoClient _mongoClient;
 
         public RoomRepository(IMongoDBSettings settings, IMongoClient mongoClient)
         {
             var database = mongoClient.GetDatabase(settings.DatabaseName);
+            _mongoClient = mongoClient;
             _roomsCollection = database.GetCollection<Room>(settings.RoomsCollectionName);
+
+            CreateIndexesAsync();
+        }
+
+        private async Task CreateIndexesAsync()
+        {
+            await _roomsCollection.Indexes.CreateOneAsync(
+                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomName),
+                new CreateIndexOptions { Unique = true }));
+            
+            //ovo da se brze hvata soba po url-u
+            await _roomsCollection.Indexes.CreateOneAsync(
+                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomURL), 
+                new CreateIndexOptions { Unique = true}));
+            
+            await _roomsCollection.Indexes.CreateOneAsync(
+                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.PlayerCount))); 
+            
+            //da filtrira sobe koje nisu in-game
+            await _roomsCollection.Indexes.CreateOneAsync(
+                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.GameState)));
+            
+            await _roomsCollection.Indexes.CreateOneAsync(
+                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.Password == null)));
+            
+            //ovaj index za myrooms tab da se otvori brze
+            await _roomsCollection.Indexes.CreateOneAsync(
+                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomAdmin)));
+            //moze da se doda index da expiruje soba to cemo kasnije da vidimo
+
+        }
+
+        public IClientSessionHandle GetSession()
+        {
+            return _mongoClient.StartSession();
         }
 
         public async Task<Room> CreateRoomAsync(Room room)
@@ -22,25 +65,81 @@ namespace DrawOutApp.Server.Repositories
             return room;
         }
 
-        public async Task<Room?> GetRoomAsync(string roomId)
+        public async Task<Room?> GetRoomAsync(string id)
         {
-            return await _roomsCollection.Find(r => r.RoomId == roomId).FirstOrDefaultAsync();
+            var objId = ObjectId.Parse(id);
+            var filter = Builders<Room>.Filter.Eq("_id", objId);
+            return await _roomsCollection.Find(filter).FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Room>> GetAllRoomsAsync()
+        public async Task<IEnumerable<Room>> GetAllRoomsAsync(FilterDefinition<Room>? filter = null, SortDefinition<Room>? sort = null)
         {
-            return await _roomsCollection.Find(_ => true).ToListAsync();
+            //compound assignment bas kul 
+            filter ??= Builders<Room>.Filter.Empty;
+            return await _roomsCollection.Find(filter).Sort(sort).ToListAsync();
         }
 
-        public async Task<bool> UpdateRoomAsync(Room room)
+        public virtual async Task UpdateRoomAsync(Expression<Func<Room,bool>> filter, 
+            UpdateDefinition<Room> update, 
+            IClientSessionHandle? sesh = null)
         {
-            await _roomsCollection.ReplaceOneAsync(r => r.RoomId == room.RoomId, room);
-            return true;
+            await _roomsCollection.UpdateOneAsync(sesh, filter, update);
+        }
+        public virtual async Task UpdateRoomAsync(FilterDefinition<Room> filter, 
+            UpdateDefinition<Room> update, 
+            IClientSessionHandle? sesh = null)
+        {
+            await _roomsCollection.UpdateOneAsync(sesh, filter, update);
         }
 
-        public async Task DeleteRoomAsync(string roomId)
+        public async Task DeleteRoomAsync(string id)
         {
-            await _roomsCollection.DeleteOneAsync(r => r.RoomId == roomId);
+            var objId = ObjectId.Parse(id);
+            var filter = Builders<Room>.Filter.Eq("_id", objId);
+            await _roomsCollection.DeleteOneAsync(filter);
         }
+
+        public async Task DeleteManyRoomsAsync(Expression<Func<Room, bool>> filter)
+        {
+            await _roomsCollection.DeleteManyAsync(filter);
+        }
+
+        public virtual async Task InsertIntoListAsync<TItem>(
+        Expression<Func<Room, bool>> filter,
+        Expression<Func<Room, IEnumerable<TItem>>> listProperty,
+        TItem item, IClientSessionHandle? sesh = null)
+        {
+            var updateDefinition = Builders<Room>.Update.Push(listProperty, item);
+            await UpdateRoomAsync(filter, updateDefinition, sesh);
+        }
+
+        public async Task<Room?> GetRoomByFilterAsync(Expression<Func<Room, bool>> filter, 
+            IClientSessionHandle? sesh = null)
+        {
+            return await _roomsCollection.Find(sesh, filter).FirstOrDefaultAsync();
+        }
+
+        //conditional remove from list
+        public virtual async Task RemoveFromListAsync<TItem>(
+        FilterDefinition<Room> filter,
+        Expression<Func<Room, IEnumerable<TItem>>> listProperty,
+        Expression<Func<TItem, bool>> condition, 
+        IClientSessionHandle? sesh = null) where TItem : class
+        {
+            var update = Builders<Room>.Update.PullFilter(listProperty, Builders<TItem>.Filter.Where(condition));
+            await UpdateRoomAsync(filter, update, sesh);
+        }
+        
+        //normal remove from list
+        public virtual async Task RemoveFromListAsync<TItem>(Expression<Func<Room, bool>> filter,
+        Expression<Func<Room, IEnumerable<TItem>>> listProperty, TItem value, 
+        IClientSessionHandle? sesh = null)
+        {
+            var update = Builders<Room>.Update.Pull(listProperty, value);
+            await UpdateRoomAsync(filter, update, sesh);
+        }
+
+
+
     }
 }

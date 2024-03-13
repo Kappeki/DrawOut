@@ -3,6 +3,7 @@ using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Settings;
 using Newtonsoft.Json;
 using StackExchange.Redis;
+using System.Reflection;
 
 namespace DrawOutApp.Server.Repositories
 {
@@ -15,82 +16,110 @@ namespace DrawOutApp.Server.Repositories
             _redis = ConnectionMultiplexer.Connect(settings.ConnectionString);
             _database = _redis.GetDatabase();
         }
-        public async Task<Game?> GetGameAsync(string gameSessionId)
+
+        public ITransaction BeginTransaction()
         {
-            if (!_database.KeyExists(gameSessionId)) throw new ArgumentException($"Game does not exist with ID {gameSessionId}");
-            var gameJson = await _database.StringGetAsync(gameSessionId);
-            if (!gameJson.IsNullOrEmpty)
-            {
-                return JsonConvert.DeserializeObject<Game>(gameJson);
-            }
-            return null;
+            return _database.CreateTransaction();
         }
 
-        public async Task<bool> AddGameAsync(Game game)
+        public async Task<Game?> GetGameAsync(string gameSessionId)
+        {
+            var hashEntries = await _database.HashGetAllAsync(gameSessionId);
+            if (hashEntries.Length == 0) return null;
+            Game game = new Game();
+            foreach (var entry in hashEntries)
+            {
+                string propName = entry.Name.ToString();
+                PropertyInfo? propInfo = typeof(Game).GetProperty(propName);
+
+                if (propInfo != null && propInfo.CanWrite)
+                {
+                    if (propName == "RoundsListKey")
+                    { 
+                        var roundIds = await _database.ListRangeAsync(entry.Value.ToString());
+                        game.RoundIds = roundIds.Select(id => id.ToString()).ToList();
+                    }
+                    else
+                    {
+                        object? propValue = JsonConvert.DeserializeObject(entry.Value!, propInfo.PropertyType);
+                        propInfo.SetValue(game, propValue);
+                    }
+                }
+            }
+            return game;
+
+        }
+
+        public async Task AddGameAsync(Game game, TimeSpan? expiry = null)
+        {
+            if(game == null) throw new ArgumentNullException(nameof(game));
+
+            string roundsListKey = $"{game._cacheKey}:rounds";
+
+            if (game.RoundIds != null && game.RoundIds.Any())
+            {
+                await _database.ListRightPushAsync(roundsListKey,
+                    game.RoundIds.Select(id => (RedisValue)id).ToArray());
+            }
+
+            await _database.HashSetAsync(game._cacheKey, [
+                new("RoomId", game.RoomId ?? string.Empty),
+                new("RedTeamId", game.RedTeamId ?? string.Empty),
+                new("BlueTeamId", game.BlueTeamId ?? string.Empty),
+                new("TotalRounds", game.TotalRounds.ToString() ?? string.Empty),
+                new("CurrentRoundIndex", game.CurrentRoundIndex.ToString() ?? string.Empty),
+                new("RoundsListKey", roundsListKey)
+            ]);
+           
+            if (expiry.HasValue)
+            {
+                await _database.KeyExpireAsync(game._cacheKey, expiry);
+                await _database.KeyExpireAsync(roundsListKey, expiry);
+            }
+
+            //_database.IncrementHashField(game._cacheKey, "CurrentRoundIndex", 1);
+        }
+
+        public async Task AddGameAsync(Game game, ITransaction tran, TimeSpan? expiry = null)
         {
             if (game == null) throw new ArgumentNullException(nameof(game));
 
-            // Initialize a list to keep track of all the keys that we will be creating
-            // This will be used for cleanup in case something fails
-            var createdKeys = new List<RedisKey>();
+            string roundsListKey = $"{game._cacheKey}:rounds";
 
-            try
+            if (game.RoundIds != null && game.RoundIds.Any())
             {
-                game.RoundIds = new List<string>();
-
-                // Use a Redis transaction (it does not support rollback, but we can use it to execute all commands atomically)
-                var tran = _database.CreateTransaction();
-
-                for (int i = 1; i <= 8; i++)
-                {
-                    var round = new Round
-                    {
-                        GameSessionId = game.GameSessionId,
-                        RoundNumber = i,
-                    };
-
-                    round.RoundId = $"round:{game.GameSessionId}:{i}";
-                    game.RoundIds.Add(round.RoundId);
-
-                    // Serialize round and add to transaction
-                    var roundJson = JsonConvert.SerializeObject(round);
-                    createdKeys.Add(round.RoundId);
-                    tran.StringSetAsync(round.RoundId, roundJson);
-                }
-
-                var gameJson = JsonConvert.SerializeObject(game);
-                createdKeys.Add(game.GameSessionId);
-                tran.StringSetAsync(game.GameSessionId, gameJson);
-
-                // Execute the transaction
-                var committed = await tran.ExecuteAsync();
-
-                if (!committed)
-                {
-                    // If the transaction was not committed successfully, attempt to clean up
-                    await DeleteKeysAsync(createdKeys);
-                    return false;
-                }
-
-                return true;
+                await tran.ListRightPushAsync(roundsListKey,
+                    game.RoundIds.Select(id => (RedisValue)id).ToArray());
             }
-            catch (Exception ex)
+
+            await tran.HashSetAsync(game._cacheKey, [
+                new("RoomId", game.RoomId ?? string.Empty),
+                new("RedTeamId", game.RedTeamId ?? string.Empty),
+                new("BlueTeamId", game.BlueTeamId ?? string.Empty),
+                new("TotalRounds", game.TotalRounds.ToString() ?? string.Empty),
+                new("CurrentRoundIndex", game.CurrentRoundIndex.ToString() ?? string.Empty),
+                new("RoundsListKey", roundsListKey)
+            ]);
+
+            if (expiry.HasValue)
             {
-                // Log the exception here using your preferred logging framework
-                await DeleteKeysAsync(createdKeys);
-                throw; // Re-throw the exception to be handled further up the call stack
+                await tran.KeyExpireAsync(game._cacheKey, expiry);
+                await tran.KeyExpireAsync(roundsListKey, expiry);
             }
+
+            //_database.IncrementHashField(game._cacheKey, "CurrentRoundIndex", 1);
         }
 
-        public async Task<bool> UpdateGameAsync(string gameSessionId, Game game)
+
+        /*public async Task<bool> UpdateGameAsync(string gameSessionId, Game game)
         {
             if(game == null || string.IsNullOrEmpty(gameSessionId)) return false;
-            if (gameSessionId != game.GameSessionId) throw new ArgumentException("GameSessionId does not match");
+            if (gameSessionId != game._cacheKey) throw new ArgumentException("GameSessionId does not match");
        
             var gameJson = JsonConvert.SerializeObject(game);
             await _database.StringSetAsync(gameSessionId, gameJson);
             return true;
-        }
+        }*/
 
         public async Task DeleteGameAsync(string gameSessionId)
         {
@@ -105,5 +134,15 @@ namespace DrawOutApp.Server.Repositories
                 await _database.KeyDeleteAsync(key);
             }
         }
+        //pomocna funkcija za izvlacenje podataka iz hash seta
+        public async Task<T?> GetFromHashSet<T>(string setKey, string valueKey)
+        {
+            var value = await _database.HashGetAsync(setKey, valueKey);
+
+            return value.IsNullOrEmpty ? default : JsonConvert.DeserializeObject<T>(value);
+        }
+
+        //u servis logika za startovanje igre, ukljucuje kreiranje rundi
+
     }
 }
