@@ -5,28 +5,19 @@ namespace DrawOutApp.Server.Entities
 {
     public class ChatMessage
     {
-        public String Sender { get; set; }
+        public string? Sender { get; set; }
         [MaxLength(100)]
-        public String Content { get; set; }
+        public string? Content { get; set; }
         public long Timestamp { get; set; }
 
         public ChatMessage() { }
 
-        public ChatMessage(ChatMessageModel message)
+        public ChatMessage(ChatMsgRecord message)
         {
             Sender = message.Sender;
             Content = message.Content;
-            Timestamp = new DateTimeOffset(message.Timestamp).ToUnixTimeSeconds();
-        }
-
-        public ChatMessageModel ToBusinessModel()
-        {
-            return new ChatMessageModel
-            {
-                Sender = this.Sender,
-                Content = this.Content,
-                Timestamp = DateTimeOffset.FromUnixTimeSeconds(this.Timestamp).DateTime
-            };
+            Timestamp = message.Timestamp;
         }
     }
+    public record class ChatMsgRecord(string Sender, string Content, long Timestamp);
 }

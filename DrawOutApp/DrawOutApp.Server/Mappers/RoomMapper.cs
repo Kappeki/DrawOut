@@ -1,17 +1,20 @@
 ﻿using DrawOutApp.Server.Entities;
 using DrawOutApp.Server.Models;
+using MongoDB.Bson;
 using System.Text.RegularExpressions;
 
 namespace DrawOutApp.Server.Mappers
 {
     public class RoomMapper
     {
-        public static RoomModel ToModel(Room entity)
+        public static RoomModel ToModel(Room entity, List<ChatMessage>? chat = null)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             return new RoomModel
             {
+                RoomId = entity.ObjectId,
+                CurrentGameId = entity.CurrentGameId,
                 RoomName = entity.RoomName,
                 PasswordHash = entity.Password,
                 RoomURL = entity.RoomURL,
@@ -19,38 +22,32 @@ namespace DrawOutApp.Server.Mappers
                 RoomAdmin = UserMapper.ToModel(entity.RoomAdmin!),
                 Players = entity.Players?.Select(UserMapper.ToModel).ToList(),
                 CustomWords = entity.CustomWords,
-                RoomChat = entity.RoomChat?.Select(rc=>rc.ToBusinessModel()).ToList(),
+                RoomChat = chat,
                 SelectedWordPack = entity.SelectedWordPack,
                 GameState = entity.GameState,
                 RoundTime = entity.RoundTime
             };
         }
 
-        // Converts from RoomModel to Room entity
+        //potencijalni problem ako dodje do neceg sa idjem 
         public static Room ToEntity(RoomModel model)
         {
             if (model == null) throw new ArgumentNullException(nameof(model));
 
             return new Room
             {
+                _id = ObjectId.Parse(model.RoomId),
+                CurrentGameId = model.CurrentGameId,
                 RoomName = model.RoomName,
                 RoomURL = model.RoomURL,
                 PlayerCount = model.PlayerCount,
                 RoomAdmin = UserMapper.ToEntity(model.RoomAdmin!),
                 Players = model.Players?.Select(UserMapper.ToEntity).ToList(),
                 CustomWords = model.CustomWords,
-                RoomChat = model.RoomChat?.Select(rc=>new ChatMessage(rc)).ToList(),
                 SelectedWordPack = model.SelectedWordPack,
                 GameState = model.GameState,
                 RoundTime = model.RoundTime
             };
-        }
-
-        public static string GenerateRoomURL(string roomName)
-        {
-            var sanitizedRoomName = Regex.Replace(roomName.ToLower(), @"[^a-z0-9]", "-");
-            var uniquePart = Guid.NewGuid().ToString().Substring(0, 8); // Use part of a GUID for uniqueness
-            return $"{sanitizedRoomName}-{uniquePart}";
         }
     }
 }

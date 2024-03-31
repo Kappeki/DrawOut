@@ -47,7 +47,6 @@ namespace DrawOutApp.Server.Repositories
                 }
             }
             return game;
-
         }
 
         public async Task AddGameAsync(Game game, TimeSpan? expiry = null)

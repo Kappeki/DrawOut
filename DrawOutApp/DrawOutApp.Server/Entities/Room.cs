@@ -27,6 +27,9 @@ namespace DrawOutApp.Server.Entities
         [BsonElement("roomAdmin")]
         public User? RoomAdmin { get; set; }
 
+        [BsonElement("currentGame")]
+        public string? CurrentGameId { get; set; }
+
         [BsonElement("players")]
         [JsonPropertyName("players")]
         public List<User>? Players { get; set; }
@@ -40,9 +43,9 @@ namespace DrawOutApp.Server.Entities
         [BsonIgnoreIfNull]
         public List<string>? CustomWords { get; set; }
 
-        [BsonElement("chatMessages")]
-        [JsonPropertyName("chatMessages")]
-        public List<ChatMessage>? RoomChat { get; set; }
+        [BsonElement("chatId")]
+        [JsonPropertyName("chatId")]
+        public string RoomChatId { get; set; }
 
         [BsonElement("wordPack")]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -64,10 +67,11 @@ namespace DrawOutApp.Server.Entities
         {
             _id = MongoDB.Bson.ObjectId.GenerateNewId();
             Players = new List<User>();
-            RoomChat = new List<ChatMessage>();
+            RoomChatId = $"chat:{ObjectId}";
             GameState = GameState.Waiting;
             RoundTime = RoundTime.Medium;
             CreatedAt = DateTime.UtcNow;
+            Games = new List<string>();
         }
     }
 }

@@ -12,7 +12,6 @@
         public Timer? RoundTimer { get; set; }
         public Timer? StealTimer { get; set; }
         public bool IsStealOpportunityActive { get; set; }
-        public List<ChatMessageModel>? RoundChat { get; set; }
         public RoundState State { get; set; }
         public List<DrawingActionModel>? DrawingActions { get; set; }
 
@@ -24,7 +23,7 @@
         public RoundModel(int roundNumber, string gameSessionId)
         {
             RoundNumber = roundNumber;
-            RoundChat = new List<ChatMessageModel>();
+           
             DrawingActions = new List<DrawingActionModel>();
             State = RoundState.InProgress; // or other appropriate initial state
             GameSessionId = gameSessionId;

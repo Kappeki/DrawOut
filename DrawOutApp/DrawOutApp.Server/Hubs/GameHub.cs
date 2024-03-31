@@ -1,8 +1,7 @@
-﻿
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 
-namespace DrawOutApp.Server
+namespace DrawOutApp.Server.Hubs
 {
     public class GameHub : Hub
     {
@@ -13,7 +12,7 @@ namespace DrawOutApp.Server
 
         public async Task SendGuess(string guess)
         {
-            
+
             await Clients.All.SendAsync("ReceiveGuess", guess, Context.ConnectionId);
         }
 

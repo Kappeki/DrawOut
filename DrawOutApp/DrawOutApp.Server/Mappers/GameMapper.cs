@@ -11,6 +11,7 @@ namespace DrawOutApp.Server.Mappers
 
             var model = new GameModel
             {
+                CacheKey = entity._cacheKey,
                 RoomId = entity.RoomId,
                 RedTeam = redTeam,
                 BlueTeam = blueTeam,

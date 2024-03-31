@@ -14,6 +14,7 @@ namespace DrawOutApp.Server.Controllers
             _gameService = gameService;
         }
 
+        //za testiranje samo
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]

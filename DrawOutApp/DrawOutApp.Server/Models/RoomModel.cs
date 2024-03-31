@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using DrawOutApp.Server.Entities;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Security.Permissions;
 using System.Text.Json.Serialization;
@@ -9,18 +10,20 @@ namespace DrawOutApp.Server.Models
 
     public enum RoundTime { Short = 40, Medium = 60, Long = 80 }
     public record class RoomRequest(string RoomName, string? Password);
-    public record class JoinRoomRequest(string RoomId, string? Password);
+    public record class JoinRoomRequest(string? RoomId, string? RoomUrl, string? Password); 
 
     public class RoomModel
     {
+        public string RoomId { get; set; } = null!;
         public string RoomName { get; set; } = null!;
         public string? PasswordHash { get; set; }
+        public string? CurrentGameId { get; set; }
         public string? RoomURL { get; set; }
         public int PlayerCount { get; set; }   
         public UserModel RoomAdmin { get; set; }
         public List<UserModel>? Players { get; set; }
         public List<string>? CustomWords { get; set; }
-        public List<ChatMessageModel>? RoomChat { get; set; }
+        public List<ChatMessage>? RoomChat { get; set; }
         //public ObjectId SelectedWordPack { get; set; }
         public string? SelectedWordPack { get; set; }
         public GameState GameState { get; set; }
@@ -29,7 +32,7 @@ namespace DrawOutApp.Server.Models
         public RoomModel()
         {
             Players = new List<UserModel>();
-            RoomChat = new List<ChatMessageModel>();
+            RoomChat = new List<ChatMessage>();
             GameState = GameState.Waiting;
             RoundTime = RoundTime.Medium;
         }

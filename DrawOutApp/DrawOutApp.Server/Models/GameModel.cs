@@ -5,6 +5,7 @@ namespace DrawOutApp.Server.Models
     public class GameModel
     {
         public string? RoomId { get; set; }
+        public string? CacheKey { get; set; }
         public TeamModel? RedTeam { get; set; }
         public TeamModel? BlueTeam { get; set; }
         public int TotalRounds { get; set; }

@@ -36,23 +36,43 @@ namespace DrawOutApp.Server.Controllers
 
             //ZA TESTIRANJE
             //return Ok($"Successfully created new room with name : {room.RoomName}");
-            return CreatedAtAction(nameof(CreateRoom), new { roomName = room!.RoomName }, room);
+            return Ok(room);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpPost("join")]
-        public async Task<IActionResult> JoinRoom([FromBody] JoinRoomRequest request)
+        [HttpPost("joinBtn")]
+        public async Task<IActionResult> JoinRoomById([FromBody] JoinRoomRequest request)
         {
             var sessionId = Request.Cookies["UserSessionId"];
             if (string.IsNullOrEmpty(sessionId))
             {
                 return BadRequest("User session is not found.");
             }
-            var (isError, nickname, error) = await _roomService.AddPlayerAsync(request.RoomId, sessionId, request.Password);
+            var (isError, username, error) = await _roomService.AddUserByIdAsync(request.RoomId!, sessionId, request.Password);
             if(isError)
                 return BadRequest(error);
-            return Ok($"{nickname!.Value} joined the room!");
+            return Ok(username!.Value);
+            
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpPost("joinUrl")]
+        public async Task<IActionResult> JoinRoomByUrl([FromBody] JoinRoomRequest request)
+        {
+            var sessionId = Request.Cookies["UserSessionId"];
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                return BadRequest("User session is not found.");
+            }
+            var (isError, username, error) = await _roomService.AddUserByUrlAsync(request.RoomUrl!, sessionId, request.Password);
+            if(isError)
+                if(error == "Invalid password.")
+                    return Unauthorized("Invalid password.");
+                else
+                    return BadRequest(error);
+            return Ok(username!.Value);
         }
 
         //korisnik SAM izlazi iz sobe, negde drugde mora kad bi korisnik bio kickovan
@@ -66,12 +86,12 @@ namespace DrawOutApp.Server.Controllers
             {
                 return BadRequest("User session is not found.");
             }
-            var (isError, nickname, error) = await _roomService.RemovePlayerAsync(roomId, sessionId);
+            var (isError, nickname, error) = await _roomService.RemoveUserAsync(roomId, sessionId);
             if (isError)
             {
                 return BadRequest(error);
             }
-            return Ok($"{nickname!.Value} left the room!");
+            return Ok(nickname!.Value);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -100,8 +120,6 @@ namespace DrawOutApp.Server.Controllers
             }
             return Ok(room);
         }
-
-
 
 
         //GET /rooms?isAscending=true&isProtected=false

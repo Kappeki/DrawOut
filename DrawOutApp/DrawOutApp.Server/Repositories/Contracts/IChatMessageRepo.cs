@@ -4,9 +4,8 @@ namespace DrawOutApp.Server.Repositories.Contracts
 {
     public interface IChatMessageRepo
     {
-        public Task AddMessageToRoomChatAsync(ChatMessage chatMessage, string roomId);
-        public Task AddMessageToRoundChatAsync(ChatMessage chatMessage, string roundId);
+        public Task AddToChatAsync(string roomId, ChatMessage msg);
         public Task<IEnumerable<ChatMessage?>> GetRoomChatAsync(string roomId);
-        public Task<IEnumerable<ChatMessage?>> GetRoundChatAsync(string roundId);
+        public Task ClearChatAsync(string roomId);
     }
 }
