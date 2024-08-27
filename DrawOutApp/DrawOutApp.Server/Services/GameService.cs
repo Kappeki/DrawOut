@@ -11,16 +11,15 @@ namespace DrawOutApp.Server.Services
     public class GameService : IGameService
     {
         private readonly IGameRepo _gameRepo;
-        private readonly ITeamRepo _teamRepo;
-        public GameService(IGameRepo gameRepo, ITeamRepo teamRepo)
+        public GameService(IGameRepo gameRepo)
         {
             _gameRepo = gameRepo;
-            _teamRepo = teamRepo;
         }
 
         public async Task<Result<GameModel,string>> CreateGameAsync(string roomId)
         {
-            var tran = _gameRepo.BeginTransaction();
+            throw new NotImplementedException();
+            /*var tran = _gameRepo.BeginTransaction();
             try
             {
                 var game = new Game()
@@ -42,9 +41,9 @@ namespace DrawOutApp.Server.Services
                 game.BlueTeamId = blueTeam._cacheKey;
                 game.RedTeamId = redTeam._cacheKey;
 
-                await _teamRepo.AddOrUpdateTeamAsync(blueTeam, tran);
-                await _teamRepo.AddOrUpdateTeamAsync(redTeam, tran);
-                await _gameRepo.AddGameAsync(game, tran);
+                _teamRepo.AddOrUpdateTeamAsync(blueTeam, tran);
+                _teamRepo.AddOrUpdateTeamAsync(redTeam, tran);
+                _gameRepo.AddGameAsync(game, tran);
 
                 bool success = await tran.ExecuteAsync();
                 if (!success) return "Error creating game.";
@@ -57,7 +56,7 @@ namespace DrawOutApp.Server.Services
             {
                 string error = ErrorHandler.HandleError(ex);
                 return $"Error creating game. : {error}";
-            }
+            }*/
         }
 
         public async Task DeleteGameAsync(string gameSessionId)
@@ -67,7 +66,9 @@ namespace DrawOutApp.Server.Services
 
         public async Task<Result<GameModel?,string>> GetGameAsync(string gameSessionId)
         {
-            GameModel gameModel = default!;
+            throw new NotImplementedException();
+            
+            /*GameModel gameModel = default!;
             try
             {
                 var game = await _gameRepo.GetGameAsync(gameSessionId);
@@ -87,7 +88,7 @@ namespace DrawOutApp.Server.Services
                 string error = ErrorHandler.HandleError(ex);
                 return $"Error getting game. : {error}";
             }
-            return gameModel;
+            return gameModel;*/
         }
 
         /*public async Task<Result<bool, string>> UpdateGameAsync(string gameSessionId, GameModel gameModel)

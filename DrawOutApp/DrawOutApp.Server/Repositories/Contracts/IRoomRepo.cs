@@ -9,6 +9,9 @@ namespace DrawOutApp.Server.Repositories.Contracts
         Task<Room> CreateRoomAsync(Room room);
         Task<Room?> GetRoomAsync(string roomId);
         IClientSessionHandle GetSession();
+        Task AddPlayerToSetAsync(string id, string sessionId);
+        Task RemovePlayerFromSetAsync(string id, string sessionId);
+        Task<List<string>> GetPlayerSetAsync(string id);
         Task<IEnumerable<Room>> GetAllRoomsAsync(FilterDefinition<Room>? filter = null, SortDefinition<Room>? sort = null);
         Task UpdateRoomAsync(Expression<Func<Room, bool>> filter, UpdateDefinition<Room> update, IClientSessionHandle? sesh = null);
         Task UpdateRoomAsync(FilterDefinition<Room> filter, 

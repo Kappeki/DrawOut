@@ -2,23 +2,47 @@
 using MongoDB.Bson;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using DrawOutApp.Server.Design;
 
 namespace DrawOutApp.Server.Entities
 {
     public class Game
     {
-        public string _cacheKey { get; set; } = null!;
-        public string? RoomId { get; set; }
-        public string? RedTeamId { get; set; }
-        public string? BlueTeamId { get; set; }
+        public string _id { get; set; } = null!;
+        public string RoomId { get; set; } = null!;
+        public int BlueTeamScore { get; set; }
+        public int RedTeamScore { get; set; }
         public int TotalRounds { get; set; }
-        public List<string>? RoundIds { get; set; }
-        public int CurrentRoundIndex { get; set; }
-  
-        public Game()
+        public int CurrentRound { get; set; }
+        public string? CurrentPainter { get; set; }
+        public string? SelectedWord { get; set; }
+        public Dictionary<string,string>? TeamLeaders { get; set; }
+        
+        public IGameState State { get; private set; }
+        public void SetState(IGameState state)
         {
-            _cacheKey = $"game:{Guid.NewGuid()}";
-            RoundIds = new List<string>();
+            State = state;
+        }
+        public string SerializeState()
+        {
+            return State._name;
+        }
+
+        public void DeserializeState(string stateName)
+        {
+            switch (stateName)
+            {
+                case "WaitingForPlayers":
+                    State = new WaitingForPlayers();
+                    break;
+                case "InProgress":
+                    State = new InProgress();
+                    break;
+                case "Completed":
+                    State = new Completed();
+                    break;
+                default: return;
+            }
         }
     }
     public class GameHistory

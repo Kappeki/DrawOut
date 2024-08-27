@@ -1,4 +1,5 @@
-﻿using DrawOutApp.Server.Entities;
+﻿using AutoMapper;
+using DrawOutApp.Server.Entities;
 using DrawOutApp.Server.Mappers;
 using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Repositories;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 
@@ -21,18 +23,15 @@ namespace DrawOutApp.Server.Services
 {
     public class RoomService : IRoomService
     {
-        private readonly IChatMessageRepo _chatRepo;
         private readonly IRoomRepo _roomRepository;
-        private readonly IUserService _userService;
-        private readonly IGameService _gameService;
         private readonly PasswordHasher<Room> _passwordHasher = new();
+        private readonly IMapper _mapper;
 
-        public RoomService(IRoomRepo roomRepository, IUserService userService, IChatMessageRepo chatRepo, IGameService gameService)
+        public RoomService(IRoomRepo roomRepository, IMapper mapper)
         {
             _roomRepository = roomRepository ?? throw new ArgumentNullException(nameof(roomRepository));
-            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _chatRepo = chatRepo ?? throw new ArgumentNullException(nameof(chatRepo));
-            _gameService = gameService ?? throw new ArgumentNullException(nameof(gameService));
+            
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         //najverovatnije greska u ovom delu koda
@@ -40,44 +39,25 @@ namespace DrawOutApp.Server.Services
         {
             try
             {
-                var adminResult = await _userService.GetUserAsync(creatingUserId);
-                if (adminResult.IsError)
-                {
-                    return $"Creating user not found, error : {adminResult.Error}";
-                }
-
-                var adminModel = adminResult.Data!;
-                var roomModel = new RoomModel
+                var room = new Room
                 {
                     RoomName = roomName,
-                    RoomAdmin = adminModel,
-                    Players = new List<UserModel> { adminModel },
+                    RoomAdminId = creatingUserId,
                     PlayerCount = 1,
                     GameState = GameState.Waiting,
-                    RoomURL = GenerateRoomURL(roomName)
+                    RoomURL = GenerateRoomURL(roomName),
+                    RoundTime = RoundTime.Medium
                 };
 
-                var roomEntity = RoomMapper.ToEntity(roomModel);
-
-                var gameResult = await _gameService.CreateGameAsync(roomEntity.ObjectId);
-                if (gameResult.IsError)
-                {
-                    return $"Error creating game. : {gameResult.Error}";
-                }
-                var gameData = gameResult.Data!;
-                
-                roomEntity.CurrentGameId = gameData.CacheKey;
+                //logika za game entitet mozda
 
                 if (password != null)
                 {
-                    roomEntity.Password = _passwordHasher.HashPassword(roomEntity, password);
+                    room.Password = _passwordHasher.HashPassword(room, password);
                 }
 
-                var room = await _roomRepository.CreateRoomAsync(roomEntity);
-
-                await _userService.AddRole(room.ObjectId, creatingUserId, Role.RoomAdmin);
-
-                return RoomMapper.ToModel(room, new List<ChatMessage>());
+                room = await _roomRepository.CreateRoomAsync(room);
+                return _mapper.Map<RoomModel>(room);
             }
             catch (Exception ex)
             {
@@ -85,58 +65,6 @@ namespace DrawOutApp.Server.Services
                 return $"Error creating room. : {error}";
             }
         }
-
-        public async Task<Result<Username, string>> AddUserByIdAsync(string roomId, string sessionId, string? password = null)
-        {
-            var roomResult = await GetRoomByIdAsync(roomId);
-            return await AddPlayerAsync(roomResult.Data!, sessionId, password);
-        }
-
-        public async Task<Result<Username, string>> AddUserByUrlAsync(string roomUrl, string sessionId, string? password = null)
-        {
-            var roomResult = await GetRoomByUrlAsync(roomUrl);
-            return await AddPlayerAsync(roomResult.Data!, sessionId, password);
-        }
-
-        public async Task<Result<Username,string>> RemoveUserAsync(string roomId, string sessionId)
-        {
-            try
-            {
-                var roomResult = await GetRoomByIdAsync(roomId);
-                var userResult = await _userService.GetUserAsync(sessionId);
-
-                if (roomResult.IsError)
-                {
-                    return "Room not found. : " + roomResult.Error;
-                }
-                if (userResult.IsError)
-                {
-                    return $"User not found. : {userResult.Error}";
-                }
-
-                var roomModel = roomResult.Data!;
-                var userModel = userResult.Data!;
-
-                if (userModel.SeshKey == roomModel.RoomAdmin.SeshKey)
-                {
-                    await _userService.RemoveRole(roomId, userModel.SeshKey, Role.RoomAdmin);
-                }
-
-                var filter = Builders<Room>.Filter.Eq(r => r._id, ObjectId.Parse(roomId));
-                await _roomRepository.RemoveFromListAsync(
-                    filter, 
-                    r => r.Players!, 
-                    u => u.Nickname == userModel.Nickname);
-
-                return new Username(userModel.Nickname!);
-            }
-            catch (Exception ex)
-            {
-                string error = ErrorHandler.HandleError(ex);
-                return $"Error removing player from room. : {error}";
-            }
-        }
-
         public async Task<Result<RoomModel?, string>> GetRoomByUrlAsync(string roomUrl)
         {
             RoomModel roomModel = default!;
@@ -147,9 +75,7 @@ namespace DrawOutApp.Server.Services
                 {
                     return "Room not found.";
                 }
-                var chat = (await _chatRepo.GetRoomChatAsync(roomEntity.ObjectId.ToString())).ToList();
-                roomModel = RoomMapper.ToModel(roomEntity, chat!);
-                return roomModel;
+                return _mapper.Map<RoomModel>(roomEntity);
             }
             catch (Exception ex)
             {
@@ -157,7 +83,23 @@ namespace DrawOutApp.Server.Services
                 return $"Error getting room by url. : {error}";
             }
         }
-
+        public async Task<string?> GetIdFromURL(string roomURL)
+        {
+            try
+            {
+                var room = await _roomRepository.GetRoomByFilterAsync(r => r.RoomURL == roomURL);
+                if (room == null)
+                {
+                    return null;
+                }
+                return room.ObjectId;
+            }
+            catch (Exception ex)
+            {
+                string error = ErrorHandler.HandleError(ex);
+                return null;
+            }
+        }
         public async Task<Result<RoomModel?,string>> GetRoomByIdAsync(string roomId)
         {
             RoomModel roomModel = default!;
@@ -168,10 +110,12 @@ namespace DrawOutApp.Server.Services
                 {
                     return "Room not found.";
                 }
-                var chat = (await _chatRepo.GetRoomChatAsync(roomId)).ToList();
-                roomModel = RoomMapper.ToModel(roomEntity, chat!);
+                var playerList = await _roomRepository.GetPlayerSetAsync(roomId);
+                
+                roomModel = _mapper.Map<RoomModel>(roomEntity);
+                roomModel.Players = playerList;
+
                 return roomModel;
-             
             }
             catch (Exception ex)
             {
@@ -179,23 +123,15 @@ namespace DrawOutApp.Server.Services
                 return $"Error getting room. : {error}";
             }
         }
-
-        public async Task<Result<List<RoomModel>, string>> GetAllRoomsAsync(string sessionId, bool? isAscending = null, bool? isProtected = null)
+        public async Task<Result<List<RoomListItem>?, string>> GetAllRoomsAsync(string sessionId, bool? isAscending = null, bool? isProtected = null)
         {
-            List<RoomModel> roomList = new List<RoomModel>();
+            List<RoomListItem> roomList = new List<RoomListItem>();
             try
             {
-                var currentUserResult = await _userService.GetUserAsync(sessionId);
-                if(currentUserResult.IsError)
-                {
-                    return $"User not found. Session error : {currentUserResult.Error}";
-                }
-                var currentUser = currentUserResult.Data!;
-                
                 var baseFilter = Builders<Room>.Filter
                     .And(
                     Builders<Room>.Filter.Eq(r => r.GameState, GameState.Waiting), 
-                    Builders<Room>.Filter.Ne(r=>r.RoomAdmin!.ObjectId, currentUser.MongoId)
+                    Builders<Room>.Filter.Ne(r=>r.RoomAdminId, sessionId)
                     );
 
 
@@ -220,7 +156,7 @@ namespace DrawOutApp.Server.Services
 
                 var roomEntities = await _roomRepository.GetAllRoomsAsync(baseFilter,sort);
 
-                roomList = roomEntities.Select(e=>RoomMapper.ToModel(e)).ToList();
+                roomList = _mapper.Map<List<RoomListItem>>(roomEntities);
                 
                 if(roomList.Count == 0)
                 {
@@ -237,24 +173,16 @@ namespace DrawOutApp.Server.Services
                 return $"Error getting all rooms. : {error}";
             }
         }
-
-        public async Task<Result<List<RoomModel>, string>> GetMyRoomsAsync(string sessionId)
+        public async Task<Result<List<RoomListItem>?, string>> GetMyRoomsAsync(string sessionId)
         {
-            List<RoomModel> roomList = new List<RoomModel>();
+            List<RoomListItem> roomList = [];
             try
             {
-                var currentUserResult = await _userService.GetUserAsync(sessionId);
-                if(currentUserResult.IsError)
-                {
-                    return $"User not found. Session error : {currentUserResult.Error}";
-                }
-                var currentUser = currentUserResult.Data!;
-
-                var filter = Builders<Room>.Filter.Eq(r => r.RoomAdmin!.ObjectId, currentUser.MongoId);
-
+                var filter = Builders<Room>.Filter.Eq(r => r.RoomAdminId, sessionId);
+                
                 var roomEntities = await _roomRepository.GetAllRoomsAsync(filter);
 
-                roomList = roomEntities.Select(e=>RoomMapper.ToModel(e)).ToList();
+                roomList = _mapper.Map<List<RoomListItem>>(roomEntities);
 
                 if (roomList.Count == 0)
                 {
@@ -271,13 +199,35 @@ namespace DrawOutApp.Server.Services
                 return $"Error getting all rooms. : {error}";
             }
         }
-
         public async Task<Result<bool,string>> UpdateRoomAsync(RoomModel roomModel)
         {
             try
             {
                 var filter  = Builders<Room>.Filter.Eq(r => r.RoomURL, roomModel.RoomURL);
-                var roomEntity = RoomMapper.ToEntity(roomModel);
+                var roomEntity = await _roomRepository.GetRoomByFilterAsync(r => r.RoomURL == roomModel.RoomURL);
+
+                if(roomEntity == null)
+                {
+                    return "Room not found.";
+                }
+
+                var update = Builders<Room>.Update;
+                var updates = new List<UpdateDefinition<Room>>();
+
+                if (roomModel.CustomWords != null && !roomModel.CustomWords.SequenceEqual(roomEntity.CustomWords!))
+                    updates.Add(update.Set(r => r.CustomWords, roomModel.CustomWords));
+
+                if (roomModel.SelectedWordPack != roomEntity.SelectedWordPack && roomModel.SelectedWordPack != null)
+                    updates.Add(update.Set(r => r.SelectedWordPack, roomModel.SelectedWordPack));
+
+                if (roomModel.RoundTime != (int)roomEntity.RoundTime)
+                    updates.Add(
+                        update.Set(
+                            r => r.RoundTime, 
+                            Enum.Parse(Enum.GetValues(typeof(RoundTime)).GetType(), roomModel.RoundTime.ToString())
+                            )
+                        );
+
                 await _roomRepository.UpdateRoomAsync(filter, Builders<Room>.Update.Set(r => r, roomEntity)); 
                 return true;
             }
@@ -287,8 +237,6 @@ namespace DrawOutApp.Server.Services
                 return $"Error updating room. : {error}";
             }
         }
-
-
         public async Task DeleteRoomAsync(string roomId)
         {
             await _roomRepository.DeleteRoomAsync(roomId);
@@ -301,96 +249,76 @@ namespace DrawOutApp.Server.Services
             var uniquePart = Guid.NewGuid().ToString().Substring(0, 8); 
             return $"{sanitizedRoomName}-{uniquePart}";
         }
-
-        private async Task<Result<Username,string>> AddPlayerAsync(RoomModel roomModel, string sessionId, string? password = null)
+        public async Task<Result<bool,string>> AddPlayerAsync(string roomId, string sessionId, string? password = null)
         { 
-            using var session = _roomRepository.GetSession();
-            session.StartTransaction();
             try
             {
-                var userResult = await _userService.GetUserAsync(sessionId);
-                if (userResult.IsError)
-                {
-                    return $"User not found. : {userResult.Error}";
-                }
-                var userModel = userResult.Data!;
-
-                if(userModel.SeshKey == roomModel.RoomAdmin.SeshKey)
-                {
-                    await _userService.AddRole(roomModel.RoomId, userModel.SeshKey, Role.RoomAdmin);
-                }
-
-                //mozda da stoji direktno u controller nmp 
-                if (roomModel.PasswordHash != null)
+                var room = await _roomRepository.GetRoomAsync(roomId);
+                if (room!.Password != null)
                 {
                     if (password == null)
                     {
                         return "Invalid password.";
                     }
-                    if (!_passwordHasher.VerifyHashedPassword(RoomMapper.ToEntity(roomModel), roomModel.PasswordHash, password)
+                    if (!_passwordHasher.VerifyHashedPassword(room, room.Password, password)
                                         .Equals(PasswordVerificationResult.Success))
                     {
                         return "Invalid password.";
                     }
                 }
 
-                if (roomModel.PlayerCount == 8)
+                if (room.PlayerCount == 8)
                 {
                     return "Room is full!";
                 }
                 else
                 { 
-                    roomModel.PlayerCount++;
-                    roomModel.Players?.Add(userModel);
-
-                    await _roomRepository.UpdateRoomAsync(r=>r._id == ObjectId.Parse(roomModel.RoomId), 
-                        Builders<Room>.Update.Set(r=>r.PlayerCount, roomModel.PlayerCount),
-                        session);
-
-                    await _roomRepository.InsertIntoListAsync(
-                        r => r._id == ObjectId.Parse(roomModel.RoomId),
-                        r => r.Players!,
-                        UserMapper.ToEntity(userModel),
-                        session);
-
-                    await session.CommitTransactionAsync();
-
-                    return new Username(userModel.Nickname!);
+                    await _roomRepository.AddPlayerToSetAsync(roomId, sessionId);
+                    return true;
                 }
             }
             catch (Exception ex)
             {
-                await session.AbortTransactionAsync();
                 string error = ErrorHandler.HandleError(ex);
                 return $"Error joining room. : {error}";
             }
-            finally
-            {
-                session.Dispose();
-            }
         }
-
-        //funckije za tajmere i gamestate
-        /*public async Task<Result<bool,string>> UpdateRoundTimerAsync(string roomId, RoundTime roundTime)
+        public async Task<Result<bool,string>> RemoveUserAsync(string roomId, string sessionId)
         {
             try
             {
-                var filter = Builders<Room>.Filter.Eq(r => r._id, ObjectId.Parse(roomId));
-                await _roomRepository.UpdateRoomAsync(filter, Builders<Room>.Update.Set(r => r.RoundTime, roundTime));
-                return true;
+                var room = _roomRepository.GetRoomAsync(roomId);
+                if (room == null)
+                {
+                    return "Room not found.";
+                }
+                var playerSet = await _roomRepository.GetPlayerSetAsync(roomId);
+                if(playerSet.Contains(sessionId))
+                {
+                    await _roomRepository.RemovePlayerFromSetAsync(roomId, sessionId);
+                    return true;
+                }
+                else
+                {
+                    return "User not in room.";
+                }
             }
             catch (Exception ex)
             {
                 string error = ErrorHandler.HandleError(ex);
-                return $"Error updating round timer. : {error}";
+                return $"Error removing player from room. : {error}";
             }
         }
 
-        public async Task UpdateGameStateAsync(string roomId, GameState gameState)
+        public async Task<Result<List<string>?,string>> GetPlayerIdsAsync(string roomId)
         {
-            var filter = Builders<Room>.Filter.Eq(r => r._id, ObjectId.Parse(roomId));
-            await _roomRepository.UpdateRoomAsync(filter, Builders<Room>.Update.Set(r => r.GameState, gameState));
-        }*/
+            var playerSet = await _roomRepository.GetPlayerSetAsync(roomId);
+            if(playerSet.Count == 0 || playerSet == null)
+            {
+                return "No player id's found! ERROR!!";
+            }
+            return playerSet;
+        }
 
     }
 }

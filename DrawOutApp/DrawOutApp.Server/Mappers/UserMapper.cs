@@ -1,39 +1,29 @@
-﻿using DrawOutApp.Server.Entities;
+﻿using Amazon.Runtime;
+using AutoMapper;
+using DrawOutApp.Server.Entities;
 using DrawOutApp.Server.Models;
 
 namespace DrawOutApp.Server.Mappers
 {
-    public static class UserMapper
+    public class UserMapper : Profile
     {
-        // Converts from User entity to UserModel
-        public static UserModel ToModel(User entity)
+        public UserMapper()
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            CreateMap<UserModel, User>()
+                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src =>
+                src.Roles != null ?
+                new HashSet<Role>(src.Roles.Select(r => Enum.Parse<Role>(r))) :
+                new HashSet<Role>()));
 
-            return new UserModel
-            {
-                SeshKey = entity._sessionKey,
-                MongoId = entity.ObjectId,
-                Nickname = entity.Nickname,
-                Roles = new HashSet<Role>(entity.Roles),
-                Icon = entity.Icon,
-                TeamId = entity.TeamId
-            };
-        }
+            CreateMap<User, UserModel>()
+                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => 
+                src.Roles != null ? 
+                src.Roles.Select(r => r.ToString()).ToList() : 
+                new List<string>()));
 
-        // Converts from UserModel to User entity
-        public static User ToEntity(UserModel model)
-        {
-            if (model == null) throw new ArgumentNullException(nameof(model));
-
-            return new User
-            {
-                _sessionKey = model.SeshKey,
-                Nickname = model.Nickname,
-                Roles = new HashSet<Role>(model.Roles),
-                Icon = model.Icon,
-                TeamId = model.TeamId
-            };
+            CreateMap<User, PlayerInfo>()
+                .ForMember(dest => dest.Nickname, opt => opt.MapFrom(src => src.Nickname))
+                .ForMember(dest => dest.Icon, opt => opt.MapFrom(src => src.Icon));
         }
     }
 }

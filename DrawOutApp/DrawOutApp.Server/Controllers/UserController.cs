@@ -18,24 +18,24 @@ namespace DrawOutApp.Server.Controllers
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpPost]
-        public async Task<IActionResult> CreateUser([FromBody] UserModel userModel)
+        [HttpPost("CreateUser")]
+        public async Task<IActionResult> CreateUser([FromBody] UserPreferences userPrefs)
         {
-            var data = await _userService.CreateUserSessionAsync(userModel);
+            var data = await _userService.CreateUserSessionAsync(userPrefs);
             if(data.IsError)
                 return BadRequest(data.Error);
             var cookieOptions = new CookieOptions
             {
-                HttpOnly = true,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                SameSite = SameSiteMode.None
             };
-            Response.Cookies.Append("UserSessionId", data.Data!.SeshKey, cookieOptions);
-            return CreatedAtAction(nameof(GetUser), new { sessionKey = data.Data!.SeshKey }, data.Data);
+            Response.Cookies.Append("UserSessionId", data.Data!._sessionKey, cookieOptions);
+            return Ok(data.Data!);
         }
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpGet("session")]
+        [HttpGet("GetSession")]
         public async Task<IActionResult> GetSession()
         {
             var sessionKey = Request.Cookies["UserSessionId"];
@@ -56,7 +56,7 @@ namespace DrawOutApp.Server.Controllers
         
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpGet("{sessionId}")]
+        [HttpGet("GetUser/{sessionId}")]
         public async Task<IActionResult> GetUser(string sessionId)
         {
             var (isError, user, error) = await _userService.GetUserAsync(sessionId);
@@ -70,7 +70,7 @@ namespace DrawOutApp.Server.Controllers
         //videcemo kako brisanje
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpDelete("{sessionId}")]
+        [HttpDelete("DeleteUser/{sessionId}")]
     
         public async Task<IActionResult> DeleteUser(string sessionId)
         {
@@ -89,10 +89,17 @@ namespace DrawOutApp.Server.Controllers
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [HttpPut("{sessionId}")]
-        public async Task<IActionResult> UpdateUser(string sessionId, [FromBody] UserModel userModel)
+        [HttpPut("UpdateUser")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserPreferences userModel)
         {
-            var (isError, success, error) = await _userService.UpdateUserPrefsAsync(sessionId, userModel);
+
+            var sessionKey = Request.Cookies["UserSessionId"];
+            if (string.IsNullOrEmpty(sessionKey))
+            {
+                return NotFound("Session not found");
+            }
+
+            var (isError, success, error) = await _userService.UpdateUserPrefsAsync(sessionKey, userModel);
             if (isError)
             {
                 return BadRequest(error);

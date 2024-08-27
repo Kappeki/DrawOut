@@ -4,28 +4,30 @@ using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Settings;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using StackExchange.Redis;
 using System.Linq.Expressions;
 
 namespace DrawOutApp.Server.Repositories
 {
-    /// <summary>
-    /// Refaktorisan repozitorijum za sobe.
-    /// Ideja je dodavanje nestovanih objekata/entiteta u sobi, kao sto su igraci, igra, reci i poruke.
-    /// </summary>
     public class RoomRepository : IRoomRepo
     {
         private readonly IMongoCollection<Room> _roomsCollection;
         private readonly IMongoClient _mongoClient;
 
-        public RoomRepository(IMongoDBSettings settings, IMongoClient mongoClient)
+        private readonly ConnectionMultiplexer _redis;
+        private readonly IDatabase _database;
+        public RoomRepository(IMongoDBSettings mongoSettings, IMongoClient mongoClient, IRedisSettings redisSettings)
         {
-            var database = mongoClient.GetDatabase(settings.DatabaseName);
+            var database = mongoClient.GetDatabase(mongoSettings.DatabaseName);
             _mongoClient = mongoClient;
-            _roomsCollection = database.GetCollection<Room>(settings.RoomsCollectionName);
+            _roomsCollection = database.GetCollection<Room>(mongoSettings.RoomsCollectionName);
+
+            _redis = ConnectionMultiplexer.Connect(redisSettings.ConnectionString);
+            _database = _redis.GetDatabase();
+
 
             CreateIndexesAsync();
         }
-
         private async Task CreateIndexesAsync()
         {
             await _roomsCollection.Indexes.CreateOneAsync(
@@ -49,29 +51,39 @@ namespace DrawOutApp.Server.Repositories
             
             //ovaj index za myrooms tab da se otvori brze
             await _roomsCollection.Indexes.CreateOneAsync(
-                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomAdmin)));
+                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomAdminId)));
             //moze da se doda index da expiruje soba to cemo kasnije da vidimo
 
         }
-
         public IClientSessionHandle GetSession()
         {
             return _mongoClient.StartSession();
         }
-
+        public async Task AddPlayerToSetAsync(string id, string sessionId)
+        {
+            await UpdateRoomAsync(id, Builders<Room>.Update.Inc(r => r.PlayerCount, 1));
+            await _database.SetAddAsync($"users-in-room:{id}", sessionId);
+        }
+        public async Task RemovePlayerFromSetAsync(string id, string sessionId)
+        {
+            await UpdateRoomAsync(id, Builders<Room>.Update.Inc(r => r.PlayerCount, -1));
+            await _database.SetRemoveAsync($"users-in-room:{id}", sessionId);
+        }
+        public async Task<List<string>> GetPlayerSetAsync(string id)
+        {
+            return (await _database.SetMembersAsync($"users-in-room:{id}")).Select(x => x.ToString()).ToList();
+        }
         public async Task<Room> CreateRoomAsync(Room room)
         {
             await _roomsCollection.InsertOneAsync(room);
             return room;
         }
-
         public async Task<Room?> GetRoomAsync(string id)
         {
             var objId = ObjectId.Parse(id);
             var filter = Builders<Room>.Filter.Eq("_id", objId);
             return await _roomsCollection.Find(filter).FirstOrDefaultAsync();
         }
-
         public async Task<IEnumerable<Room>> GetAllRoomsAsync(FilterDefinition<Room>? filter = null, SortDefinition<Room>? sort = null)
         {
             //compound assignment bas kul 
@@ -83,13 +95,19 @@ namespace DrawOutApp.Server.Repositories
             UpdateDefinition<Room> update, 
             IClientSessionHandle? sesh = null)
         {
-            await _roomsCollection.UpdateOneAsync(sesh, filter, update);
+            if (sesh == null)
+                await _roomsCollection.UpdateOneAsync(filter, update);
+            else
+                await _roomsCollection.UpdateOneAsync(sesh, filter, update);
         }
         public virtual async Task UpdateRoomAsync(FilterDefinition<Room> filter, 
             UpdateDefinition<Room> update, 
             IClientSessionHandle? sesh = null)
         {
-            await _roomsCollection.UpdateOneAsync(sesh, filter, update);
+            if (sesh == null)
+                await _roomsCollection.UpdateOneAsync(filter, update);
+            else
+                await _roomsCollection.UpdateOneAsync(sesh, filter, update);
         }
 
         public async Task DeleteRoomAsync(string id)
@@ -116,7 +134,14 @@ namespace DrawOutApp.Server.Repositories
         public async Task<Room?> GetRoomByFilterAsync(Expression<Func<Room, bool>> filter, 
             IClientSessionHandle? sesh = null)
         {
-            return await _roomsCollection.Find(sesh, filter).FirstOrDefaultAsync();
+            if (sesh == null)
+            {
+                return await _roomsCollection.Find(filter).FirstOrDefaultAsync();
+            }
+            else
+            {
+                return await _roomsCollection.Find(sesh, filter).FirstOrDefaultAsync();
+            }
         }
 
         //conditional remove from list

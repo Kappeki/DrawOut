@@ -14,23 +14,22 @@ namespace DrawOutApp.Server.Repositories
     {
         private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
-        private readonly IRoomRepo _roomRepo;
-        public UserRepository(IRedisSettings settings, IRoomRepo roomRepo)
+        public UserRepository(IRedisSettings settings)
         {
             _redis = ConnectionMultiplexer.Connect(settings.ConnectionString);
-
             _database = _redis.GetDatabase();
-            _roomRepo = roomRepo;
         }
 
         public async Task AddOrUpdateUserAsync(User user, TimeSpan? expiry = null)
         {
             if (user == null) throw new ArgumentNullException(nameof(user));
 
+            var rolesSerialized = user.SerializeRoles();
+
             await _database.HashSetAsync(user._sessionKey,[
                 new("Nickname", user.Nickname ?? string.Empty),
                 new("Icon", user.Icon ?? string.Empty),
-                new("MongoId", user.ObjectId ?? string.Empty)
+                new("Roles", rolesSerialized ?? string.Empty)
             ]);
 
             if (expiry.HasValue)
@@ -50,7 +49,10 @@ namespace DrawOutApp.Server.Repositories
         public async Task<T?> GetFromHashSet<T>(string setKey, string valueKey)
         {
             var value = await _database.HashGetAsync(setKey, valueKey);
-
+            if(typeof(T) == typeof(string))
+            {
+                return value.IsNullOrEmpty ? default(T) : (T)(object)value.ToString();
+            }
             return value.IsNullOrEmpty ? default(T) : JsonConvert.DeserializeObject<T>(value);
         }
 
@@ -70,44 +72,39 @@ namespace DrawOutApp.Server.Repositories
             var hashEntries = await _database.HashGetAllAsync(key);
             if (hashEntries.Length == 0)
             {
-                return null; 
+                return null;
             }
 
-            User user = new User();
-            foreach (var entry in hashEntries)
+            User user = new User()
+            {
+                _sessionKey = key,
+                Nickname = hashEntries.FirstOrDefault(x => x.Name == "Nickname").Value,
+                Icon = hashEntries.FirstOrDefault(x => x.Name == "Icon").Value,
+            };
+
+            string rolesSerialized = hashEntries.FirstOrDefault(x => x.Name == "Roles").Value!;
+            user.DeserializeRoles(rolesSerialized);
+            /*foreach (var entry in hashEntries)
             {
                 string propName = entry.Name.ToString();
                 PropertyInfo? propInfo = typeof(User).GetProperty(propName);
-
+                
                 if (propInfo != null && propInfo.CanWrite)
                 {
-                    object? propValue = JsonConvert.DeserializeObject(entry.Value!, propInfo.PropertyType);
-                    propInfo.SetValue(user, propValue);
+                    if (propInfo.PropertyType == typeof(string))
+                    {
+                       
+                        propInfo.SetValue(user, entry.Value.ToString());
+                    }
+                    else
+                    {
+                        object? propValue = JsonConvert.DeserializeObject(entry.Value.ToString(), propInfo.PropertyType);
+                        propInfo.SetValue(user, propValue);
+                    }
                 }
-            }
-
-            user._id = ObjectId.Parse(GetFromHashSet<string>(key, "MongoId").Result);
-
+            }*/
             return user;
         }
 
-        public async Task UpdateUserInRoomAsync(string roomId, User user, Dictionary<string, object> updates)
-        {
-            var roomObjectId = ObjectId.Parse(roomId);
-
-            var filter = Builders<Room>.Filter.And(
-                Builders<Room>.Filter.Eq("_id", roomObjectId),
-                Builders<Room>.Filter.ElemMatch(r => r.Players, u => u._id == user._id)
-            );
-
-            var updateDefinitions = new List<UpdateDefinition<Room>>();
-            foreach (var update in updates)
-            {
-                var updateDefinition = Builders<Room>.Update.Set($"Users.$.{update.Key}", update.Value);
-                updateDefinitions.Add(updateDefinition);
-            }
-            var combinedUpdate = Builders<Room>.Update.Combine(updateDefinitions);
-            await _roomRepo.UpdateRoomAsync(filter, combinedUpdate);
-        }
     }
 }

@@ -6,6 +6,8 @@ using System.Text.RegularExpressions;
 
 namespace DrawOutApp.Server.Entities
 {
+    public enum GameState { Waiting, InGame }
+    public enum RoundTime { Short = 40, Medium = 60, Long = 80 }
     [BsonIgnoreExtraElements]
     public class Room
     {
@@ -13,52 +15,30 @@ namespace DrawOutApp.Server.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         [JsonIgnore]
         public ObjectId _id { get; set; }
-
-        [BsonElement("roomName")]
         public string RoomName { get; set; } = null!;
-        public string? Password { get; set; } = String.Empty;
-
-        [BsonElement("roomURL")]
+        public string? Password { get; set; }
         public string? RoomURL { get; set; }
-
-        [BsonElement("playerCount")]
         public int PlayerCount { get; set; }
-
-        [BsonElement("roomAdmin")]
-        public User? RoomAdmin { get; set; }
-
-        [BsonElement("currentGame")]
-        public string? CurrentGameId { get; set; }
-
-        [BsonElement("players")]
-        [JsonPropertyName("players")]
-        public List<User>? Players { get; set; }
-
-        [BsonElement("gameHistory")]
+        public string RoomAdminId { get; set; } = null!;
         [BsonIgnoreIfNull]
-        public List<GameHistory>? GameHistory { get; set; }
+        public string? PlayersSetKey { get; set; }
 
-        [BsonElement("customWords")]
-        [JsonPropertyName("customWords")]
         [BsonIgnoreIfNull]
         public List<string>? CustomWords { get; set; }
-
-        [BsonElement("chatId")]
-        [JsonPropertyName("chatId")]
-        public string RoomChatId { get; set; }
 
         [BsonElement("wordPack")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? SelectedWordPack { get; set; }
 
         [BsonElement("gameState")]
+        [BsonRepresentation(BsonType.String)]
         public GameState GameState { get; set; }
 
         [BsonElement("roundTime")]
         public RoundTime RoundTime { get; set; } //selektuje room admin
 
-        [BsonElement("createdAt")]
-        public DateTime CreatedAt { get; set; }
+        [BsonElement("timeElapsed")]
+        public DateTime TimeElapsed { get; set; }
 
         [BsonIgnore]
         public string ObjectId { get { return _id.ToString(); } }
@@ -66,12 +46,10 @@ namespace DrawOutApp.Server.Entities
         public Room()
         {
             _id = MongoDB.Bson.ObjectId.GenerateNewId();
-            Players = new List<User>();
-            RoomChatId = $"chat:{ObjectId}";
+            PlayersSetKey = $"users-in-room:{ObjectId}";
             GameState = GameState.Waiting;
             RoundTime = RoundTime.Medium;
-            CreatedAt = DateTime.UtcNow;
-            Games = new List<string>();
+            TimeElapsed = DateTime.UtcNow;
         }
     }
 }

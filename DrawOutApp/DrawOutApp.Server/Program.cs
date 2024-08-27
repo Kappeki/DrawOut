@@ -7,7 +7,8 @@ using DrawOutApp.Server.Services.Contracts;
 using MongoDB.Driver;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.CookiePolicy;
-
+using DrawOutApp.Server.Hubs;
+using DrawOutApp.Server.Mappers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -18,6 +19,20 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder => builder.WithOrigins("http://localhost:4200")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials());
+});
+
+
+#region Mappers
+builder.Services.AddAutoMapper(typeof(UserMapper));
+builder.Services.AddAutoMapper(typeof(RoomMapper));
+#endregion
 
 #region MongoDB
 
@@ -35,6 +50,7 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddTransient<IRoomRepo, RoomRepository>();
 
 builder.Services.AddScoped<IRoomService, RoomService>();
+
 
 #endregion
 
@@ -60,13 +76,11 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.MinimumSameSitePolicy = SameSiteMode.None;
-    options.HttpOnly = HttpOnlyPolicy.Always;
     options.Secure = CookieSecurePolicy.Always; 
 });
 
 builder.Services.AddSession(options =>
 {
-    options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
     options.IdleTimeout = TimeSpan.FromDays(7);
@@ -74,14 +88,11 @@ builder.Services.AddSession(options =>
 
 //repositories
 builder.Services.AddTransient<IChatMessageRepo, ChatMessageRepository>();
-builder.Services.AddTransient<ITeamRepo, TeamRepository>();
-builder.Services.AddTransient<IRoundRepo, RoundRepository>();
 builder.Services.AddTransient<IGameRepo, GameRepository>();
 builder.Services.AddTransient<IUserRepo, UserRepository>();
 
 //services
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ITeamService,TeamService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IGameService, GameService>();
 
@@ -90,6 +101,7 @@ builder.Services.AddScoped<IGameService, GameService>();
 var app = builder.Build();
 
 app.UseDefaultFiles();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
@@ -99,13 +111,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseSession();
+app.UseCors("CorsPolicy");
 
-app.UseHttpsRedirection();
+app.UseSession();
+app.UseCookiePolicy();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<RoomHub>("/roomhub");
 
 app.MapFallbackToFile("/index.html");
 

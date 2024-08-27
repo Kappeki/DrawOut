@@ -11,10 +11,11 @@ namespace DrawOutApp.Server.Controllers
     public class RoomController : ControllerBase
     {
         private readonly IRoomService _roomService;
-
-        public RoomController(IRoomService roomService)
+        private readonly IUserService _userService;
+        public RoomController(IRoomService roomService, IUserService userService)
         {
             _roomService = roomService;
+            _userService = userService;
         }
 
         //znaci na front mora se stavi samo da treba da se unese ime sobe i da se klikne na create room
@@ -25,21 +26,28 @@ namespace DrawOutApp.Server.Controllers
         [Route("CreateRoom")]
         public async Task<ActionResult> CreateRoom([FromBody] RoomRequest request)
         {
-            var sessionId = Request.Cookies["UserSessionId"];
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                return BadRequest("User session is not found.");
-            }
-            var (isError, room, error) = await _roomService.CreateRoomAsync(sessionId, request.RoomName, request.Password);
-            if(isError)
-                return BadRequest(error);
+            var (userIsError, adminUser, userError) = await _userService.GetUserSessionAsync(Request);
+            
+            if(userIsError)
+                return BadRequest(userError);
+            
+            if(adminUser!.Roles != null)
+                return BadRequest("You are not allowed to create a room.");
 
-            //ZA TESTIRANJE
-            //return Ok($"Successfully created new room with name : {room.RoomName}");
+            var (roomIsError, room, roomError) = await _roomService.CreateRoomAsync(adminUser._sessionKey, request.RoomName, request.Password);
+            
+            if(roomIsError)
+                return BadRequest(roomError);
+
             return Ok(room);
         }
-
-        [ProducesResponseType(StatusCodes.Status200OK)]
+       
+        /// <summary>
+        /// METODE KORISCENJE ISKLJUCIVO ZA TESTIRANJE
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        /*[ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPost("joinBtn")]
         public async Task<IActionResult> JoinRoomById([FromBody] JoinRoomRequest request)
@@ -92,7 +100,7 @@ namespace DrawOutApp.Server.Controllers
                 return BadRequest(error);
             }
             return Ok(nickname!.Value);
-        }
+        }*/
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -125,14 +133,13 @@ namespace DrawOutApp.Server.Controllers
         //GET /rooms?isAscending=true&isProtected=false
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpGet("rooms")]
+        [HttpGet("allRooms")]
         public async Task<ActionResult> GetAllRooms([FromQuery] bool? isAscending, [FromQuery] bool? isProtected)
         {
-            var sessionId = Request.Cookies["UserSessionId"];
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                return BadRequest("User session is not found.");
-            }
+            var (userIsError, user, userError) = await _userService.GetUserSessionAsync(Request);
+            if (userIsError)
+                return BadRequest(userError);
+            var sessionId = user!._sessionKey;
             var (isError, rooms, error) = await _roomService.GetAllRoomsAsync(sessionId, isAscending, isProtected);
             if (isError)
             {
@@ -146,11 +153,10 @@ namespace DrawOutApp.Server.Controllers
         [HttpGet("myRooms")]
         public async Task<ActionResult> GetMyRooms()
         {
-            var sessionId = Request.Cookies["UserSessionId"];
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                return BadRequest("User session is not found.");
-            }
+            var (userIsError, user, userError) = await _userService.GetUserSessionAsync(Request);
+            if (userIsError)
+                return BadRequest(userError);
+            var sessionId = user!._sessionKey;
             var (isError, rooms, error) = await _roomService.GetMyRoomsAsync(sessionId);
             if (isError)
             {
@@ -159,7 +165,7 @@ namespace DrawOutApp.Server.Controllers
             return Ok(rooms);
         }
 
-
+        //takodje samo za testiranje se koristi
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpPut("update")]
@@ -170,12 +176,11 @@ namespace DrawOutApp.Server.Controllers
             {
                 return BadRequest("User session is not found.");
             }
-            if(sessionId != roomModel.RoomAdmin!.SeshKey) { return BadRequest("You're not allowed to change the settings of the room!"); }
+            if(sessionId != roomModel.RoomAdminId) { return BadRequest("You're not allowed to change the settings of the room!"); }
             var (isError, success, error) = await _roomService.UpdateRoomAsync(roomModel);
             if(isError)
                 return BadRequest($"Error while updating room : {error}");
            
-
             return Ok("Room updated!");
         }
 

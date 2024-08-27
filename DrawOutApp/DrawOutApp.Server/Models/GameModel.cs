@@ -6,8 +6,6 @@ namespace DrawOutApp.Server.Models
     {
         public string? RoomId { get; set; }
         public string? CacheKey { get; set; }
-        public TeamModel? RedTeam { get; set; }
-        public TeamModel? BlueTeam { get; set; }
         public int TotalRounds { get; set; }
         //public List<RoundModel>? Rounds { get; set; }
         public int CurrentRoundIndex { get; set; }
