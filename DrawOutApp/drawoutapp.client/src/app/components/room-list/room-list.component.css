@@ -1,0 +1,93 @@
+.room-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.search-and-sort-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-bottom: 50px;
+}
+
+.title-container {
+    margin: 20px 0;
+    flex: 1 1 70%;
+}
+
+.search-container {
+    margin: 20px 0;
+    flex: 1 1 50%;
+}
+
+.sort-container {
+    margin: 20px 20px;
+    flex: 1 1 50%;
+
+}
+
+.filter-and-list-container {
+    display: flex;
+    flex-direction: row;
+    /* justify-content: space-evenly; */
+    width: 100%;
+}
+
+.filter-container {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    /* min-width: 100px; */
+    background-color: lightcoral;
+    margin: 10px;
+    padding: 20px 30px;
+    align-items: center;
+}
+
+.filters-title {
+    font-size: 40px;
+}
+
+label {
+    display: flex;
+    margin-top: 10px;
+}
+
+.locked-filter {
+    margin: 10px;
+}
+
+.players-filter {
+    /* margin: 10px; */
+}
+
+.players-values, .time-values {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.roomslist-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    /* overflow: auto; */
+}
+
+/* mat-accent, mat-slider-track-fill {
+    background-color: green !important;
+}
+
+mat-slider-thumb-label {
+    background-color: green !important;
+
+}
+
+mat-slider-thumb {
+    background-color: green !important;
+} */
+
+mat-paginator {
+    background-color: transparent;
+}

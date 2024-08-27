@@ -1,0 +1,55 @@
+<div class="background-container">
+  <div class="home-container">
+
+    <div class="title-container">
+      <h1 class="title">DrawOut</h1>
+      <h2>Draw and guess words with friends!</h2>
+    </div>
+
+    <div class="panel-container">
+      <div class="panel-left"></div>
+
+      <div class="panel-main">
+
+        <div class="nickname-container">
+          
+          <div class="nickname-input">
+            <!-- <label>Nickname:</label> -->
+            <input type="text" [(ngModel)]="currentNickname" placeholder="Enter your nickname" />
+          </div> 
+
+          <div class="nickname-random" (click)="randomizeNickname()"></div>
+
+        </div>
+
+        <div class="icon-container">
+
+          <!-- <div class="icon-label"> 
+            <label>Choose an icon:</label>
+          </div> -->
+          
+          <div class="icon-random"></div>
+
+          <div class="icon-panel">
+            <div class="arrow-left"></div>
+            <img class="icon" alt='icon'/>
+            <div class="arrow-right"></div>
+          </div>
+
+        </div>
+        
+        <div class="button-container">
+
+          <button (click)="joinRandomRoom()">Play</button> <!-- join random room -->
+          <button routerLink="/rooms">Rooms</button> <!-- ode na str lista soba -->
+          <button (click)="createRoom()">Create Room</button> <!-- ode na str za kreiranje sobe -->
+
+        </div>
+
+      </div>
+      
+      <div class="panel-right"></div>
+    </div>
+
+  </div>
+</div>

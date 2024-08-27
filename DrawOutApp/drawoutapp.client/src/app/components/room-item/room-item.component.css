@@ -1,0 +1,27 @@
+.room-item-background {
+    background-color: lightcoral;
+}
+
+.room-item-container {
+    display: flex;
+    flex-direction: row;
+    margin: 10px 10px;
+    justify-content: space-around;
+}
+
+/* .mat-accent .mat-slider-track-fill {
+    background-color: red !important;
+}
+
+.mat-slider-thumb-label {
+    background-color: red !important;
+
+}
+
+.mat-slider-thumb {
+    background-color: red !important;
+} */
+
+mat-paginator {
+    background-color: transparent;
+}

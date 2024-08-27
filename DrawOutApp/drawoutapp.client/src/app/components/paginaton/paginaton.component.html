@@ -1,0 +1,37 @@
+<!-- Pagination for Small Screens -->
+<nav *ngIf="isSmallScreen" class="pagination-small">
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" (click)="selectPage(1)">‹</a>
+      </li>
+      <li class="page-item" [class.active]="currentPage === page" *ngFor="let page of getPagesVisibleOnSmallScreen()">
+        <a class="page-link" (click)="selectPage(page)">{{ page }}</a>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" (click)="selectPage(totalPages)">›</a>
+      </li>
+    </ul>
+  </nav>
+  
+  <!-- Pagination for Large Screens -->
+  <nav *ngIf="!isSmallScreen" class="pagination-large">
+    <ul class="pagination">
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" (click)="selectPage(1)">«</a>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === 1">
+        <a class="page-link" (click)="selectPage(currentPage - 1)">‹</a>
+      </li>
+      <li class="page-item" *ngFor="let page of getPagesVisibleOnLargeScreen()">
+        <a class="page-link" (click)="selectPage(page)" [class.active]="currentPage === page">{{ page }}</a>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" (click)="selectPage(currentPage + 1)">›</a>
+      </li>
+      <li class="page-item" [class.disabled]="currentPage === totalPages">
+        <a class="page-link" (click)="selectPage(totalPages)">»</a>
+      </li>
+    </ul>
+    <span class="pagination-info">{{ currentPage }} of {{ totalPages }} items</span>
+  </nav>
+  

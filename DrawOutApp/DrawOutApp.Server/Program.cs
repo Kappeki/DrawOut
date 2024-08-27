@@ -1,7 +1,14 @@
-using DrawOutApp.Server.DataLayer;
+using DrawOutApp.Server.Settings;
 using DrawOutApp.Server.Services;
 using Microsoft.Extensions.Options;
-
+using DrawOutApp.Server.Repositories.Contracts;
+using DrawOutApp.Server.Repositories;
+using DrawOutApp.Server.Services.Contracts;
+using MongoDB.Driver;
+using StackExchange.Redis;
+using Microsoft.AspNetCore.CookiePolicy;
+using DrawOutApp.Server.Hubs;
+using DrawOutApp.Server.Mappers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -12,25 +19,89 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        builder => builder.WithOrigins("http://localhost:4200")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials());
+});
+
+
+#region Mappers
+builder.Services.AddAutoMapper(typeof(UserMapper));
+builder.Services.AddAutoMapper(typeof(RoomMapper));
+#endregion
+
+#region MongoDB
+
 builder.Services.Configure<MongoDBSettings>(
     builder.Configuration.GetSection("MongoDBSettings"));
-
 builder.Services.AddSingleton<IMongoDBSettings>(sp =>
     sp.GetRequiredService<IOptions<MongoDBSettings>>().Value);
 
-builder.Services.AddScoped<IDrawOutDBService, DrawOutDBService>();
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<MongoDBSettings>>().Value;
+    return new MongoClient(settings.ConnectionString);
+});
+
+builder.Services.AddTransient<IRoomRepo, RoomRepository>();
+
+builder.Services.AddScoped<IRoomService, RoomService>();
 
 
+#endregion
+
+#region REDIS
 builder.Services.Configure<RedisSettings>(
     builder.Configuration.GetSection("RedisSettings"));
 builder.Services.AddSingleton<IRedisSettings>(sp =>
     sp.GetRequiredService<IOptions<RedisSettings>>().Value);
 
-builder.Services.AddSingleton<IRedisService, RedisService>();
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var settings = sp.GetRequiredService<IOptions<RedisSettings>>().Value;
+    return ConnectionMultiplexer.Connect(settings.ConnectionString);
+});
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    var redisSettings = builder.Configuration.GetSection("RedisSettings").Get<RedisSettings>();
+    options.Configuration = redisSettings!.ConnectionString;
+    options.InstanceName = redisSettings.InstanceName;
+});
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+    options.Secure = CookieSecurePolicy.Always; 
+});
+
+builder.Services.AddSession(options =>
+{
+    options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
+    options.IdleTimeout = TimeSpan.FromDays(7);
+});
+
+//repositories
+builder.Services.AddTransient<IChatMessageRepo, ChatMessageRepository>();
+builder.Services.AddTransient<IGameRepo, GameRepository>();
+builder.Services.AddTransient<IUserRepo, UserRepository>();
+
+//services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IGameService, GameService>();
+
+#endregion
 
 var app = builder.Build();
 
 app.UseDefaultFiles();
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
@@ -40,11 +111,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");
+
+app.UseSession();
+app.UseCookiePolicy();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<RoomHub>("/roomhub");
 
 app.MapFallbackToFile("/index.html");
 
