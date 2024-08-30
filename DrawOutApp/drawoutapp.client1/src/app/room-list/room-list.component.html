@@ -1,0 +1,9 @@
+<div class="room-list-container">
+    <h2>Available Rooms</h2>
+    <ul>
+      <li *ngFor="let room of rooms">
+        <app-room-item [room]="room" (roomSelected)="onRoomSelected($event)"></app-room-item>
+      </li>
+    </ul>
+  </div>
+  

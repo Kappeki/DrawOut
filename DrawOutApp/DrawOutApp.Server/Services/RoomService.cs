@@ -47,6 +47,7 @@ namespace DrawOutApp.Server.Services
                     GameState = GameState.Waiting,
                     RoomURL = GenerateRoomURL(roomName),
                     RoundTime = RoundTime.Medium
+                    //timeEalapsed?
                 };
 
                 //logika za game entitet mozda
@@ -55,6 +56,8 @@ namespace DrawOutApp.Server.Services
                 {
                     room.Password = _passwordHasher.HashPassword(room, password);
                 }
+
+                await _roomRepository.AddPlayerToSetAsync(room._id.ToString(), creatingUserId);
 
                 room = await _roomRepository.CreateRoomAsync(room);
                 return _mapper.Map<RoomModel>(room);

@@ -1,0 +1,56 @@
+<div class="canvas-controls-container">
+    <canvas id="drawCanvas"></canvas>
+
+    <!-- Game Controls -->
+    <div class="game-controls-container">
+        <div class="start-button-container" *ngIf="!isRoomAdmin && !gameStarted" >
+            <button (click)="startGame()" class="start-button">Start!</button>
+        </div>
+
+        <div class="game-paint-container" *ngIf="!gameStarted">
+            <!-- Color Palette -->
+            <div class="color-palette">
+                <div
+                *ngFor="let color of colors"
+                [style.background-color]="color"
+                class="color-box"
+                (click)="selectColor(color)"
+                ></div>
+            </div>
+
+            <!-- Brush Size Selector -->
+            <div class="brush-options">
+                <button
+                *ngFor="let size of brushSizes"
+                [style.width.px]="size"
+                [style.height.px]="size"
+                class="brush-size"
+                (click)="selectBrushSize(size)"
+                ></button>
+            </div>
+
+            <!-- Tool Options -->
+            <div class="tool-options">
+                <button (click)="selectTool('brush')" class="tool-button">
+                B
+                </button>
+                <button (click)="selectTool('fill')" class="tool-button">
+                F
+                </button>
+            </div>
+
+            <!-- Undo and Clear Options -->
+            <div class="action-options">
+                <button (click)="undoLastStroke()" class="action-button">
+                Undo
+                </button>
+                <button (click)="clearCanvas()" class="action-button">
+                Clear
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+       
+       
+      

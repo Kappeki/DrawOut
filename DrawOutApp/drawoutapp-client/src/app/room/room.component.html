@@ -1,0 +1,72 @@
+<div class="room-container">
+    <!-- Header -->
+    <div class="room-header">
+      <div class="room-name">
+        <h2>{{ room?.roomName }}</h2>
+      </div>
+
+      <div *ngIf="!gameStarted" class="room-status">
+        <p>Waiting for players...</p>
+      </div>
+
+      <div *ngIf="!gameStarted" class="room-round">
+        <p>Round {{ currentRound }} of {{ 8 }}</p>
+      </div>
+    </div>
+  
+    <!-- Teams and Canvas -->
+    <div class="room-main">
+      <div class="team-canvas-container">
+
+        <div class="team-container red-team">
+          <div class="team-name">
+            <h3>Red Team</h3>
+            <button class="join-team-btn">Join</button>
+          </div>
+
+          <ul>
+            <li *ngFor="let player of redTeam">{{ "Proba" }}</li>
+            <!-- <app-user-item *ngIf="blueTeam"></app-user-item> -->
+          </ul>
+        </div>
+
+        <div class="whiteboard-container">
+          <app-whiteboard></app-whiteboard>
+        </div>
+
+        <div class="team-container blue-team">
+          <div class="team-name">
+            <h3>Blue Team</h3>
+            <button class="join-team-btn">Join</button>
+          </div>
+
+          <div>
+            <ul>
+              <li *ngFor="let player of blueTeam">{{ "Proba" }}</li>
+              <!-- <app-user-item *ngIf="blueTeam"></app-user-item> -->
+              <!-- Ovde ce da bude user component -->
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="below-canvas-container">
+        <!-- Invite Section -->
+         <!-- Pomeriti inv ispod canvasa i dodati spectator mode za usere koji nisu jos usli u tim-->
+        <div class="invite-container">
+            <p>Invite your friends!</p>
+            
+            <button (click)="copyInviteLink()">Copy Invite Link</button>
+        </div>
+
+            <!-- Chat -->
+          <div class="chat-container">
+            <app-chat 
+            [messages]="chatMessages" 
+            [(ngModel)]="chatInput" 
+            (messageSent)="sendMessage($event)">
+          </app-chat>
+          </div>
+      </div>
+  </div>

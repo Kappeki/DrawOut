@@ -23,37 +23,39 @@ namespace DrawOutApp.Server.Hubs
             _roomService = roomService;
             _mapper = mapper;
         }
-        private async Task<bool> TryJoinRoom(string roomId, string nickname)
+        private async Task<bool> TryJoinRoom(string roomId, string nickname, string? password)
         {
+            var seshKey = Context.Items["SeshKey"]!.ToString();
             Context.Items["RoomId"] = roomId;
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-            await Clients.Group(roomId).SendAsync("ReceiveMessage", $"{nickname} has joined the room.");
+            await Clients.Group(roomId).SendAsync("ReceiveMessage", "Server", $"{nickname} has joined the room.", DateTime.Now);
+            await _roomService.AddPlayerAsync(roomId, seshKey!, password);
             await SendConnectedRoomById(roomId);
             await SendConnectedUsers(roomId);
             return true;
         }
         public async Task JoinRoomById(string roomId, string? password = null)
         {
-            var seshKey = Context.Items["SeshKey"]!.ToString();
-            if (!await TryJoinRoom(roomId, Context.Items["Nickname"]!.ToString()!))
+            if (!await TryJoinRoom(roomId, Context.Items["Nickname"]!.ToString()!, password))
             {
                 return;
             }
-            await _roomService.AddPlayerAsync(roomId, seshKey!, password);
-
         }
         public async Task JoinRoomByURL(string roomURL, string? password = null)
         {
             var roomId = await _roomService.GetIdFromURL(roomURL) ?? throw new HubException("Room not found.");
-            if (!await TryJoinRoom(roomId, Context.Items["Nickname"]!.ToString()!))
+            if (!await TryJoinRoom(roomId, Context.Items["Nickname"]!.ToString()!, password))
             {
                 return;
             }
-            await _roomService.AddPlayerAsync(roomId, Context.Items["SeshKey"]!.ToString()!, password);
         }
         public async Task SendConnectedUsers(string roomId)
         {
             var (isError, users, error) = await _roomService.GetPlayerIdsAsync(roomId);
+
+            if (users == null)
+                return;
+
             if (isError)
                 throw new HubException(error);
 
@@ -61,21 +63,26 @@ namespace DrawOutApp.Server.Hubs
             foreach (var userId in users!)
             {
                 await _userService.AddRolesAsync(userId, [Role.Player]);
-                usersInfo.Add(_mapper.Map<PlayerInfo>(await _userService.GetUserAsync(userId)));
+                var (userIsError, user, userError) = await _userService.GetUserAsync(userId);
+                if (userIsError)
+                {
+                    throw new HubException(userError);
+                }
+                usersInfo.Add(_mapper.Map<PlayerInfo>(user));
             }
 
             await Clients
                 .Group(roomId)
                 .SendAsync("ConnectedUsers", usersInfo);
         }
-        public async Task SendConnectedRoomById(string roomId)
+        public async Task SendConnectedRoomById(string roomId, bool isLeaving = false)
         {
             var (isError,room,error) = await _roomService.GetRoomByIdAsync(roomId);
             if(isError)
             {
                 throw new HubException(error);
             }
-            if(room!.RoomAdminId == Context.Items["SeshKey"]!.ToString())
+            if(room!.RoomAdminId == Context.Items["SeshKey"]!.ToString() && isLeaving)
             {
                 await _userService.AddRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.RoomAdmin]);
             }
@@ -84,10 +91,11 @@ namespace DrawOutApp.Server.Hubs
                 .Group(roomId)
                 .SendAsync("ConnectedRoom", room);
         }
-        public async Task SendMessageToRoom(string roomId, string message)
+        public async Task SendMessageToRoom(string roomUrl, string message)
         {
             var seshKey = Context.Items["SeshKey"]!.ToString();
             var user = await _userService.GetUserAsync(seshKey!);
+            var roomId = await _roomService.GetIdFromURL(roomUrl);
 
             if(user.IsError)
             {
@@ -131,8 +139,11 @@ namespace DrawOutApp.Server.Hubs
                 await base.OnDisconnectedAsync(exception);
             }
 
-            var roomId = Context.Items["RoomId"]!.ToString();
             var seshKey = Context.Items["SeshKey"]!.ToString();
+
+            await _userService.RemoveRolesAsync(seshKey!, [Role.RoomAdmin, Role.Player, Role.Red, Role.Blue, Role.Painter, Role.TeamLeader]);
+
+            var roomId = Context.Items["RoomId"]!.ToString();
 
             var isRemoved = await _roomService.RemoveUserAsync(roomId!, seshKey!);
             if(!isRemoved.Data)
@@ -141,12 +152,10 @@ namespace DrawOutApp.Server.Hubs
                 await base.OnDisconnectedAsync(exception);
             }
 
-            await _userService.RemoveRolesAsync(seshKey!, [Role.RoomAdmin, Role.Player, Role.Red, Role.Blue, Role.Painter, Role.TeamLeader]);
-
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId!);
             await Clients
                 .Group(roomId!)
-                .SendAsync("ReceiveMessage", "System", $"{Context.Items["Nickname"].ToString()} has left the room.");
+                .SendAsync("ReceiveMessage", "Server", $"{Context.Items["Nickname"].ToString()} has left the room.", DateTime.Now);
 
             await SendConnectedRoomById(roomId!);
             await SendConnectedUsers(roomId!);

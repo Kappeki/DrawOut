@@ -61,12 +61,16 @@ namespace DrawOutApp.Server.Repositories
         }
         public async Task AddPlayerToSetAsync(string id, string sessionId)
         {
-            await UpdateRoomAsync(id, Builders<Room>.Update.Inc(r => r.PlayerCount, 1));
+            var objId = ObjectId.Parse(id);
+            var filter = Builders<Room>.Filter.Eq("_id", objId);
+            await UpdateRoomAsync(filter, Builders<Room>.Update.Inc(r => r.PlayerCount, 1));
             await _database.SetAddAsync($"users-in-room:{id}", sessionId);
         }
         public async Task RemovePlayerFromSetAsync(string id, string sessionId)
         {
-            await UpdateRoomAsync(id, Builders<Room>.Update.Inc(r => r.PlayerCount, -1));
+            var objId = ObjectId.Parse(id);
+            var filter = Builders<Room>.Filter.Eq("_id", objId);
+            await UpdateRoomAsync(filter, Builders<Room>.Update.Inc(r => r.PlayerCount, -1));
             await _database.SetRemoveAsync($"users-in-room:{id}", sessionId);
         }
         public async Task<List<string>> GetPlayerSetAsync(string id)

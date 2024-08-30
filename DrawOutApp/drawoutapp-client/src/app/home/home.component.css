@@ -1,0 +1,140 @@
+.home-container {
+    display: flex;
+    font-family: 'Courier New', Courier, monospace;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.welcome-label {
+    font-size: 70px;
+    margin-bottom: 20px;
+}
+
+.user-pref-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+    border: brown 2px solid;
+    padding: 20px;
+    border-radius: 8%;
+}
+
+.nickname-text {
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 35px;
+    margin-left: 20px;
+    margin-bottom: 3%;
+}
+
+.play-btn {
+    padding: 10px 20px;
+    font-size: 40px;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    margin-top: 20px;
+}
+
+.create-room-btn {
+    padding: 10px 20px;
+    font-size: 40px;
+    border-radius: 5px;
+    background-color: #2113a7;
+    color: white;
+    margin-top: 40px;
+}
+
+.icon-selector {
+    margin-bottom: 20px;
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.icon-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.icon-input {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+}
+
+.modal-container {
+    display: flex;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+  }
+  
+  .modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .submit-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .submit-btn:hover {
+    background-color: #45a049;
+  }
+  

@@ -1,0 +1,80 @@
+.home-container {
+    display: flex;
+    font-family: 'Courier New', Courier, monospace;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.welcome-label {
+    font-size: 70px;
+    margin-bottom: 20px;
+}
+
+.user-pref-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 20px;
+    border: brown 2px solid;
+    padding: 20px;
+    border-radius: 8%;
+}
+
+.nickname-text {
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 35px;
+    margin-left: 20px;
+    margin-bottom: 3%;
+}
+
+.play-btn {
+    padding: 10px 20px;
+    font-size: 40px;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    margin-top: 20px;
+}
+
+.create-room-btn {
+    padding: 10px 20px;
+    font-size: 40px;
+    border-radius: 5px;
+    background-color: #2113a7;
+    color: white;
+    margin-top: 40px;
+}
+
+.icon-selector {
+    margin-bottom: 20px;
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.icon-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.icon-input {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+}

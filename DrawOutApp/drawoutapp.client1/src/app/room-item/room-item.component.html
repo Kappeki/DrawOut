@@ -1,0 +1,23 @@
+<div class="room-item-container">
+
+    <div class="name">
+        <h2>{{ room.roomName }}</h2>
+    </div>
+
+    <div>
+        <p>{{ room.playerCount }}</p>
+    </div>
+
+    <div>
+        <p>{{ room.gameState }}</p>
+    </div>
+
+    <div>
+        <p *ngIf="room.hasPassword">🔒 Password Protected</p>
+        <p *ngIf="!room.hasPassword">🔓 Open Room</p>
+    </div>
+
+    <div>
+        <button class="join-room-btn" (click)="onJoinRoom()">Play!</button>
+    </div>
+</div>

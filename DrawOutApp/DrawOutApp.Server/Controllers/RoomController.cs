@@ -31,7 +31,7 @@ namespace DrawOutApp.Server.Controllers
             if(userIsError)
                 return BadRequest(userError);
             
-            if(adminUser!.Roles != null)
+            if(adminUser!.Roles!.Count != 0)
                 return BadRequest("You are not allowed to create a room.");
 
             var (roomIsError, room, roomError) = await _roomService.CreateRoomAsync(adminUser._sessionKey, request.RoomName, request.Password);
@@ -39,13 +39,13 @@ namespace DrawOutApp.Server.Controllers
             if(roomIsError)
                 return BadRequest(roomError);
 
-            return Ok(room);
+            return Ok(new { roomUrl = room!.RoomURL });
         }
-       
+
         /// <summary>
         /// METODE KORISCENJE ISKLJUCIVO ZA TESTIRANJE
         /// </summary>
-        /// <param name="roomId"></param>
+        /// <param name="roomId"></param><button class="join-team-btn">Join</button>
         /// <returns></returns>
         /*[ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

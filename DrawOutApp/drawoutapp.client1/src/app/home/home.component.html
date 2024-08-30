@@ -1,0 +1,12 @@
+<div class="home-container">
+    <label class="welcome-label">{{"DrawOut!"}}</label>
+    <div class="user-pref-container">
+        <div class="icon-selector">
+            <img *ngIf="selectedIcon" [src]="selectedIcon" alt="User Icon" class="icon-preview">
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" class="icon-input">
+        </div>
+        <input type="text" class="nickname-text" placeholder="Enter your nickname" [(ngModel)]="nicknameText">
+    </div>
+    <button class="play-btn" (click)="onPressPlay()">Play!</button>
+    <button class="create-room-btn" (click)="onPressCreateRoom()">Create Private Room</button>
+</div>

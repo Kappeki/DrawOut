@@ -21,7 +21,7 @@ namespace DrawOutApp.Server.Mappers
                 src.Roles.Select(r => r.ToString()).ToList() : 
                 new List<string>()));
 
-            CreateMap<User, PlayerInfo>()
+            CreateMap<UserModel, PlayerInfo>()
                 .ForMember(dest => dest.Nickname, opt => opt.MapFrom(src => src.Nickname))
                 .ForMember(dest => dest.Icon, opt => opt.MapFrom(src => src.Icon));
         }

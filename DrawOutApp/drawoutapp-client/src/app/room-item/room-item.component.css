@@ -1,0 +1,30 @@
+.room-item-container {
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+}
+
+.room-name-count-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin: 10px;
+}
+
+.room-state-pass-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin: 10px;
+}
+
+.room-btn-container {
+    align-self: center;
+    margin-top: 10px;
+}
+
+.join-room-btn {
+
+}

@@ -1,0 +1,159 @@
+.room-container {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Courier New', Courier, monospace;
+    /* height: 100vh; */
+    /* background-color: #f0f0f0; */
+}
+  
+.room-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /*between*/
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333;
+    border-radius: 8px;
+    color: white;
+    font-size: small;
+    height: 30px;
+}
+  
+.room-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding-top: 10px;
+}
+
+.team-canvas-container {
+    display: flex;
+    justify-content: space-between;
+}
+  
+.team-container {
+    width: 20%;
+    padding: 0px 5px 5px 5px;
+    background-color: #e6e6e6;
+    border-radius: 8px;
+}
+
+.whiteboard-container {
+    width: 60%;
+    height: 450px;
+    /* padding: 0px 5px 5px 5px;
+    background-color: #e6e6e6;
+    border-radius: 8px; */
+}
+
+.team-name {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+}
+
+.join-team-btn {
+    flex: 1;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    border: none;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.red-team .join-team-btn {
+    background-color: white;
+    color: #ff4d4d; /* Darker red for text */
+    border: 2px solid #ff4d4d;
+}
+
+.red-team .join-team-btn:hover {
+    background-color: #ff4d4d; /* Change background to match team color */
+    color: white; /* Invert text color for better contrast */
+}
+
+.blue-team .join-team-btn {
+    background-color: white;
+    color: #3399ff; /* Darker blue for text */
+    border: 2px solid #3399ff;
+}
+
+.blue-team .join-team-btn:hover {
+    background-color: #3399ff; /* Change background to match team color */
+    color: white; /* Invert text color for better contrast */
+}
+  
+.red-team {
+    background-color: #ffcccc;
+}
+  
+.blue-team {
+    background-color: #cce5ff;
+}
+
+.below-canvas-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px;
+}
+
+.invite-container {
+    width: 20%;
+    text-align: center;
+    margin: 10px 0;
+}
+  
+.invite-container button {
+    background-color: #0000ff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px; 
+}
+  
+.invite-container button:hover {
+    background-color: #000099;  
+}
+
+.chat-container {
+    width: 19.5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.chat-messages {
+    width: 100%;
+    height: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.messages {
+    flex-grow: 1;
+    overflow-y: auto; /* Show scrollbar only when necessary */
+    margin-bottom: 10px;
+}
+  
+.chat-container input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    margin-top: 5px;
+}
+
+
+  

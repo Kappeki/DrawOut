@@ -1,0 +1,27 @@
+<div class="room-list-container">
+  <h2 class="room-list-header">Available Rooms</h2>
+  
+  <table class="room-table">
+    <thead>
+      <tr>
+        <th>Room Name</th>
+        <th>Players</th>
+        <th>Game State</th>
+        <th>Password</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let room of rooms">
+        <td>{{ room.roomName }}</td>
+        <td>{{ room.playerCount }}/8</td>
+        <td>{{ room.gameState }}</td>
+        <td>
+          <span *ngIf="room.hasPassword">🔒</span>
+          <span *ngIf="!room.hasPassword">🔓</span>
+        </td>
+        <td><button class="join-room-btn" (click)="onRoomSelected(room.roomId)">Play!</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

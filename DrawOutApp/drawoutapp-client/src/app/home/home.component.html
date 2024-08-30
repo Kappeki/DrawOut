@@ -1,0 +1,33 @@
+<div class="home-container">
+    <label class="welcome-label">{{"DrawOut!"}}</label>
+
+    <div class="user-pref-container">
+        <div class="icon-selector">
+            <img *ngIf="selectedIcon" [src]="selectedIcon" alt="User Icon" class="icon-preview">
+            <input type="file" (change)="onFileSelected($event)" accept="image/*" class="icon-input">
+        </div>
+        <input type="text" class="nickname-text" placeholder="Enter your nickname" [(ngModel)]="nicknameText">
+    </div>
+
+    <button class="play-btn" (click)="onPressPlay()">Play!</button>
+    <button class="create-room-btn" (click)="openRoomModal()">Create Private Room</button>
+
+    <div class="modal-container" *ngIf="isModalOpen">
+        <div class="modal-content">
+            <span class="close" (click)="closeRoomModal()">&times;</span>
+            <h2>Create Private Room</h2>
+        
+            <form (ngSubmit)="createRoom()">
+              <label for="roomName">Room Name</label>
+              <input type="text" id="roomName" name="roomName" [(ngModel)]="roomName" required>
+        
+              <label for="password">Password (optional)</label>
+              <input type="password" id="password" name="password" [(ngModel)]="password">
+        
+              <button type="submit" class="submit-btn">Create Room</button>
+            </form>
+          </div>
+    </div>
+
+
+</div>
