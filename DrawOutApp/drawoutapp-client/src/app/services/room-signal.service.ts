@@ -12,17 +12,19 @@ export class RoomSignalService {
 
   private readonly API_URL = 'https://localhost:7041';
   public hubConnection: HubConnection = new HubConnectionBuilder()
-    .withUrl(`${this.API_URL}/roomhub`, { withCredentials: true }) // Connect to the backend hub
+    .withUrl(`${this.API_URL}/roomhub`, { withCredentials: true })
     .configureLogging(LogLevel.Information)
     .build();
 
   public messages$ = new BehaviorSubject<any>([]);
   public connectedUsers$ = new BehaviorSubject<User[]>([]);
   public connectedRoom$ = new BehaviorSubject<Room | null>(null);
+  public teams$ = new BehaviorSubject<any>([]);
 
   public messages: any[] = [];
   public users: User[] = [];
   public room: Room | null = null;
+  public teams: any[] = [];
 
   constructor() {
     this.hubConnection?.on('ReceiveMessage', (sender: string, content: string, timestamp: string) => {
@@ -35,14 +37,17 @@ export class RoomSignalService {
     this.hubConnection?.on('ConnectedRoom', (room: Room) => {
       this.connectedRoom$.next(room);
     });
+
+    // this.hubConnection?.on('ReceiveTeamJoin', (teamName: string, nickname: string) => {
+    //   this.teams$.next({ teamName, nickname });
+    // });
+
+    this.hubConnection?.on('ReceiveTeamSwitch', (oldTeam: string | null, newTeam: string, nickname: string) => {
+      this.handleTeamSwitch(oldTeam, newTeam, nickname);
+    });
   }
 
   public async startConnection() {
-    // try{
-    //   await this.hubConnection?.start();
-    // }catch(err){
-    //   console.error(err);
-    // }
     await this.hubConnection
       .start()
       .then(() => console.log('Connection started'))
@@ -51,9 +56,11 @@ export class RoomSignalService {
 
   public async leaveRoom() {
     return await this.hubConnection?.stop().then(() => {
+      this.messages = [];
       this.connectedRoom$.next(null);
       this.messages$.next([]);
       this.connectedUsers$.next([]);
+      this.teams$.next([]);
     }).catch(err => console.error('Error stopping connection:', err));
   }
 
@@ -75,6 +82,25 @@ export class RoomSignalService {
   public async sendMessageToRoom(roomId: string, message: string) {
     return await this.hubConnection?.invoke('SendMessageToRoom', roomId, message)
       .catch(err => console.error(err));
+  }
+
+  public async joinTeam(roomURL: string, teamName: string) {
+    return await this.hubConnection?.invoke('JoinTeam', roomURL, teamName)
+      .catch(err => console.error(err));
+  }
+
+  public async switchTeam(roomURL: string, oldTeam: string | null, newTeam: string) {
+    return await this.hubConnection?.invoke('SwitchTeam', roomURL, oldTeam, newTeam)
+      .catch(err => console.error(err));
+  }
+
+  private handleTeamSwitch(oldTeam: string | null, newTeam: string, nickname: string): void {
+    if (oldTeam === 'Red') {
+      this.teams = this.teams.filter(member => !(member.teamName === 'Red' && member.nickname === nickname));
+    } else if (oldTeam === 'Blue') {
+      this.teams = this.teams.filter(member => !(member.teamName === 'Blue' && member.nickname === nickname));
+    }
+    this.teams$.next({ oldTeam, newTeam, nickname });
   }
 
   public onReceiveMessage(): void {

@@ -9,11 +9,13 @@ import { FormsModule } from '@angular/forms';
 import { ChatComponent } from '../chat/chat.component';
 import { WhiteboardComponent } from '../whiteboard/whiteboard.component';
 import { Subscription } from 'rxjs';
+import UserListComponent from "../user-list/user-list.component";
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [CommonModule, FormsModule, ChatComponent, WhiteboardComponent],
+  imports: [CommonModule, FormsModule, ChatComponent, WhiteboardComponent, UserListComponent],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })
@@ -32,6 +34,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   gameStarted: boolean = false;
   currentRound: number = 1;
 
+  currentTeam: string | null = null;
   chatInput: string = '';
 
   constructor(
@@ -42,17 +45,38 @@ export class RoomComponent implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit(): Promise<void> {
+
     await this.roomService.startConnection();
 
     this.subscriptions.add(this.roomService.connectedRoom$.subscribe(res => {
       this.room = res!;
       this.roomURL = this.room?.roomURL!;
     }));
+
     this.subscriptions.add(this.roomService.messages$.subscribe(res => {
       this.chatMessages = res;
     }));
+
     this.subscriptions.add(this.roomService.connectedUsers$.subscribe(res => {
       this.users = res;
+    }));
+
+    this.subscriptions.add(this.roomService.teams$.subscribe(res => {
+      if (res.oldTeam) {
+        if (res.oldTeam === 'Red' && res.newTeam === 'Blue') {
+          this.redTeam = this.redTeam.filter(name => name !== res.nickname);
+          this.blueTeam.push(res.nickname);
+        } else if (res.oldTeam === 'Blue' && res.newTeam === 'Red') {
+          this.blueTeam = this.blueTeam.filter(name => name !== res.nickname);
+          this.redTeam.push(res.nickname);
+        }
+      } else {
+        if (res.newTeam === 'Red') {
+          this.redTeam.push(res.nickname);
+        } else if (res.newTeam === 'Blue') {
+          this.blueTeam.push(res.nickname);
+        }
+      }
     }));
 
     this.subscriptions.add(this.route.paramMap.subscribe(params => {
@@ -71,13 +95,15 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.handleWindowClose(null);
   }
 
-
   @HostListener('window:beforeunload', ['$event'])
   @HostListener('window:popstate', ['$event'])
   handleWindowClose(event: any) {
     this.chatMessages = [];
     this.room = null;
     this.users = [];
+    this.redTeam = [];
+    this.blueTeam = [];
+    this.currentTeam = null;
     this.roomService.leaveRoom();
   }
 
@@ -91,4 +117,8 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   copyInviteLink() { }
 
+  handleTeamJoin(event: { oldTeam: string | null, newTeam: string }) {
+    this.currentTeam = event.newTeam;
+    this.roomService.switchTeam(this.roomURL, event.oldTeam, event.newTeam);
+  }
 }

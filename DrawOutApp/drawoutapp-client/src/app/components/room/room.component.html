@@ -18,36 +18,15 @@
   <div class="room-main">
     <div class="team-canvas-container">
 
-      <div class="team-container red-team">
-        <div class="team-name">
-          <h3>Red Team</h3>
-          <button class="join-team-btn">Join</button>
-        </div>
-
-        <ul>
-          <li *ngFor="let player of redTeam">{{ "Proba" }}</li>
-          <!-- <app-user-item *ngIf="blueTeam"></app-user-item> -->
-        </ul>
-      </div>
+      <app-user-list class="user-team-list" [users]="users" [team]="redTeam" [currentTeam]="currentTeam" className="Red"
+        (teamChange)="handleTeamJoin($event)"></app-user-list>
 
       <div class="whiteboard-container">
         <app-whiteboard></app-whiteboard>
       </div>
 
-      <div class="team-container blue-team">
-        <div class="team-name">
-          <h3>Blue Team</h3>
-          <button class="join-team-btn">Join</button>
-        </div>
-
-        <div>
-          <ul>
-            <li *ngFor="let player of blueTeam">{{ "Proba" }}</li>
-            <!-- <app-user-item *ngIf="blueTeam"></app-user-item> -->
-            <!-- Ovde ce da bude user component -->
-          </ul>
-        </div>
-      </div>
+      <app-user-list class="user-team-list" [users]="users" [team]="blueTeam" [currentTeam]="currentTeam"
+        className="Blue" (teamChange)="handleTeamJoin($event)"></app-user-list>
 
     </div>
 
@@ -67,5 +46,9 @@
         </app-chat>
       </div>
     </div>
+  </div>
+  <div class="room-footer">
+    <app-user-list class="user-team-list" [users]="users" [team]=" this.redTeam.concat(this.blueTeam)"
+      [currentTeam]="currentTeam" className="Spectators" (teamChange)="handleTeamJoin($event)"></app-user-list>
   </div>
 </div>

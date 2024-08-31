@@ -167,10 +167,11 @@ namespace DrawOutApp.Server.Hubs
                 .Group(roomId)
                 .SendAsync("RoomSettingsChanged", settingName, settingValue);
         }
-        public async Task JoinTeam(string roomId, string teamName)
+        public async Task JoinTeam(string roomUrl, string teamName)
         {
             var nickname = Context.Items["Nickname"]!.ToString();
-            await Clients.Group(roomId).SendAsync("ReceiveTeamJoin", teamName, nickname);
+            var roomId = await _roomService.GetIdFromURL(roomUrl);
+            await Clients.Group(roomId!).SendAsync("ReceiveTeamJoin", teamName, nickname);
             if (teamName == "Red")
             {
                 await _userService.AddRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Red]);
@@ -184,24 +185,36 @@ namespace DrawOutApp.Server.Hubs
                 throw new HubException("Invalid team name.");
             }
         }
-        public async Task SwitchTeam(string roomId, string oldTeam, string newTeam)
+        public async Task SwitchTeam(string roomUrl, string? oldTeam, string newTeam)
         {
             var nickname = Context.Items["Nickname"]!.ToString();
-            await Clients.Group(roomId).SendAsync("ReceiveTeamSwitch", oldTeam, newTeam, nickname);
-            if (oldTeam == "Red")
+            var roomId = await _roomService.GetIdFromURL(roomUrl);
+
+            if (!string.IsNullOrEmpty(oldTeam))
             {
-                await _userService.RemoveRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Red]);
-                await _userService.AddRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Blue]);
+                if (oldTeam == "Red")
+                {
+                    await _userService.RemoveRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Red]);
+                }
+                else if (oldTeam == "Blue")
+                {
+                    await _userService.RemoveRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Blue]);
+                }
             }
-            else if (oldTeam == "Blue")
+            if (newTeam == "Red")
             {
-                await _userService.RemoveRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Blue]);
                 await _userService.AddRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Red]);
+            }
+            else if (newTeam == "Blue")
+            {
+                await _userService.AddRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Blue]);
             }
             else
             {
                 throw new HubException("Invalid team name.");
             }
+
+            await Clients.Group(roomId!).SendAsync("ReceiveTeamSwitch", oldTeam, newTeam, nickname);
         }
     }
 }

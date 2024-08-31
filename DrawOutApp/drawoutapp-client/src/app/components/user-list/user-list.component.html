@@ -1,1 +1,13 @@
-<p>user-list works!</p>
+<div class="user-list-container" [ngClass]="className.toLowerCase() + '-team'">
+    <div class="user-list-name">
+        <h3>{{className == 'Spectators' ? 'Spectators' : className + ' Team'}}</h3>
+        <button *ngIf="className !== 'Spectators'" class="join-team-btn" (click)="joinTeam()">Join</button>
+    </div>
+
+    <ul>
+        <li *ngFor="let player of teamUsers" class="user-item">
+            <img [src]="player.icon" alt="User Icon" class="user-icon">
+            <span class="user-nickname">{{ player.nickname }}</span>
+        </li>
+    </ul>
+</div>
