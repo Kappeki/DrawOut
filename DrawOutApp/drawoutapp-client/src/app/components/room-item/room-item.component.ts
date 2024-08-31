@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { RoomListItem } from '../models/room';
+import { RoomListItem } from '../../models/room';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,14 +11,14 @@ import { CommonModule } from '@angular/common';
 })
 export class RoomItemComponent implements OnInit {
   @Input() room!: RoomListItem;
-  @Output() roomSelected = new EventEmitter<string>(); // Output event to notify parent component when a room is selected
+  @Output() roomSelected = new EventEmitter<string>();
 
-  constructor() {}
+  constructor() { }
 
-  ngOnInit(): void {  }
+  ngOnInit(): void { }
 
   onJoinRoom(): void {
-    this.roomSelected.emit(this.room.roomId); // Emit the roomId when the user selects this room
+    this.roomSelected.emit(this.room.roomId);
   }
 
 }

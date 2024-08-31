@@ -12,17 +12,17 @@ export class RoomSignalService {
 
   private readonly API_URL = 'https://localhost:7041';
   public hubConnection: HubConnection = new HubConnectionBuilder()
-  .withUrl(`${this.API_URL}/roomhub`, { withCredentials: true }) // Connect to the backend hub
-  .configureLogging(LogLevel.Information)
-  .build();
+    .withUrl(`${this.API_URL}/roomhub`, { withCredentials: true }) // Connect to the backend hub
+    .configureLogging(LogLevel.Information)
+    .build();
 
   public messages$ = new BehaviorSubject<any>([]);
   public connectedUsers$ = new BehaviorSubject<User[]>([]);
-  public connectedRoom$ = new BehaviorSubject<Room|null>(null);
+  public connectedRoom$ = new BehaviorSubject<Room | null>(null);
 
   public messages: any[] = [];
   public users: User[] = [];
-  public room: Room|null = null;
+  public room: Room | null = null;
 
   constructor() {
     this.hubConnection?.on('ReceiveMessage', (sender: string, content: string, timestamp: string) => {
@@ -50,12 +50,15 @@ export class RoomSignalService {
   }
 
   public async leaveRoom() {
-    return await this.hubConnection?.stop()
-      .catch(err => console.error(err));
+    return await this.hubConnection?.stop().then(() => {
+      this.connectedRoom$.next(null);
+      this.messages$.next([]);
+      this.connectedUsers$.next([]);
+    }).catch(err => console.error('Error stopping connection:', err));
   }
 
   public async joinRoomById(roomId: string, password?: string) {
-    return await this.hubConnection?.invoke('JoinRoomById', roomId, password)
+    return await this.hubConnection.invoke('JoinRoomById', roomId, password)
       .catch(err => console.error(err));
   }
 
@@ -64,12 +67,12 @@ export class RoomSignalService {
       console.error('Connection not established yet');
       return;
     }
-  
+
     return this.hubConnection.invoke('JoinRoomByURL', roomURL, password)
       .catch(err => console.error(err));
   }
 
-  public async sendMessageToRoom(roomId: string, message: string){
+  public async sendMessageToRoom(roomId: string, message: string) {
     return await this.hubConnection?.invoke('SendMessageToRoom', roomId, message)
       .catch(err => console.error(err));
   }

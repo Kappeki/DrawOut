@@ -28,9 +28,9 @@ namespace DrawOutApp.Server.Hubs
             var seshKey = Context.Items["SeshKey"]!.ToString();
             Context.Items["RoomId"] = roomId;
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
-            await Clients.Group(roomId).SendAsync("ReceiveMessage", "Server", $"{nickname} has joined the room.", DateTime.Now);
+            await Clients.Group(roomId).SendAsync("ReceiveMessage", "Server", $"{nickname} has joined the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             await _roomService.AddPlayerAsync(roomId, seshKey!, password);
-            await SendConnectedRoomById(roomId);
+            await SendConnectedRoomById(roomId, true);
             await SendConnectedUsers(roomId);
             return true;
         }
@@ -75,14 +75,14 @@ namespace DrawOutApp.Server.Hubs
                 .Group(roomId)
                 .SendAsync("ConnectedUsers", usersInfo);
         }
-        public async Task SendConnectedRoomById(string roomId, bool isLeaving = false)
+        public async Task SendConnectedRoomById(string roomId, bool isJoining = false)
         {
             var (isError,room,error) = await _roomService.GetRoomByIdAsync(roomId);
             if(isError)
             {
                 throw new HubException(error);
             }
-            if(room!.RoomAdminId == Context.Items["SeshKey"]!.ToString() && isLeaving)
+            if(room!.RoomAdminId == Context.Items["SeshKey"]!.ToString() && isJoining)
             {
                 await _userService.AddRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.RoomAdmin]);
             }
@@ -155,7 +155,7 @@ namespace DrawOutApp.Server.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId!);
             await Clients
                 .Group(roomId!)
-                .SendAsync("ReceiveMessage", "Server", $"{Context.Items["Nickname"].ToString()} has left the room.", DateTime.Now);
+                .SendAsync("ReceiveMessage", "Server", $"{Context.Items["Nickname"].ToString()} has left the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
             await SendConnectedRoomById(roomId!);
             await SendConnectedUsers(roomId!);

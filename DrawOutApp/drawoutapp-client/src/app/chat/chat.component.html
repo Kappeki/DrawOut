@@ -1,9 +1,0 @@
-<div class="chat-container">
-    <div class="chat-messages">
-        <div class="messages">
-            <p *ngFor="let message of messages">{{ message.timestamp}} {{ message.sender }}: {{ message.content }} </p>
-        </div>
-        <input placeholder="Type your guess here..." (keydown)="handleKeyDown($event)"/>
-    </div>
-  <!-- <button (click)="sendMessage()">Send</button> -->
-</div>

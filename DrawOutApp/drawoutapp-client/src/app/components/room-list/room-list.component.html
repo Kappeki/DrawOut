@@ -1,0 +1,79 @@
+<div class="room-list-container">
+
+  <!-- Tabs navigation -->
+  <ul class="nav nav-tabs" id="roomTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" [class.active]="activeTab === 'available'" (click)="selectTab('available')">Available
+        Rooms</a>
+    </li>
+    <li class="nav-item" role="presentation">
+      <a class="nav-link" [class.active]="activeTab === 'myrooms'" (click)="selectTab('myrooms')">My Rooms</a>
+    </li>
+  </ul>
+
+  <!-- Tabs content -->
+  <div class="tab-content" id="roomTabsContent">
+    <div *ngIf="activeTab === 'available'" class="tab-pane fade show active">
+      <table class="room-table">
+        <thead>
+          <tr>
+            <th>Room Name</th>
+            <th>Players</th>
+            <th>Game State</th>
+            <th>Password</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="room-list-body">
+        <app-room-item *ngFor="let room of rooms" [room]="room" (roomSelected)="onRoomSelected($event)"></app-room-item>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'myrooms'" class="tab-pane fade show active">
+      <table class="room-table">
+        <thead>
+          <tr>
+            <th>Room Name</th>
+            <th>Players</th>
+            <th>Game State</th>
+            <th>Password</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="room-list-body">
+        <app-room-item *ngFor="let room of myRooms" [room]="room"
+          (roomSelected)="onRoomSelected($event)"></app-room-item>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="room-list-container">
+  <h2 class="room-list-header">Available Rooms</h2>
+
+  <table class="room-table">
+    <thead>
+      <tr>
+        <th>Room Name</th>
+        <th>Players</th>
+        <th>Game State</th>
+        <th>Password</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let room of rooms">
+        <td>{{ room.roomName }}</td>
+        <td>{{ room.playerCount }}/8</td>
+        <td>{{ room.gameState }}</td>
+        <td>
+          <span *ngIf="room.hasPassword">🔒</span>
+          <span *ngIf="!room.hasPassword">🔓</span>
+        </td>
+        <td><button class="join-room-btn" (click)="onRoomSelected(room.roomId)">Play!</button></td>
+      </tr>
+    </tbody>
+  </table>
+</div> -->

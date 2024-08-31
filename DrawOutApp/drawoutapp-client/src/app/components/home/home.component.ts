@@ -1,11 +1,8 @@
 import { Component, OnInit, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { User } from '../models/user';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DrawOutAPIService } from '../services/draw-out-api.service';
-import { Room } from '../models/room';
-import { RoomSignalService } from '../services/room-signal.service';
+import { DrawOutAPIService } from '../../services/draw-out-api.service';
 
 @Component({
   selector: 'app-home',
@@ -19,7 +16,7 @@ export class HomeComponent implements OnInit {
   selectedIcon: string | ArrayBuffer | null = null;
   isModalOpen = false;
   roomName = '';
-  password: string|null = null;
+  password: string | null = null;
   sessionExists = false;
 
   onFileSelected(event: any) {
@@ -31,7 +28,7 @@ export class HomeComponent implements OnInit {
     };
   }
 
-//nedostaje chat component 
+  //nedostaje chat component 
 
   //home compoentn i room component bind preko pass
   //room list component i room component bind preko roomid i pass
@@ -61,7 +58,7 @@ export class HomeComponent implements OnInit {
       icon: this.selectedIcon
     }
     this.router.navigate(['/rooms']);
-    if(this.sessionExists) {
+    if (this.sessionExists) {
       this.apiService.updateUserPrefs(userPrefs).subscribe({
         next: (response: any) => {
           this.router.navigate(['/rooms']);
@@ -75,18 +72,18 @@ export class HomeComponent implements OnInit {
         }
       });
     } else {
-        this.apiService.createUser(userPrefs).subscribe({
-          next: (response: any) => {
-            this.router.navigate(['/rooms']);
-            console.log('User created');
-          },
-          error: (error: any) => {
-            console.error(error);
-          },
-          complete: () => {
-            console.log('User creation completed');
-          }
-        });
+      this.apiService.createUser(userPrefs).subscribe({
+        next: (response: any) => {
+          this.router.navigate(['/rooms']);
+          console.log('User created');
+        },
+        error: (error: any) => {
+          console.error(error);
+        },
+        complete: () => {
+          console.log('User creation completed');
+        }
+      });
     }
   }
 
@@ -98,28 +95,11 @@ export class HomeComponent implements OnInit {
     this.isModalOpen = false;
   }
 
-  // createRoom() {
-  //   // Call your backend service to create the room
-  //   this.apiService.createRoom(this.roomName, this.password).subscribe((roomURL: string) => {
-  //     if(roomURL) {
-  //         // Redirect to the new room page
-  //         this.router.navigate(['/room', roomURL]);
-  //     }
-  //   });
-
-  //   // Close the modal
-  //   this.closeRoomModal();
-  // }
-
   createRoom() {
-
-    //check za role admin da ne moze da pravi sobu ako je vec
-
-    // Call your backend service to create the room
-    //check za ime sobe da li vec postoji
+    // name check if exists
     this.apiService.createRoom(this.roomName, this.password!).subscribe({
       next: (response: any) => {
-        this.router.navigate(['/room', response.roomUrl]);
+        this.router.navigate(['/room/by-url', response.roomUrl]);
         console.log(`Room created with ${response.roomUrl}`);
       },
       error: (error: any) => {

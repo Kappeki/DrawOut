@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormsModule, NgModel } from '@angular/forms';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css'
 })
@@ -25,5 +25,10 @@ export class ChatComponent {
     if (event.key === 'Enter') {
       this.onSendMessage();
     }
+  }
+
+  formatTimestamp(timestamp: number): string {
+    const date = new Date(timestamp * 1000); // Assuming timestamp is in seconds
+    return date.toLocaleTimeString(); // You can customize the format as needed
   }
 }

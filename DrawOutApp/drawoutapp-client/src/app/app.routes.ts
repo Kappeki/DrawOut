@@ -1,13 +1,14 @@
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './home/home.component';
+import { HomeComponent } from './components/home/home.component';
 import { NgModule } from '@angular/core';
-import { RoomListComponent } from './room-list/room-list.component';
-import { RoomComponent } from './room/room.component';
+import { RoomListComponent } from './components/room-list/room-list.component';
+import { RoomComponent } from './components/room/room.component';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
-    { path: 'rooms', component: RoomListComponent},
-    { path: 'room/:roomURL', component: RoomComponent }
+    { path: 'rooms', component: RoomListComponent },
+    { path: 'room/by-id/:roomId', component: RoomComponent },
+    { path: 'room/by-url/:roomURL', component: RoomComponent }
 ];
 
 @NgModule({

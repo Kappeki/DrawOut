@@ -1,0 +1,16 @@
+<div class="chat-container">
+    <!-- Display chat messages -->
+    <ul class="list-group chat-messages">
+        <li *ngFor="let message of messages" class="list-group-item message-item">
+            <strong class="message-sender">{{ message.sender }}:</strong>
+            <span class="message-text">{{ message.content }}</span>
+            <small class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</small>
+        </li>
+    </ul>
+
+    <!-- Chat input and send button -->
+    <div class="input-group chat-input-container">
+        <input type="text" [(ngModel)]="chatInput" (keydown)="handleKeyDown($event)" placeholder="Type your message..."
+            class="form-control" />
+    </div>
+</div>

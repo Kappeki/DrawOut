@@ -43,7 +43,7 @@ namespace DrawOutApp.Server.Services
                 {
                     RoomName = roomName,
                     RoomAdminId = creatingUserId,
-                    PlayerCount = 1,
+                    PlayerCount = 0,
                     GameState = GameState.Waiting,
                     RoomURL = GenerateRoomURL(roomName),
                     RoundTime = RoundTime.Medium

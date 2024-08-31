@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HomeComponent } from "./home/home.component";
+import { HomeComponent } from "./components/home/home.component";
 import { FormsModule } from '@angular/forms';
-import { RoomItemComponent } from './room-item/room-item.component';
+import { RoomItemComponent } from './components/room-item/room-item.component';
 
 
 @Component({

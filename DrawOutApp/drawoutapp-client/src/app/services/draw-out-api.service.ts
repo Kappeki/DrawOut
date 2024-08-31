@@ -20,12 +20,12 @@ export class DrawOutAPIService {
   }
 
   updateUserPrefs(userPrefs: any): Observable<any> {
-    return this.http.post(`${this.API_URL}/User/UpdateUser`, userPrefs, { withCredentials: true });
+    return this.http.put(`${this.API_URL}/User/UpdateUser`, userPrefs, { withCredentials: true, responseType: 'text' });
   }
 
   getRooms(isAscending?: boolean, isProtected?: boolean): Observable<RoomListItem[]> {
     let params = new HttpParams();
-    
+
     if (isAscending !== undefined) {
       params = params.append('isAscending', isAscending.toString());
     }
@@ -36,13 +36,18 @@ export class DrawOutAPIService {
     return this.http.get<RoomListItem[]>(`${this.API_URL}/Room/allRooms`, { params, withCredentials: true });
   }
 
+
+  getMyRooms(): Observable<RoomListItem[]> {
+    return this.http.get<RoomListItem[]>(`${this.API_URL}/Room/myRooms`, { withCredentials: true });
+  }
+
   createRoom(roomName: string, password?: string): Observable<string> {
     const payload = { roomName, password };
     return this.http.post<string>(`${this.API_URL}/Room/CreateRoom`, payload, { withCredentials: true });
   }
 
   getRoomByUrl(roomId: string): Observable<Room> {
-    return this.http.get<Room>(`${this.API_URL}/Room/${roomId}/get`, { withCredentials: true, responseType: 'text' as 'json'}, );
+    return this.http.get<Room>(`${this.API_URL}/Room/${roomId}/get`, { withCredentials: true, responseType: 'text' as 'json' },);
   }
-  
+
 }

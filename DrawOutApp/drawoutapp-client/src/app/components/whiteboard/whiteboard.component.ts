@@ -45,6 +45,6 @@ export class WhiteboardComponent {
     // Logic to clear the canvas
   }
 
-  startGame() {}
+  startGame() { }
 
 }
