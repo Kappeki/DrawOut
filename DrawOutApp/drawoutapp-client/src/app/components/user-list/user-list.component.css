@@ -1,12 +1,10 @@
 .user-list-container {
     width: 100%;
-    background-color: #e6e6e6;
     border-radius: 8px;
 }
 
 .user-list-name {
     display: flex;
-
     justify-content: space-between;
     align-items: center;
     padding: 5px 15px;
@@ -27,29 +25,23 @@
 .red-team .join-team-btn {
     background-color: white;
     color: #ff4d4d;
-    /* Darker red for text */
     border: 2px solid #ff4d4d;
 }
 
 .red-team .join-team-btn:hover {
     background-color: #ff4d4d;
-    /* Change background to match team color */
     color: white;
-    /* Invert text color for better contrast */
 }
 
 .blue-team .join-team-btn {
     background-color: white;
     color: #3399ff;
-    /* Darker blue for text */
     border: 2px solid #3399ff;
 }
 
 .blue-team .join-team-btn:hover {
     background-color: #3399ff;
-    /* Change background to match team color */
     color: white;
-    /* Invert text color for better contrast */
 }
 
 .red-team {

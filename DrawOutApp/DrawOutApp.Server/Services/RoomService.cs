@@ -217,11 +217,18 @@ namespace DrawOutApp.Server.Services
                 var update = Builders<Room>.Update;
                 var updates = new List<UpdateDefinition<Room>>();
 
-                if (roomModel.CustomWords != null && !roomModel.CustomWords.SequenceEqual(roomEntity.CustomWords!))
-                    updates.Add(update.Set(r => r.CustomWords, roomModel.CustomWords));
+                if (roomModel.CustomWords != null && roomModel.CustomWords.Count != 0)
+                {
+                    if (!roomModel.CustomWords.SequenceEqual(roomEntity.CustomWords!))
+                        updates.Add(update.Set(r => r.CustomWords, roomModel.CustomWords));
+                }
 
-                if (roomModel.SelectedWordPack != roomEntity.SelectedWordPack && roomModel.SelectedWordPack != null)
-                    updates.Add(update.Set(r => r.SelectedWordPack, roomModel.SelectedWordPack));
+                if (roomModel.SelectedWordPack != null)
+                {
+                    if (roomModel.SelectedWordPack != roomEntity.SelectedWordPack)
+                        updates.Add(update.Set(r => r.SelectedWordPack, roomModel.SelectedWordPack));
+
+                }
 
                 if (roomModel.RoundTime != (int)roomEntity.RoundTime)
                     updates.Add(

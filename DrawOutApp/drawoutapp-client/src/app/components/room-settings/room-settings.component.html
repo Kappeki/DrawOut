@@ -1,0 +1,55 @@
+<div class="settings-container">
+    <div class="settings-header">
+        <h2>Settings</h2>
+    </div>
+
+    <div class="settings-rows">
+        <div class="setting-item">
+            <span class="setting-label">
+                <img src="path/to/icon.png" alt="Icon" class="setting-icon">
+                Draw Time
+            </span>
+            <select *ngIf="room" [(ngModel)]="room.roundTime" (ngModelChange)="updateDrawTime($event)" class="setting-select">
+                <option value="40">40 seconds</option>
+                <option value="60">60 seconds</option>
+                <option value="80">80 seconds</option>
+            </select>
+        </div>
+
+        <div class="setting-item">
+            <span class="setting-label">
+                <img src="path/to/icon.png" alt="Icon" class="setting-icon">
+                Word Pack
+            </span>
+            <select *ngIf="room" [(ngModel)]="room.selectedWordPack" (ngModelChange)="updateWordPack($event)" class="setting-select">
+                <option value="default">Default</option>
+                <option value="custom1">Nesto nesto</option>
+                <option value="custom2">Nesto 2</option>
+                <option value="custom3">Nesto 3</option>
+            </select>
+        </div>
+
+        <!-- za change/remove/set password? mozda -->
+        <!-- <div class="password-container">
+            <p>Password</p>
+            <input type="password" [(ngModel)]="password">
+        </div> -->
+
+        <!-- za change admina sobe? -->
+        <!-- <div class="admin-contaier">
+
+        </div> -->
+
+        <!-- ovako je na skribbl ali ne nam ne treba -->
+        <!-- <div class="setting-item">
+            <span class="setting-label">Use custom words only</span>
+            <input type="checkbox" [(ngModel)]="useCustomWords" class="setting-checkbox">
+        </div> -->
+
+        <!-- Custom Words Section as a Column -->
+        <div class="setting-item-column">
+            <span class="setting-label">Custom Words</span>
+            <textarea *ngIf="room" [(ngModel)]="room.customWords" (ngModelChange)="updateCustomWords($event)" placeholder="Minimum of 10 words. 1-32 characters per word! 20000 characters maximum. Separated by a , (comma)" class="setting-textarea"></textarea>
+        </div>
+    </div>
+</div>

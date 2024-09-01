@@ -5,7 +5,7 @@
       <h2>{{ room?.roomName }}</h2>
     </div>
 
-    <div *ngIf="!gameStarted" class="room-status">
+    <div *ngIf="room?.gameState === 'Waiting'" class="room-status">
       <p>Waiting for players...</p>
     </div>
 
@@ -14,29 +14,28 @@
     </div>
   </div>
 
-  <!-- Teams and Canvas -->
+  <!-- Teams WhiteBoard Chat -->
   <div class="room-main">
-    <div class="team-canvas-container">
+    <div class="teams-canvas-chat-container">
 
-      <app-user-list class="user-team-list" [users]="users" [team]="redTeam" [currentTeam]="currentTeam" className="Red"
-        (teamChange)="handleTeamJoin($event)"></app-user-list>
-
-      <div class="whiteboard-container">
-        <app-whiteboard></app-whiteboard>
+      <!-- Teams -->
+      <div class="teams-container">
+        <!-- Red Team -->
+        <app-user-list class="user-team-list" [users]="users" [team]="redTeam" [currentTeam]="currentTeam" 
+          className="Red" (teamChange)="handleTeamJoin($event)"></app-user-list>
+        <!-- Blue Team -->
+        <app-user-list class="user-team-list" [users]="users" [team]="blueTeam" [currentTeam]="currentTeam"
+          className="Blue" (teamChange)="handleTeamJoin($event)"></app-user-list>
       </div>
 
-      <app-user-list class="user-team-list" [users]="users" [team]="blueTeam" [currentTeam]="currentTeam"
-        className="Blue" (teamChange)="handleTeamJoin($event)"></app-user-list>
-
-    </div>
-
-    <div class="below-canvas-container">
-      <!-- Invite Section -->
-      <!-- Pomeriti inv ispod canvasa i dodati spectator mode za usere koji nisu jos usli u tim-->
-      <div class="invite-container">
-        <p>Invite your friends!</p>
-
-        <button (click)="copyInviteLink()">Copy Invite Link</button>
+      <!-- Whiteboard and Settings -->
+      <div class="whiteboard-container">
+        <app-whiteboard></app-whiteboard>
+      
+        <!-- Settings overlay -->
+        <div *ngIf="room?.gameState === 'Waiting'" class="settings-overlay">
+          <app-room-settings [room]="room"></app-room-settings>
+        </div>
       </div>
 
       <!-- Chat -->
@@ -46,9 +45,25 @@
         </app-chat>
       </div>
     </div>
-  </div>
-  <div class="room-footer">
-    <app-user-list class="user-team-list" [users]="users" [team]=" this.redTeam.concat(this.blueTeam)"
-      [currentTeam]="currentTeam" className="Spectators" (teamChange)="handleTeamJoin($event)"></app-user-list>
+
+    <div class="below-canvas-container">
+      <!-- Spectators Section -->
+      <div class="spectator-container">
+        <app-user-list class="user-team-list" [users]="users" [team]=" this.redTeam.concat(this.blueTeam)"
+          [currentTeam]="currentTeam" className="Spectators" (teamChange)="handleTeamJoin($event)"></app-user-list>
+      </div>
+
+      <!-- Start Button -->
+      <div class="start-button-container" *ngIf="!isRoomAdmin && room?.gameState === 'Waiting'">
+        <button (click)="startGame()" class="start-button">Start!</button>
+      </div>
+
+      <!-- Invite Section -->
+      <div class="invite-container">
+        <p>Invite your friends!</p>
+        <button (click)="copyInviteLink()">Copy Invite Link</button>
+      </div>
+
+    </div>
   </div>
 </div>

@@ -13,6 +13,7 @@ export class ChatComponent {
   @Input() messages: any[] = [];
   @Input() chatInput: string = '';
   @Output() messageSent = new EventEmitter<string>();
+  charCount: number = 0;
 
   onSendMessage() {
     if (this.chatInput.trim()) {
@@ -29,6 +30,10 @@ export class ChatComponent {
 
   formatTimestamp(timestamp: number): string {
     const date = new Date(timestamp * 1000); // Assuming timestamp is in seconds
-    return date.toLocaleTimeString(); // You can customize the format as needed
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); // You can customize the format as needed
+  }
+
+  updateCharacterCount(): void {
+    this.charCount = this.chatInput.length;
   }
 }

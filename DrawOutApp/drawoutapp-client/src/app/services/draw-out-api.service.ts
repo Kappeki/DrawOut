@@ -36,7 +36,6 @@ export class DrawOutAPIService {
     return this.http.get<RoomListItem[]>(`${this.API_URL}/Room/allRooms`, { params, withCredentials: true });
   }
 
-
   getMyRooms(): Observable<RoomListItem[]> {
     return this.http.get<RoomListItem[]>(`${this.API_URL}/Room/myRooms`, { withCredentials: true });
   }
@@ -48,6 +47,10 @@ export class DrawOutAPIService {
 
   getRoomByUrl(roomId: string): Observable<Room> {
     return this.http.get<Room>(`${this.API_URL}/Room/${roomId}/get`, { withCredentials: true, responseType: 'text' as 'json' },);
+  }
+
+  updateRoom(room: Room): Observable<any> {
+    return this.http.put(`${this.API_URL}/Room/update`, room, { withCredentials: true });
   }
 
 }

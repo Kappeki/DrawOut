@@ -10,12 +10,15 @@ import { ChatComponent } from '../chat/chat.component';
 import { WhiteboardComponent } from '../whiteboard/whiteboard.component';
 import { Subscription } from 'rxjs';
 import UserListComponent from "../user-list/user-list.component";
-import { combineLatest } from 'rxjs';
+import { RoomSettingsComponent } from '../room-settings/room-settings.component';
 
 @Component({
   selector: 'app-room',
   standalone: true,
-  imports: [CommonModule, FormsModule, ChatComponent, WhiteboardComponent, UserListComponent],
+  imports: [
+    CommonModule, FormsModule, ChatComponent, 
+    WhiteboardComponent, UserListComponent, RoomSettingsComponent
+  ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
 })

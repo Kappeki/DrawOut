@@ -42,6 +42,13 @@ export class RoomSignalService {
     //   this.teams$.next({ teamName, nickname });
     // });
 
+    // this.hubConnection?.on('RoomSettingsChanged', (settingName, settingValue) => {
+    //   if (this.room) {
+    //     this.room[settingName] = settingValue;
+    //     this.connectedRoom$.next(this.room);
+    //   }
+    // });
+
     this.hubConnection?.on('ReceiveTeamSwitch', (oldTeam: string | null, newTeam: string, nickname: string) => {
       this.handleTeamSwitch(oldTeam, newTeam, nickname);
     });
@@ -120,4 +127,5 @@ export class RoomSignalService {
       console.log('Connected room:', room);
     });
   }
+  
 }

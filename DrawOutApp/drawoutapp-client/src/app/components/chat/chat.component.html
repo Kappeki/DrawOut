@@ -2,15 +2,18 @@
     <!-- Display chat messages -->
     <ul class="list-group chat-messages">
         <li *ngFor="let message of messages" class="list-group-item message-item">
-            <strong class="message-sender">{{ message.sender }}:</strong>
-            <span class="message-text">{{ message.content }}</span>
-            <small class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</small>
+            <div class="message-header">
+                <strong class="message-sender">{{ message.sender }}:</strong>
+                <small class="message-timestamp">{{ formatTimestamp(message.timestamp) }}</small>
+            </div>
+            <div class="message-text">{{ message.content }}</div>
         </li>
     </ul>
 
     <!-- Chat input and send button -->
     <div class="input-group chat-input-container">
-        <input type="text" [(ngModel)]="chatInput" (keydown)="handleKeyDown($event)" placeholder="Type your message..."
+        <input type="text" [(ngModel)]="chatInput" (keydown)="handleKeyDown($event)" (input)="updateCharacterCount()" placeholder="Type your message..."
             class="form-control" />
+        <!-- <span class="char-count">{{ charCount }}</span> -->
     </div>
 </div>

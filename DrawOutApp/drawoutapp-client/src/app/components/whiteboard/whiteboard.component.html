@@ -1,12 +1,8 @@
 <div class="canvas-controls-container">
     <canvas id="drawCanvas"></canvas>
 
-    <!-- Game Controls -->
+    <!-- Game Controls doraditi ovo lose napravljno-->
     <div class="game-controls-container">
-        <div class="start-button-container" *ngIf="!isRoomAdmin && !gameStarted" >
-            <button (click)="startGame()" class="start-button">Start!</button>
-        </div>
-
         <div class="game-paint-container" *ngIf="!gameStarted">
             <!-- Color Palette -->
             <div class="color-palette">
