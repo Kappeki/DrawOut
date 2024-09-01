@@ -11,12 +11,13 @@ import { WhiteboardComponent } from '../whiteboard/whiteboard.component';
 import { Subscription } from 'rxjs';
 import UserListComponent from "../user-list/user-list.component";
 import { RoomSettingsComponent } from '../room-settings/room-settings.component';
+import { SessionService } from '../../services/session.service';
 
 @Component({
   selector: 'app-room',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ChatComponent, 
+    CommonModule, FormsModule, ChatComponent,
     WhiteboardComponent, UserListComponent, RoomSettingsComponent
   ],
   templateUrl: './room.component.html',
@@ -41,10 +42,10 @@ export class RoomComponent implements OnInit, OnDestroy {
   chatInput: string = '';
 
   constructor(
-    private apiService: DrawOutAPIService,
     private roomService: RoomSignalService,
     private router: Router,
     private route: ActivatedRoute,
+    private sessionService: SessionService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -54,6 +55,8 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.subscriptions.add(this.roomService.connectedRoom$.subscribe(res => {
       this.room = res!;
       this.roomURL = this.room?.roomURL!;
+      const sessionId = this.sessionService.getSessionId();
+      this.isRoomAdmin = this.room && this.room?.roomAdminId === sessionId;
     }));
 
     this.subscriptions.add(this.roomService.messages$.subscribe(res => {
@@ -62,6 +65,15 @@ export class RoomComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(this.roomService.connectedUsers$.subscribe(res => {
       this.users = res;
+      this.redTeam = [];
+      this.blueTeam = [];
+      this.users.forEach(user => {
+        if (user.roles?.includes('Red')) {
+          this.redTeam.push(user.nickname);
+        } else if (user.roles?.includes('Blue')) {
+          this.blueTeam.push(user.nickname);
+        }
+      });
     }));
 
     this.subscriptions.add(this.roomService.teams$.subscribe(res => {
@@ -78,6 +90,22 @@ export class RoomComponent implements OnInit, OnDestroy {
           this.redTeam.push(res.nickname);
         } else if (res.newTeam === 'Blue') {
           this.blueTeam.push(res.nickname);
+        }
+      }
+    }));
+
+    this.subscriptions.add(this.roomService.roomSettings$.subscribe(setting => {
+      if (setting && this.room) {
+        switch (setting.settingName) {
+          case 'RoundTime':
+            this.room.roundTime = setting.settingValue;
+            break;
+          case 'SelectedWordPack':
+            this.room.selectedWordPack = setting.settingValue;
+            break;
+          case 'CustomWords':
+            this.room.customWords = setting.settingValue.split(',');
+            break;
         }
       }
     }));
@@ -123,5 +151,11 @@ export class RoomComponent implements OnInit, OnDestroy {
   handleTeamJoin(event: { oldTeam: string | null, newTeam: string }) {
     this.currentTeam = event.newTeam;
     this.roomService.switchTeam(this.roomURL, event.oldTeam, event.newTeam);
+  }
+
+  handleSettingChange(event: { settingName: string, settingValue: any }) {
+    if (this.isRoomAdmin && this.room) {
+      this.roomService.changeRoomSettings(this.roomURL, event.settingName, event.settingValue);
+    }
   }
 }

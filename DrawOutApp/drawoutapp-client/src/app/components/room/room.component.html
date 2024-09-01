@@ -21,7 +21,7 @@
       <!-- Teams -->
       <div class="teams-container">
         <!-- Red Team -->
-        <app-user-list class="user-team-list" [users]="users" [team]="redTeam" [currentTeam]="currentTeam" 
+        <app-user-list class="user-team-list" [users]="users" [team]="redTeam" [currentTeam]="currentTeam"
           className="Red" (teamChange)="handleTeamJoin($event)"></app-user-list>
         <!-- Blue Team -->
         <app-user-list class="user-team-list" [users]="users" [team]="blueTeam" [currentTeam]="currentTeam"
@@ -31,10 +31,11 @@
       <!-- Whiteboard and Settings -->
       <div class="whiteboard-container">
         <app-whiteboard></app-whiteboard>
-      
+
         <!-- Settings overlay -->
         <div *ngIf="room?.gameState === 'Waiting'" class="settings-overlay">
-          <app-room-settings [room]="room"></app-room-settings>
+          <app-room-settings [room]="room" [isRoomAdmin]="isRoomAdmin"
+            (settingChanged)="handleSettingChange($event)"></app-room-settings>
         </div>
       </div>
 

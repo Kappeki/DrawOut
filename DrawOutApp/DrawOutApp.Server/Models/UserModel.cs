@@ -9,6 +9,7 @@ namespace DrawOutApp.Server.Models
     {
         public string? Nickname { get; set; }
         public string? Icon { get; set; }
+        public List<string>? Roles { get; set; }
     }
     public class UserModel
     {

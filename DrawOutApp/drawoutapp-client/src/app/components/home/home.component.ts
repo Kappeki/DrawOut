@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DrawOutAPIService } from '../../services/draw-out-api.service';
+import { SessionService } from '../../services/session.service';
 
 @Component({
   selector: 'app-home',
@@ -32,7 +33,7 @@ export class HomeComponent implements OnInit {
 
   //home compoentn i room component bind preko pass
   //room list component i room component bind preko roomid i pass
-  constructor(private apiService: DrawOutAPIService, private router: Router) { }
+  constructor(private apiService: DrawOutAPIService, private router: Router, private sessionService: SessionService) { }
 
   ngOnInit(): void {
     this.apiService.getSession().subscribe({
@@ -41,6 +42,7 @@ export class HomeComponent implements OnInit {
           this.nicknameText = session.nickname;
           this.selectedIcon = session.icon;
           this.sessionExists = true;
+          this.sessionService.setSessionId(session._sessionKey);
         }
       },
       error: (error: any) => {
@@ -74,6 +76,7 @@ export class HomeComponent implements OnInit {
     } else {
       this.apiService.createUser(userPrefs).subscribe({
         next: (response: any) => {
+          this.sessionService.setSessionId(response._sessionKey);
           this.router.navigate(['/rooms']);
           console.log('User created');
         },

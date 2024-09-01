@@ -70,7 +70,11 @@ namespace DrawOutApp.Server.Repositories
         {
             var objId = ObjectId.Parse(id);
             var filter = Builders<Room>.Filter.Eq("_id", objId);
-            await UpdateRoomAsync(filter, Builders<Room>.Update.Inc(r => r.PlayerCount, -1));
+            var room = await _roomsCollection.Find(filter).FirstOrDefaultAsync();
+            if (room != null && room.PlayerCount > 0)
+            {
+                await UpdateRoomAsync(filter, Builders<Room>.Update.Inc(r => r.PlayerCount, -1));
+            }
             await _database.SetRemoveAsync($"users-in-room:{id}", sessionId);
         }
         public async Task<List<string>> GetPlayerSetAsync(string id)

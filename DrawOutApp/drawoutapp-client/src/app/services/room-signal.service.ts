@@ -20,6 +20,7 @@ export class RoomSignalService {
   public connectedUsers$ = new BehaviorSubject<User[]>([]);
   public connectedRoom$ = new BehaviorSubject<Room | null>(null);
   public teams$ = new BehaviorSubject<any>([]);
+  public roomSettings$ = new BehaviorSubject<{ settingName: string, settingValue: any } | null>(null);
 
   public messages: any[] = [];
   public users: User[] = [];
@@ -37,20 +38,11 @@ export class RoomSignalService {
     this.hubConnection?.on('ConnectedRoom', (room: Room) => {
       this.connectedRoom$.next(room);
     });
-
-    // this.hubConnection?.on('ReceiveTeamJoin', (teamName: string, nickname: string) => {
-    //   this.teams$.next({ teamName, nickname });
-    // });
-
-    // this.hubConnection?.on('RoomSettingsChanged', (settingName, settingValue) => {
-    //   if (this.room) {
-    //     this.room[settingName] = settingValue;
-    //     this.connectedRoom$.next(this.room);
-    //   }
-    // });
-
     this.hubConnection?.on('ReceiveTeamSwitch', (oldTeam: string | null, newTeam: string, nickname: string) => {
       this.handleTeamSwitch(oldTeam, newTeam, nickname);
+    });
+    this.hubConnection.on('RoomSettingsChanged', (settingName: string, settingValue: any) => {
+      this.roomSettings$.next({ settingName, settingValue });
     });
   }
 
@@ -91,11 +83,6 @@ export class RoomSignalService {
       .catch(err => console.error(err));
   }
 
-  public async joinTeam(roomURL: string, teamName: string) {
-    return await this.hubConnection?.invoke('JoinTeam', roomURL, teamName)
-      .catch(err => console.error(err));
-  }
-
   public async switchTeam(roomURL: string, oldTeam: string | null, newTeam: string) {
     return await this.hubConnection?.invoke('SwitchTeam', roomURL, oldTeam, newTeam)
       .catch(err => console.error(err));
@@ -108,6 +95,11 @@ export class RoomSignalService {
       this.teams = this.teams.filter(member => !(member.teamName === 'Blue' && member.nickname === nickname));
     }
     this.teams$.next({ oldTeam, newTeam, nickname });
+  }
+
+  public async changeRoomSettings(roomURL: string, settingName: string, settingValue: any) {
+    return await this.hubConnection?.invoke('ChangeRoomSettings', roomURL, settingName, settingValue)
+      .catch(err => console.error(err));
   }
 
   public onReceiveMessage(): void {
@@ -127,5 +119,5 @@ export class RoomSignalService {
       console.log('Connected room:', room);
     });
   }
-  
+
 }

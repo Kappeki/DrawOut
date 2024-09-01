@@ -13,6 +13,7 @@ namespace DrawOutApp.Server.Entities
         public int BlueTeamScore { get; set; }
         public int RedTeamScore { get; set; }
         public int TotalRounds { get; set; }
+        public List<string>? PainterOrder { get; set; }
         public int CurrentRound { get; set; }
         public string? CurrentPainter { get; set; }
         public string? SelectedWord { get; set; }

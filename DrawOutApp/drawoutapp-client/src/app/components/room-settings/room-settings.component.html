@@ -9,7 +9,8 @@
                 <img src="path/to/icon.png" alt="Icon" class="setting-icon">
                 Draw Time
             </span>
-            <select *ngIf="room" [(ngModel)]="room.roundTime" (ngModelChange)="updateDrawTime($event)" class="setting-select">
+            <select *ngIf="room" [(ngModel)]="room.roundTime" (ngModelChange)="updateDrawTime($event)"
+                [disabled]="!isRoomAdmin" class="setting-select">
                 <option value="40">40 seconds</option>
                 <option value="60">60 seconds</option>
                 <option value="80">80 seconds</option>
@@ -21,7 +22,8 @@
                 <img src="path/to/icon.png" alt="Icon" class="setting-icon">
                 Word Pack
             </span>
-            <select *ngIf="room" [(ngModel)]="room.selectedWordPack" (ngModelChange)="updateWordPack($event)" class="setting-select">
+            <select *ngIf="room" [(ngModel)]="room.selectedWordPack" (ngModelChange)="updateWordPack($event)"
+                [disabled]="!isRoomAdmin" class="setting-select">
                 <option value="default">Default</option>
                 <option value="custom1">Nesto nesto</option>
                 <option value="custom2">Nesto 2</option>
@@ -49,7 +51,10 @@
         <!-- Custom Words Section as a Column -->
         <div class="setting-item-column">
             <span class="setting-label">Custom Words</span>
-            <textarea *ngIf="room" [(ngModel)]="room.customWords" (ngModelChange)="updateCustomWords($event)" placeholder="Minimum of 10 words. 1-32 characters per word! 20000 characters maximum. Separated by a , (comma)" class="setting-textarea"></textarea>
+            <textarea *ngIf="room" [(ngModel)]="room.customWords" (ngModelChange)="updateCustomWords($event)"
+                [disabled]="!isRoomAdmin"
+                placeholder="Minimum of 10 words. 1-32 characters per word! 20000 characters maximum. Separated by a , (comma)"
+                class="setting-textarea"></textarea>
         </div>
     </div>
 </div>

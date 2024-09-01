@@ -222,23 +222,23 @@ namespace DrawOutApp.Server.Services
                     if (!roomModel.CustomWords.SequenceEqual(roomEntity.CustomWords!))
                         updates.Add(update.Set(r => r.CustomWords, roomModel.CustomWords));
                 }
-
                 if (roomModel.SelectedWordPack != null)
                 {
                     if (roomModel.SelectedWordPack != roomEntity.SelectedWordPack)
                         updates.Add(update.Set(r => r.SelectedWordPack, roomModel.SelectedWordPack));
 
                 }
-
                 if (roomModel.RoundTime != (int)roomEntity.RoundTime)
-                    updates.Add(
-                        update.Set(
-                            r => r.RoundTime, 
-                            Enum.Parse(Enum.GetValues(typeof(RoundTime)).GetType(), roomModel.RoundTime.ToString())
-                            )
-                        );
+                {
+                    updates.Add(update.Set(r => r.RoundTime, (RoundTime)roomModel.RoundTime));
+                }
 
-                await _roomRepository.UpdateRoomAsync(filter, Builders<Room>.Update.Set(r => r, roomEntity)); 
+                if (updates.Count > 0)
+                {
+                    var combinedUpdate = update.Combine(updates);
+                    await _roomRepository.UpdateRoomAsync(filter, combinedUpdate);
+                }
+
                 return true;
             }
             catch (Exception ex)
