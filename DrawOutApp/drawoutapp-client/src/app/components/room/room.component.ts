@@ -12,13 +12,15 @@ import { Subscription } from 'rxjs';
 import UserListComponent from "../user-list/user-list.component";
 import { RoomSettingsComponent } from '../room-settings/room-settings.component';
 import { SessionService } from '../../services/session.service';
+import { GameComponent } from '../game/game.component';
 
 @Component({
   selector: 'app-room',
   standalone: true,
   imports: [
     CommonModule, FormsModule, ChatComponent,
-    WhiteboardComponent, UserListComponent, RoomSettingsComponent
+    WhiteboardComponent, UserListComponent, RoomSettingsComponent,
+    GameComponent
   ],
   templateUrl: './room.component.html',
   styleUrl: './room.component.css'
@@ -37,6 +39,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   isRoomAdmin: boolean = false;
   gameStarted: boolean = false;
   currentRound: number = 1;
+  totalRounds: number = 8;
 
   currentTeam: string | null = null;
   chatInput: string = '';
@@ -147,6 +150,11 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   copyInviteLink() { }
+
+  handleRoundChange(event: { newRound: number, totalRounds: number } ): void {
+    this.currentRound = event.newRound;
+    this.totalRounds = event.totalRounds;
+  }
 
   handleTeamJoin(event: { oldTeam: string | null, newTeam: string }) {
     this.currentTeam = event.newTeam;

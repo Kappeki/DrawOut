@@ -10,7 +10,7 @@
     </div>
 
     <div *ngIf="!gameStarted" class="room-round">
-      <p>Round {{ currentRound }} of {{ 8 }}</p>
+      <p>Round {{ currentRound }} of {{ totalRounds }}</p>
     </div>
   </div>
 
@@ -30,10 +30,10 @@
 
       <!-- Whiteboard and Settings -->
       <div class="whiteboard-container">
-        <app-whiteboard></app-whiteboard>
+        <app-game *ngIf="room?.gameState === 'Waiting'" (roundChange)="handleRoundChange($event)"></app-game>
 
         <!-- Settings overlay -->
-        <div *ngIf="room?.gameState === 'Waiting'" class="settings-overlay">
+        <div *ngIf="room?.gameState !== 'Waiting'" class="settings-overlay">
           <app-room-settings [room]="room" [isRoomAdmin]="isRoomAdmin"
             (settingChanged)="handleSettingChange($event)"></app-room-settings>
         </div>

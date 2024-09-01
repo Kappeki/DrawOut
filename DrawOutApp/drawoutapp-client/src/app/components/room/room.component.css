@@ -49,8 +49,6 @@
     width: 60%;
     height: 550px;
     margin: 0 10px;
-    border: 2px solid #000;
-    border-radius: 8px;
     position: relative;
 }
 
@@ -64,7 +62,7 @@
     justify-content: center;
     /* background-color: rgba(0, 0, 0, 0.5); */
     z-index: 10;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .chat-container {

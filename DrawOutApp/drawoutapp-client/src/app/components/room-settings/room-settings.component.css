@@ -1,20 +1,23 @@
 .settings-container {
     background-color: #333;
     color: white;
-    padding: 20px;
     border-radius: 8px;
     height: 100%;
+    margin-top: 0px; /* Ovo stavlja settings da bude unutar canvas okvira */ 
 }
 
 .settings-header h2 {
     text-align: center;
     margin-bottom: 20px;
+    margin-top: 0px;
     font-size: 24px;
+    padding: 20px;
 }
 
 .settings-rows {
     display: flex;
     flex-direction: column;
+    padding: 20px;
     gap: 20px;
 }
 

@@ -1,0 +1,32 @@
+<div class="game-container">
+    <div class="score-word-container">
+        <div class="score-container redTeam">
+            <span>Red Team: {{game?.redScore}}</span>
+        </div>
+    
+        <div class="word-container">
+            <span>{{game?.selectedWord}}</span>
+        </div>
+    
+        <div class="score-container blueTeam">
+            <span>Blue Team: {{game?.blueScore}}</span>
+        </div>
+    </div>
+
+    <div class="whiteboard-wrapper">
+        <!-- Timer and Round Info -->
+        <div class="overlay">
+            <div class="time-container">
+                <span>{{game?.mainTimer}}</span>
+            </div>
+            <div class="round-container">
+                <span>Round {{game?.currentRound}} of {{game?.totalRounds}}</span>
+            </div>
+        </div>
+
+        <!-- Whiteboard Component -->
+        <app-whiteboard></app-whiteboard>
+    </div>
+    <!-- Mozda crtanje, boje itd da bude ovde a ne u whiteboard -->
+</div>
+  

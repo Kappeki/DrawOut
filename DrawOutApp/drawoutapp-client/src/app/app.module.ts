@@ -10,6 +10,7 @@ import { RoomComponent } from './components/room/room.component';
 import { WhiteboardComponent } from './components/whiteboard/whiteboard.component';
 import { FormsModule } from '@angular/forms';
 import { RoomSettingsComponent } from './components/room-settings/room-settings.component';
+import { GameComponent } from './components/game/game.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { RoomSettingsComponent } from './components/room-settings/room-settings.
     CommonModule,
     WhiteboardComponent,
     RoomSettingsComponent,
+    GameComponent,
     FormsModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
