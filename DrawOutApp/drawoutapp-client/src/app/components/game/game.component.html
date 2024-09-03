@@ -1,13 +1,27 @@
 <div class="game-container">
+
+    <ng-template #wordSelectionModal>
+        <div mat-dialog-content>
+            <h2>Select a Word</h2>
+            <div class="word-options">
+                <button mat-button *ngFor="let word of selectedWords" (click)="selectWord(word)">
+                    {{ word }}
+                </button>
+            </div>
+        </div>
+    </ng-template>
+
+
     <div class="score-word-container">
         <div class="score-container redTeam">
             <span>Red Team: {{game?.redScore}}</span>
         </div>
-    
+
         <div class="word-container">
-            <span>{{game?.selectedWord}}</span>
+            <span *ngIf="this.drawEnabled && game?.selectedWord">{{game?.selectedWord}}</span>
+            <span *ngIf="!this.drawEnabled">Guess the word! Hint : {{this.hint}}</span>
         </div>
-    
+
         <div class="score-container blueTeam">
             <span>Blue Team: {{game?.blueScore}}</span>
         </div>
@@ -17,7 +31,8 @@
         <!-- Timer and Round Info -->
         <div class="overlay">
             <div class="time-container">
-                <span>{{game?.mainTimer}}</span>
+                <span *ngIf="isInProgressState">{{game?.mainTimer}}</span>
+                <span *ngIf="isStealState">{{game?.stealTimer}}</span>
             </div>
             <div class="round-container">
                 <span>Round {{game?.currentRound}} of {{game?.totalRounds}}</span>
@@ -25,8 +40,7 @@
         </div>
 
         <!-- Whiteboard Component -->
-        <app-whiteboard></app-whiteboard>
+        <!-- <app-whiteboard></app-whiteboard> -->
     </div>
     <!-- Mozda crtanje, boje itd da bude ovde a ne u whiteboard -->
 </div>
-  

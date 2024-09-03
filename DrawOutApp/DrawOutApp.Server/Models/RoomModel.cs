@@ -15,7 +15,7 @@ namespace DrawOutApp.Server.Models
         public string RoomId { get; init; } = null!;  // Read-only, set during mapping
         public string RoomName { get; set; } = null!;
         public bool HasPassword { get; set; }         // Indicates if the room has a password
-        public string GameState { get; set; } = null!;
+        public string RoomState { get; set; } = null!;
         public int PlayerCount { get; set; }
     }
 
@@ -29,7 +29,7 @@ namespace DrawOutApp.Server.Models
         public List<string>? Players { get; set; }
         public List<string>? CustomWords { get; set; }
         public string? SelectedWordPack { get; set; }
-        public string GameState { get; set; } = null!;
+        public string RoomState { get; set; } = null!;
         public int RoundTime { get; set; }
         public DateTime TimeElapsed { get; set; }
     }

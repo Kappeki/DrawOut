@@ -12,6 +12,7 @@ namespace DrawOutApp.Server.Repositories
     public class RoomRepository : IRoomRepo
     {
         private readonly IMongoCollection<Room> _roomsCollection;
+        private readonly IMongoCollection<WordPack> _wordPacksCollection;
         private readonly IMongoClient _mongoClient;
 
         private readonly ConnectionMultiplexer _redis;
@@ -21,12 +22,13 @@ namespace DrawOutApp.Server.Repositories
             var database = mongoClient.GetDatabase(mongoSettings.DatabaseName);
             _mongoClient = mongoClient;
             _roomsCollection = database.GetCollection<Room>(mongoSettings.RoomsCollectionName);
+            _wordPacksCollection = database.GetCollection<WordPack>(mongoSettings.WordPacksCollectionName);
 
             _redis = ConnectionMultiplexer.Connect(redisSettings.ConnectionString);
             _database = _redis.GetDatabase();
 
 
-            CreateIndexesAsync();
+            //CreateIndexesAsync();
         }
         private async Task CreateIndexesAsync()
         {
@@ -44,7 +46,7 @@ namespace DrawOutApp.Server.Repositories
             
             //da filtrira sobe koje nisu in-game
             await _roomsCollection.Indexes.CreateOneAsync(
-                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.GameState)));
+                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomState)));
             
             await _roomsCollection.Indexes.CreateOneAsync(
                 new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.Password == null)));
@@ -55,6 +57,23 @@ namespace DrawOutApp.Server.Repositories
             //moze da se doda index da expiruje soba to cemo kasnije da vidimo
 
         }
+
+        public async Task<List<string>> GetAllPackNamesAsync()
+        {
+            var packs = await _wordPacksCollection.Find(Builders<WordPack>.Filter.Empty)
+                                                 .Project(p => p.Name)
+                                                 .ToListAsync();
+            return packs;
+        }
+
+        // Method to retrieve words by pack name
+        public async Task<List<string>> GetWordsByPackNameAsync(string packName)
+        {
+            var filter = Builders<WordPack>.Filter.Eq(p => p.Name, packName);
+            var pack = await _wordPacksCollection.Find(filter).FirstOrDefaultAsync();
+            return pack?.Words ?? new List<string>();
+        }
+
         public IClientSessionHandle GetSession()
         {
             return _mongoClient.StartSession();

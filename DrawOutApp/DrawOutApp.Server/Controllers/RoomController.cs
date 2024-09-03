@@ -41,6 +41,33 @@ namespace DrawOutApp.Server.Controllers
 
             return Ok(new { roomUrl = room!.RoomURL });
         }
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet]
+        [Route("GetAllWordPacks")]
+        public async Task<ActionResult> GetAllWordPacks()
+        {
+            var wordPacks = await _roomService.GetAllWordPacksAsync();
+            if (wordPacks == null)
+            {
+                return NotFound($"No word packs found.\n Error");
+            }
+            return Ok(wordPacks);
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet]
+        [Route("GetWordsByPackName")]
+        public async Task<ActionResult> GetWordsByPackName([FromQuery] string packName)
+        {
+            var words = await _roomService.GetWordsByPackNameAsync(packName);
+            if (words == null)
+            {
+                return NotFound($"No words found for pack {packName}.\n");
+            }
+            return Ok(words);
+        }
 
         /// <summary>
         /// METODE KORISCENJE ISKLJUCIVO ZA TESTIRANJE

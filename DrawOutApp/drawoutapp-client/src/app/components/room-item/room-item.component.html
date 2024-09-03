@@ -14,7 +14,7 @@
 <div class="room-item">
     <div class="room-item-cell">{{ room.roomName }}</div>
     <div class="room-item-cell">{{ room.playerCount }}/8</div>
-    <div class="room-item-cell">{{ room.gameState }}</div>
+    <div class="room-item-cell">{{ room.roomState }}</div>
     <div class="room-item-cell">
         <span *ngIf="room.hasPassword">🔒</span>
         <span *ngIf="!room.hasPassword">🔓</span>

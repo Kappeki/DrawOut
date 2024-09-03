@@ -1,19 +1,27 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DrawOutApp.Server.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace DrawOutApp.Server.Models
 {
+    public class GameRound
+    {
+        public string _gameId { get; set; } = null!;
+        public GameState GameState { get; set; }
+        public int BlueScore { get; set; }
+        public int RedScore { get; set; }
+        public int CurrentRound { get; set; }
+        public string? CurrentPainter { get; set; }
+        public string? SelectedWord { get; set; }
+        public int MainTimer { get; set; }
+        public int StealTimer { get; set; }
+    }
+
     public class GameModel
     {
-        public string? RoomId { get; set; }
-        public string? CacheKey { get; set; }
+        public string _id { get; set; } = null!;
+        public string RoomId { get; set; } = null!;
         public int TotalRounds { get; set; }
-        //public List<RoundModel>? Rounds { get; set; }
-        public int CurrentRoundIndex { get; set; }
-        //public RoundModel? CurrentRound => Rounds?[CurrentRoundIndex];
-
-        public GameModel()
-        {
-            //Rounds = new List<RoundModel>(TotalRounds);
-        }
+        public List<string>? PainterOrder { get; set; }
+        public Dictionary<string, string>? TeamLeaders { get; set; }
     }
 }

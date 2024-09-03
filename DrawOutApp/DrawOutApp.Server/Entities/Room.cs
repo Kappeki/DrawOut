@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace DrawOutApp.Server.Entities
 {
-    public enum GameState { Waiting, InGame }
+    public enum RoomState { Waiting, InGame }
     public enum RoundTime { Short = 40, Medium = 60, Long = 80 }
     [BsonIgnoreExtraElements]
     public class Room
@@ -27,12 +27,11 @@ namespace DrawOutApp.Server.Entities
         public List<string>? CustomWords { get; set; }
 
         [BsonElement("wordPack")]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string? SelectedWordPack { get; set; }
 
-        [BsonElement("gameState")]
+        [BsonElement("roomState")]
         [BsonRepresentation(BsonType.String)]
-        public GameState GameState { get; set; }
+        public RoomState RoomState { get; set; }
 
         [BsonElement("roundTime")]
         public RoundTime RoundTime { get; set; } //selektuje room admin
@@ -47,7 +46,7 @@ namespace DrawOutApp.Server.Entities
         {
             _id = MongoDB.Bson.ObjectId.GenerateNewId();
             PlayersSetKey = $"users-in-room:{ObjectId}";
-            GameState = GameState.Waiting;
+            RoomState = RoomState.Waiting;
             RoundTime = RoundTime.Medium;
             TimeElapsed = DateTime.UtcNow;
         }

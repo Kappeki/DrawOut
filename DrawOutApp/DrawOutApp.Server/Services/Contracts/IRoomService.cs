@@ -18,8 +18,11 @@ namespace DrawOutApp.Server.Services.Contracts
         Task<Result<List<RoomListItem>?,string>> GetAllRoomsAsync(string sessionId, bool? isAscending = null, bool? isProtected = null);
         Task<Result<List<RoomListItem>?, string>> GetMyRoomsAsync(string sessionId);
         Task<Result<bool,string>> UpdateRoomAsync(RoomModel roomModel);
+        Task UpdateRoomStateAsync(string roomId, RoomState roomState);
         Task DeleteRoomAsync(string roomId);
         Task<string?> GetIdFromURL(string roomURL);
         Task<Result<List<string>?, string>> GetPlayerIdsAsync(string roomId);
+        Task<List<string>> GetAllWordPacksAsync();
+        Task<List<string>> GetWordsByPackNameAsync(string packName);
     }
 }

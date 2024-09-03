@@ -70,6 +70,8 @@ export class RoomSettingsComponent {
   customWords: string = '';
   useCustomWords: boolean = false;
 
+  wordPacks: string[] = [];
+
   constructor(private apiService: DrawOutAPIService) { }
 
   ngOnInit(): void {
@@ -79,6 +81,10 @@ export class RoomSettingsComponent {
       this.customWords = this.room.customWords?.join(', ') || '';
       this.useCustomWords = !!this.room.customWords?.length;
     }
+
+    this.apiService.getAllWordPacks().subscribe((packs) => {
+      this.wordPacks = packs;
+    });
   }
 
   updateDrawTime(newDrawTime: number) {

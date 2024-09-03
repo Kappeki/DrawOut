@@ -1,6 +1,6 @@
 <div class="chat-container">
     <!-- Display chat messages -->
-    <ul class="list-group chat-messages">
+    <ul *ngIf="enableGuessing" class="list-group chat-messages">
         <li *ngFor="let message of messages" class="list-group-item message-item">
             <div class="message-header">
                 <strong class="message-sender">{{ message.sender }}:</strong>
@@ -12,8 +12,8 @@
 
     <!-- Chat input and send button -->
     <div class="input-group chat-input-container">
-        <input type="text" [(ngModel)]="chatInput" (keydown)="handleKeyDown($event)" (input)="updateCharacterCount()" placeholder="Type your message..."
-            class="form-control" />
+        <input type="text" [(ngModel)]="chatInput" (keydown)="handleKeyDown($event)" (input)="updateCharacterCount()"
+            placeholder="Type your message..." class="form-control" [disabled]="!enableGuessing" />
         <!-- <span class="char-count">{{ charCount }}</span> -->
     </div>
 </div>

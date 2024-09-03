@@ -32,6 +32,7 @@ builder.Services.AddCors(options =>
 #region Mappers
 builder.Services.AddAutoMapper(typeof(UserMapper));
 builder.Services.AddAutoMapper(typeof(RoomMapper));
+builder.Services.AddAutoMapper(typeof(GameMapper));
 #endregion
 
 #region MongoDB
@@ -48,7 +49,6 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 });
 
 builder.Services.AddTransient<IRoomRepo, RoomRepository>();
-
 builder.Services.AddScoped<IRoomService, RoomService>();
 
 
@@ -93,7 +93,6 @@ builder.Services.AddTransient<IUserRepo, UserRepository>();
 
 //services
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IGameService, GameService>();
 
 #endregion
@@ -121,6 +120,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapHub<RoomHub>("/roomhub");
+app.MapHub<GameHub>("/gamehub");
 
 app.MapFallbackToFile("/index.html");
 

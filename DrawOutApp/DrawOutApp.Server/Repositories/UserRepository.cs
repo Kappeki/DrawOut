@@ -84,25 +84,6 @@ namespace DrawOutApp.Server.Repositories
 
             string rolesSerialized = hashEntries.FirstOrDefault(x => x.Name == "Roles").Value!;
             user.DeserializeRoles(rolesSerialized);
-            /*foreach (var entry in hashEntries)
-            {
-                string propName = entry.Name.ToString();
-                PropertyInfo? propInfo = typeof(User).GetProperty(propName);
-                
-                if (propInfo != null && propInfo.CanWrite)
-                {
-                    if (propInfo.PropertyType == typeof(string))
-                    {
-                       
-                        propInfo.SetValue(user, entry.Value.ToString());
-                    }
-                    else
-                    {
-                        object? propValue = JsonConvert.DeserializeObject(entry.Value.ToString(), propInfo.PropertyType);
-                        propInfo.SetValue(user, propValue);
-                    }
-                }
-            }*/
             return user;
         }
 

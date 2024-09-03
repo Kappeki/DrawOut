@@ -8,7 +8,7 @@ import { __values } from 'tslib';
 @Injectable({
   providedIn: 'root'
 })
-export class RoomSignalService {
+export class RoomHubService {
 
   private readonly API_URL = 'https://localhost:7041';
   public hubConnection: HubConnection = new HubConnectionBuilder()
@@ -41,7 +41,7 @@ export class RoomSignalService {
     this.hubConnection?.on('ReceiveTeamSwitch', (oldTeam: string | null, newTeam: string, nickname: string) => {
       this.handleTeamSwitch(oldTeam, newTeam, nickname);
     });
-    this.hubConnection.on('RoomSettingsChanged', (settingName: string, settingValue: any) => {
+    this.hubConnection?.on('RoomSettingsChanged', (settingName: string, settingValue: any) => {
       this.roomSettings$.next({ settingName, settingValue });
     });
   }
@@ -102,22 +102,8 @@ export class RoomSignalService {
       .catch(err => console.error(err));
   }
 
-  public onReceiveMessage(): void {
-    this.hubConnection?.on('ReceiveMessage', (sender, content, timestamp) => {
-      console.log(`Message from ${sender}: ${content} at ${timestamp}`);
-    });
+  public async notifyGameStart(roomURL: string) {
+    return await this.hubConnection?.invoke('NotifyGameStart', roomURL)
+      .catch(err => console.error(err));
   }
-
-  public onConnectedUsers(): void {
-    this.hubConnection?.on('ConnectedUsers', (users) => {
-      console.log('Connected users:', users);
-    });
-  }
-
-  public onConnectedRoom(): void {
-    this.hubConnection?.on('ConnectedRoom', (room) => {
-      console.log('Connected room:', room);
-    });
-  }
-
 }

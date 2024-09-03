@@ -11,6 +11,11 @@ import { WhiteboardComponent } from './components/whiteboard/whiteboard.componen
 import { FormsModule } from '@angular/forms';
 import { RoomSettingsComponent } from './components/room-settings/room-settings.component';
 import { GameComponent } from './components/game/game.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatOptionModule } from '@angular/material/core';
 
 @NgModule({
   declarations: [
@@ -27,7 +32,12 @@ import { GameComponent } from './components/game/game.component';
     WhiteboardComponent,
     RoomSettingsComponent,
     GameComponent,
-    FormsModule
+    FormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatLabel,
+    MatOptionModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [],

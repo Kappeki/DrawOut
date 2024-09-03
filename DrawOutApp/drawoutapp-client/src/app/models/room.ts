@@ -3,7 +3,7 @@ export class RoomListItem {
         public roomId: string,
         public roomName: string,
         public hasPassword: boolean,
-        public gameState: string,
+        public roomState: string,
         public playerCount: number
     ) {
     }
@@ -20,7 +20,7 @@ export interface Room {
     players?: string[];
     customWords?: string[];
     selectedWordPack?: string;
-    gameState?: string;
+    roomState?: string;
     roundTime: number;
     timeElapsed: Date;
 }

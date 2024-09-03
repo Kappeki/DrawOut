@@ -6,6 +6,8 @@ namespace DrawOutApp.Server.Repositories.Contracts
 {
     public interface IRoomRepo
     {
+        Task<List<string>> GetAllPackNamesAsync();
+        Task<List<string>> GetWordsByPackNameAsync(string packName);
         Task<Room> CreateRoomAsync(Room room);
         Task<Room?> GetRoomAsync(string roomId);
         IClientSessionHandle GetSession();

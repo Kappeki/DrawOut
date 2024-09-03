@@ -53,4 +53,12 @@ export class DrawOutAPIService {
     return this.http.put(`${this.API_URL}/Room/update`, room, { withCredentials: true });
   }
 
+  getAllWordPacks(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.API_URL}/Room/GetAllWordPacks`, { withCredentials: true });
+  }
+  getWordsByPackName(packName: string): Observable<string[]> {
+    const params = new HttpParams().set('packName', packName);
+    return this.http.get<string[]>(`${this.API_URL}/Room/GetWordsByPackName`, { params });
+  }
+
 }

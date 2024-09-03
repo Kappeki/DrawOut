@@ -1,9 +1,10 @@
 ﻿using DrawOutApp.Server.Entities;
+using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Settings;
 using Newtonsoft.Json;
 using StackExchange.Redis;
-using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace DrawOutApp.Server.Repositories
 {
@@ -16,28 +17,132 @@ namespace DrawOutApp.Server.Repositories
             _redis = ConnectionMultiplexer.Connect(settings.ConnectionString);
             _database = _redis.GetDatabase();
         }
-
-        public ITransaction BeginTransaction()
-        {
-            return _database.CreateTransaction();
-        }
-
         public async Task<Game?> GetGameAsync(string gameId)
         {
             var hashEntries = await _database.HashGetAllAsync(gameId);
-            throw new NotImplementedException();
+            if (hashEntries.Length == 0)
+            {
+                return null;
+            }
+
+            var game = new Game
+            {
+                _id = gameId,
+                RoomId = hashEntries.FirstOrDefault(x => x.Name == "RoomId").Value!,
+                GameState = Enum.Parse<GameState>(hashEntries.FirstOrDefault(x => x.Name == "GameState").Value!),
+                BlueScore = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "BlueScore").Value!),
+                RedScore = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "RedScore").Value!),
+                TotalRounds = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "TotalRounds").Value!),
+                CurrentRound = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "CurrentRound").Value!),
+                CurrentPainter = hashEntries.FirstOrDefault(x => x.Name == "CurrentPainter").Value.ToString(),
+                SelectedWord = hashEntries.FirstOrDefault(x => x.Name == "SelectedWord").Value,
+                TeamLeaders = hashEntries.FirstOrDefault(x => x.Name == "TeamLeaders")
+                                .Value
+                                .ToString()
+                                .Split(',')
+                                .Select(s => s.Split(':'))
+                                .ToDictionary(split => split[0], split => split[1]),
+                MainTimer = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "MainTimer").Value!),
+                StealTimer = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "StealTimer").Value!)
+            };
+            game.PainterOrder = (await _database.SetMembersAsync($"users-in-room:{game.RoomId}")).Select(x => x.ToString()).ToList();
+
+            return game;
         }
-        public async Task<bool> SaveGameAsync(Game game, TimeSpan? expiry)
+        public async Task<string> SaveGameAsync(Game game, TimeSpan? expiry = null)
         {
             if (game == null) throw new ArgumentNullException(nameof(game));
+
+            if(game.RoomId == null) throw new ArgumentException("RoomId must be set.", nameof(game.RoomId));
+
             game._id = $"game:{game.RoomId}";
 
-            //NOT IMPLEMENTED//
+            // Serialize the complex properties
+            
+            var teamLeadersSerialized = game.TeamLeaders != null ? string
+                .Join(",", game.TeamLeaders.Select(kv => $"{kv.Key}:{kv.Value}")) : string.Empty;
+
+
+            await _database.HashSetAsync(game._id,
+            [
+                new HashEntry("RoomId", game.RoomId ?? string.Empty),
+                new HashEntry("GameState", game.GameState.ToString()),
+                new HashEntry("BlueScore", game.BlueScore.ToString()),
+                new HashEntry("RedScore", game.RedScore.ToString()),
+                new HashEntry("TotalRounds", game.TotalRounds.ToString()),
+                new HashEntry("PainterOrder", $"painter-order:{game.RoomId}"),
+                new HashEntry("CurrentRound", game.CurrentRound.ToString()),
+                new HashEntry("CurrentPainter", game.CurrentPainter ?? string.Empty),
+                new HashEntry("SelectedWord", game.SelectedWord ?? string.Empty),
+                new HashEntry("TeamLeaders", teamLeadersSerialized),
+                new HashEntry("MainTimer", game.MainTimer.ToString()),
+                new HashEntry("StealTimer", game.StealTimer.ToString())
+            ]);
+
+            foreach(var painter in game.PainterOrder!)
+            {
+                await _database.SetAddAsync($"painter-order:{game.RoomId}", painter);
+            }
 
             if (expiry.HasValue)
             {
                 await _database.KeyExpireAsync(game._id, expiry);
             }
+
+            return game._id;
+        }
+        public async Task<bool> UpdateGameRoundAsync(GameRound gameRound, TimeSpan? expiry = null)
+        {
+            if (gameRound == null) throw new ArgumentNullException(nameof(gameRound));
+
+            await _database.HashSetAsync(gameRound._gameId,
+            [
+                new HashEntry("GameState", gameRound.GameState.ToString()),
+                new HashEntry("BlueScore", gameRound.BlueScore.ToString()),
+                new HashEntry("RedScore", gameRound.RedScore.ToString()),
+                new HashEntry("CurrentRound", gameRound.CurrentRound.ToString()),
+                new HashEntry("CurrentPainter", gameRound.CurrentPainter ?? string.Empty),
+                new HashEntry("SelectedWord", gameRound.SelectedWord ?? string.Empty),
+                new HashEntry("MainTimer", gameRound.MainTimer.ToString()),
+                new HashEntry("StealTimer", gameRound.StealTimer.ToString())
+            ]);
+
+            if (expiry.HasValue)
+            {
+                await _database.KeyExpireAsync(gameRound._gameId, expiry);
+            }
+
+            return true;
+        }
+
+        //vraca score, cisto kao provera za sad, mozda nepotrebno
+        public async Task<int> IncrementScoreAsync(string gameId, string teamName, int incrementValue)
+        {
+            if (incrementValue <= 0) throw new ArgumentException("Increment value must be positive.", nameof(incrementValue));
+
+            var field = $"{teamName}Score";
+            await _database.HashIncrementAsync(gameId, field, incrementValue);
+            return int.Parse((await _database.HashGetAsync(gameId, field))!);
+        }
+        public async Task DecrementTimerAsync(string gameId, string timerName, int decrementValue)
+        {
+            if (decrementValue <= 0) throw new ArgumentException("Decrement value must be positive.", nameof(decrementValue));
+
+            var field = $"{timerName}Timer";
+            var currentValue = (int)await _database.HashGetAsync(gameId, field);
+
+            // Ensure timer doesn't go below zero
+            var newValue = Math.Max(0, currentValue - decrementValue);
+            await _database.HashSetAsync(gameId, [new HashEntry(field, newValue.ToString())]);
+        }
+        public async Task<bool> UpdateSelectedWordAsync(string gameId, string selectedWord)
+        {
+            if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
+            if (selectedWord == null) throw new ArgumentNullException(nameof(selectedWord));
+
+            // Update the SelectedWord field in the hash
+            await _database.HashSetAsync(gameId, [new HashEntry("SelectedWord", selectedWord)]);
+
             return true;
         }
 
@@ -46,7 +151,6 @@ namespace DrawOutApp.Server.Repositories
             if (!_database.KeyExists(gameId)) { throw new ArgumentException("GameSessionId does not exist"); }
             await _database.KeyDeleteAsync(gameId);
         }
-
         private async Task DeleteKeysAsync(IEnumerable<RedisKey> keys)
         {
             foreach (var key in keys)
@@ -54,16 +158,11 @@ namespace DrawOutApp.Server.Repositories
                 await _database.KeyDeleteAsync(key);
             }
         }
-        //pomocna funkcija za izvlacenje podataka iz hash seta
         public async Task<T?> GetFromHashSet<T>(string setKey, string valueKey)
         {
             var value = await _database.HashGetAsync(setKey, valueKey);
 
             return value.IsNullOrEmpty ? default : JsonConvert.DeserializeObject<T>(value);
         }
-
-
-        //u servis logika za startovanje igre, ukljucuje kreiranje rundi
-
     }
 }

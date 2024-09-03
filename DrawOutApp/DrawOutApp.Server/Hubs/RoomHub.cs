@@ -24,6 +24,7 @@ namespace DrawOutApp.Server.Hubs
             _roomService = roomService;
             _mapper = mapper;
         }
+
         private async Task<bool> TryJoinRoom(string roomId, string nickname, string? password)
         {
             var seshKey = Context.Items["SeshKey"]!.ToString();
@@ -66,7 +67,7 @@ namespace DrawOutApp.Server.Hubs
             if (isError)
                 throw new HubException(error);
 
-            var usersInfo = new List<PlayerInfo>();
+            var usersInfo = new List<UserModel>();
             foreach (var userId in users!)
             {
                 if(userId == Context.Items["SeshKey"]!.ToString()!)
@@ -81,7 +82,7 @@ namespace DrawOutApp.Server.Hubs
                 {
                     throw new HubException(userError);
                 }
-                usersInfo.Add(_mapper.Map<PlayerInfo>(user));
+                usersInfo.Add(user!);
             }
 
             await Clients
@@ -132,50 +133,30 @@ namespace DrawOutApp.Server.Hubs
                 msg.Content, 
                 msg.Timestamp);
         }
-        public override async Task OnConnectedAsync()
+        public async Task NotifyGameStart(string roomUrl)
         {
-            var sessionId = Context.GetHttpContext()!.Request.Cookies["UserSessionId"];
-            
-            var (isError, user, error) = await _userService.GetUserAsync(sessionId!);
+            var roomId = await _roomService.GetIdFromURL(roomUrl);
+            var roles = Context.Items["Roles"] as List<string>;
+            if (roles == null || !roles.Contains("RoomAdmin"))
+            {
+                throw new HubException("You do not have permission to start the game.");
+            }
+            var (isError, room, error) = await _roomService.GetRoomByUrlAsync(roomUrl);
             if (isError)
             {
                 throw new HubException(error);
             }
-            Context.Items["SeshKey"] = sessionId;
-            Context.Items["Nickname"] = user!.Nickname;
-            Context.Items["Roles"] = user!.Roles;
-
-            await base.OnConnectedAsync();
-        }
-        public override async Task OnDisconnectedAsync(Exception? exception)
-        {
-            if(!Context.Items.ContainsKey("RoomId"))
+            /*if (room!.Players!.Count < 4)
             {
-                await base.OnDisconnectedAsync(exception);
-            }
-
-            var seshKey = Context.Items["SeshKey"]!.ToString();
-
-            await _userService.RemoveRolesAsync(seshKey!, [Role.RoomAdmin, Role.Player, Role.Red, Role.Blue, Role.Painter, Role.TeamLeader]);
-
-
-            var roomId = Context.Items["RoomId"]!.ToString();
-
-            var isRemoved = await _roomService.RemoveUserAsync(roomId!, seshKey!);
-            if(!isRemoved.Data)
-            {
-                await Clients.Caller.SendAsync("Error", isRemoved.Error);
-                await base.OnDisconnectedAsync(exception);
-            }
-
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId!);
+                throw new HubException("Not enough players to start the game.");
+            }*/
+            await _roomService.UpdateRoomStateAsync(roomId!, RoomState.InGame);
+            
             await Clients
                 .Group(roomId!)
-                .SendAsync("ReceiveMessage", "Server", $"{Context.Items["Nickname"]!.ToString()} has left the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                .SendAsync("StartingGame", true);
 
             await SendConnectedRoomById(roomId!);
-            await SendConnectedUsers(roomId!);
-            await base.OnDisconnectedAsync(exception);
         }
         public async Task ChangeRoomSettings(string roomURL, string settingName, string settingValue)
         {
@@ -211,25 +192,6 @@ namespace DrawOutApp.Server.Hubs
                 .Group(roomId!)
                 .SendAsync("RoomSettingsChanged", settingName, settingValue);
         }
-
-        public async Task JoinTeam(string roomUrl, string teamName)
-        {
-            var nickname = Context.Items["Nickname"]!.ToString();
-            var roomId = await _roomService.GetIdFromURL(roomUrl);
-            await Clients.Group(roomId!).SendAsync("ReceiveTeamJoin", teamName, nickname);
-            if (teamName == "Red")
-            {
-                await _userService.AddRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Red]);
-            }
-            else if (teamName == "Blue")
-            {
-                await _userService.AddRolesAsync(Context.Items["SeshKey"]!.ToString()!, [Role.Blue]);
-            }
-            else
-            {
-                throw new HubException("Invalid team name.");
-            }
-        }
         public async Task SwitchTeam(string roomUrl, string? oldTeam, string newTeam)
         {
             var nickname = Context.Items["Nickname"]!.ToString();
@@ -260,6 +222,51 @@ namespace DrawOutApp.Server.Hubs
             }
 
             await Clients.Group(roomId!).SendAsync("ReceiveTeamSwitch", oldTeam, newTeam, nickname);
+        }
+        public override async Task OnConnectedAsync()
+        {
+            var sessionId = Context.GetHttpContext()!.Request.Cookies["UserSessionId"];
+            
+            var (isError, user, error) = await _userService.GetUserAsync(sessionId!);
+            if (isError)
+            {
+                throw new HubException(error);
+            }
+            Context.Items["SeshKey"] = sessionId;
+            Context.Items["Nickname"] = user!.Nickname;
+            Context.Items["Roles"] = user!.Roles;
+
+            await base.OnConnectedAsync();
+        }
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            if(!Context.Items.ContainsKey("RoomId"))
+            {
+                await base.OnDisconnectedAsync(exception);
+            }
+            
+            var seshKey = Context.Items["SeshKey"]!.ToString();
+
+            await _userService.RemoveRolesAsync(seshKey!, [Role.RoomAdmin, Role.Player, Role.Red, Role.Blue, Role.Painter, Role.TeamLeader]);
+
+            var roomId = Context.Items["RoomId"]!.ToString();
+
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId!);
+
+            var isRemoved = await _roomService.RemoveUserAsync(roomId!, seshKey!);
+            if(!isRemoved.Data)
+            {
+                await Clients.Caller.SendAsync("Error", isRemoved.Error);
+                await base.OnDisconnectedAsync(exception);
+            }
+            await Clients
+                .Group(roomId!)
+                .SendAsync("ReceiveMessage", "Server", $"{Context.Items["Nickname"]!.ToString()} has left the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+
+
+            await SendConnectedRoomById(roomId!);
+            await SendConnectedUsers(roomId!);
+            await base.OnDisconnectedAsync(exception);
         }
     }
 }

@@ -12,13 +12,19 @@ import { FormsModule } from '@angular/forms';
 export class ChatComponent {
   @Input() messages: any[] = [];
   @Input() chatInput: string = '';
+  @Input() enableGuessing: boolean = false;
   @Output() messageSent = new EventEmitter<string>();
+  @Output() guessSent = new EventEmitter<string>();
   charCount: number = 0;
 
   onSendMessage() {
     if (this.chatInput.trim()) {
-      this.messageSent.emit(this.chatInput);
-      this.chatInput = ''; // Clear the input after sending the message
+      if (this.enableGuessing) {
+        this.guessSent.emit(this.chatInput);
+      } else {
+        this.messageSent.emit(this.chatInput);
+      }
+      this.chatInput = '';
     }
   }
 

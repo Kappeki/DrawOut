@@ -34,6 +34,7 @@ namespace DrawOutApp.Server.Services
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
+
         //najverovatnije greska u ovom delu koda
         public async Task<Result<RoomModel,string>> CreateRoomAsync(string creatingUserId, string roomName, string? password = null)
         {
@@ -44,7 +45,7 @@ namespace DrawOutApp.Server.Services
                     RoomName = roomName,
                     RoomAdminId = creatingUserId,
                     PlayerCount = 0,
-                    GameState = GameState.Waiting,
+                    RoomState = RoomState.Waiting,
                     RoomURL = GenerateRoomURL(roomName),
                     RoundTime = RoundTime.Medium
                     //timeEalapsed?
@@ -133,7 +134,7 @@ namespace DrawOutApp.Server.Services
             {
                 var baseFilter = Builders<Room>.Filter
                     .And(
-                    Builders<Room>.Filter.Eq(r => r.GameState, GameState.Waiting), 
+                    Builders<Room>.Filter.Eq(r => r.RoomState, RoomState.Waiting), 
                     Builders<Room>.Filter.Ne(r=>r.RoomAdminId, sessionId)
                     );
 
@@ -247,6 +248,13 @@ namespace DrawOutApp.Server.Services
                 return $"Error updating room. : {error}";
             }
         }
+        public async Task UpdateRoomStateAsync(string roomId, RoomState roomState)
+        {
+            var filter = Builders<Room>.Filter.Eq(r => r._id, ObjectId.Parse(roomId));
+            var update = Builders<Room>.Update.Set(r => r.RoomState, roomState);
+            await _roomRepository.UpdateRoomAsync(filter, update);
+        }
+
         public async Task DeleteRoomAsync(string roomId)
         {
             await _roomRepository.DeleteRoomAsync(roomId);
@@ -319,7 +327,6 @@ namespace DrawOutApp.Server.Services
                 return $"Error removing player from room. : {error}";
             }
         }
-
         public async Task<Result<List<string>?,string>> GetPlayerIdsAsync(string roomId)
         {
             var playerSet = await _roomRepository.GetPlayerSetAsync(roomId);
@@ -328,6 +335,16 @@ namespace DrawOutApp.Server.Services
                 return "No player id's found! ERROR!!";
             }
             return playerSet;
+        }
+
+        public async Task<List<string>> GetAllWordPacksAsync()
+        {
+             return await _roomRepository.GetAllPackNamesAsync();
+        }
+
+        public async Task<List<string>> GetWordsByPackNameAsync(string packName)
+        {
+            return await _roomRepository.GetWordsByPackNameAsync(packName.ToLower());
         }
 
     }

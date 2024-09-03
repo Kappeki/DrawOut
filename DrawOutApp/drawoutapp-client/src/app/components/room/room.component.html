@@ -5,7 +5,7 @@
       <h2>{{ room?.roomName }}</h2>
     </div>
 
-    <div *ngIf="room?.gameState === 'Waiting'" class="room-status">
+    <div *ngIf="room?.roomState === 'Waiting'" class="room-status">
       <p>Waiting for players...</p>
     </div>
 
@@ -30,10 +30,13 @@
 
       <!-- Whiteboard and Settings -->
       <div class="whiteboard-container">
-        <app-game *ngIf="room?.gameState === 'Waiting'" (roundChange)="handleRoundChange($event)"></app-game>
+        <app-game *ngIf="room?.roomState === 'InGame'" (roundChange)="handleRoundChange($event)"
+          (guessEnabledChange)="handleGuessEnabled($event)" [isRoomAdmin]="isRoomAdmin" [users]="users!"
+          [roundTime]="room?.roundTime!" [roomId]="roomId" [wordPack]="availableWords" [chatMessages]="chatMessages"
+          [latestGuess$]="latestGuess$"></app-game>
 
         <!-- Settings overlay -->
-        <div *ngIf="room?.gameState !== 'Waiting'" class="settings-overlay">
+        <div *ngIf="room?.roomState === 'Waiting'" class="settings-overlay">
           <app-room-settings [room]="room" [isRoomAdmin]="isRoomAdmin"
             (settingChanged)="handleSettingChange($event)"></app-room-settings>
         </div>
@@ -42,7 +45,7 @@
       <!-- Chat -->
       <div class="chat-container">
         <app-chat name="fieldName" ngDefaultControl [messages]="chatMessages" [(ngModel)]="chatInput"
-          (messageSent)="sendMessage($event)">
+          [enableGuessing]="this.enableGuessing" (messageSent)="sendMessage($event)" (guessSent)="sendMessage($event)">
         </app-chat>
       </div>
     </div>
@@ -55,7 +58,7 @@
       </div>
 
       <!-- Start Button -->
-      <div class="start-button-container" *ngIf="!isRoomAdmin && room?.gameState === 'Waiting'">
+      <div class="start-button-container" *ngIf="isRoomAdmin && room?.roomState === 'Waiting'">
         <button (click)="startGame()" class="start-button">Start!</button>
       </div>
 

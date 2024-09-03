@@ -24,10 +24,7 @@
             </span>
             <select *ngIf="room" [(ngModel)]="room.selectedWordPack" (ngModelChange)="updateWordPack($event)"
                 [disabled]="!isRoomAdmin" class="setting-select">
-                <option value="default">Default</option>
-                <option value="custom1">Nesto nesto</option>
-                <option value="custom2">Nesto 2</option>
-                <option value="custom3">Nesto 3</option>
+                <option *ngFor="let pack of wordPacks" [value]="pack">{{ pack }}</option>
             </select>
         </div>
 
