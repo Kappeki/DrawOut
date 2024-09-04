@@ -1,0 +1,16 @@
+{
+	"name": "sport",
+	"words": [
+		"soccer", "goal", "offside", "penalty", "corner kick",
+		"basketball", "dribble", "three-pointer", "dunk", "free throw",
+		"tennis", "karate", "chess", "voleyball", "judo", "boxing", "running",
+		"cardio", "weightlifting", "Olympic Games", "gym", "exercise", "gym equipment", "euroleague", 
+		"Champions League", "golf", "Crvena Zvezda", "Partizan", "baseball", "cricket", "table tennis",
+		"hokey stick", "tennis racket", "handball", "Premier League", "referee", "coach", "fans", "tournament",
+		"cyclist", "kick", "home run", "Real Madrid", "Barcelona", "Manchester United", "Liverpool", "grand slam",
+		"skateboard", "defense", "formula one", "foul", "swimming", "half time", "finish line", "goalkeeper",
+		"home team", "away team", "gold medal", "amateur league", "Juventus", "Inter Milan", "Napoli", "taekwondo",
+		"water polo", "World Cup", "fitness", "fencing", "diver", "archery", "bench press", "deadlift", "squat", 
+		"dumbbell", "treadmill", "substitute", "trophy"
+	]
+}

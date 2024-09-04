@@ -1,0 +1,17 @@
+{
+	"name": "music",
+	"words": [
+		"rock", "pop", "jazz", "blues", "classical",
+		"hip hop", "rap", "reggae", "country", "electronic",
+		"house", "techno", "dubstep", "metal", "punk",
+		"indie", "folk", "soul", "r&b", "funk",
+		"orchestra", "choir", "guitar", "bass", "drums",
+		"piano", "keyboard", "violin", "saxophone", "trumpet",
+		"flute", "cello", "clarinet", "harmonica", "accordion",
+		"microphone", "amplifier", "speaker", "turntable", "synthesizer",
+		"headphones", "mixer", "dj", "composer", "conductor",
+		"Beethoven", "Mozart", "Bach", "Elvis Presley", "Michael Jackson",
+		"Madonna", "Freddie Mercury", "Bob Dylan", "John Lennon", "Prince",
+		"Taylor Swift", "Beyoncé", "Drake", "Eminem", "Kendrick Lamar"
+	]
+}

@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;700&display=swap');
+
+* {
+  font-family: 'Fredoka', sans-serif;
+}
+
 .nav-tabs {
   display: inline-flex;
   justify-content: center;

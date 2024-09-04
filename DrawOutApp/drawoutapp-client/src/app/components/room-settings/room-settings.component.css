@@ -1,5 +1,5 @@
 .settings-container {
-    background-color: #333;
+    background-color: #585858;
     color: white;
     border-radius: 8px;
     height: 100%;
@@ -42,8 +42,8 @@
 
 .setting-icon {
     margin-right: 10px;
-    width: 24px; /* Adjust size as needed */
-    height: 24px; /* Adjust size as needed */
+    width: 45px;
+    height: 45px; 
 }
 
 .setting-select, 
