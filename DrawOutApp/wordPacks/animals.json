@@ -1,0 +1,17 @@
+{
+	"name": "animals",
+	"words": [
+		"lion", "tiger", "elephant", "giraffe", "zebra",
+		"penguin", "kangaroo", "panda", "koala", "rhinoceros",
+		"hippopotamus", "cheetah", "leopard", "gorilla", "chimpanzee",
+		"dolphin", "whale", "shark", "octopus", "jellyfish",
+		"turtle", "crocodile", "alligator", "snake", "frog",
+		"toad", "eagle", "owl", "falcon", "parrot",
+		"peacock", "flamingo", "ostrich", "bat", "wolf",
+		"fox", "bear", "raccoon", "squirrel", "rabbit",
+		"hare", "deer", "moose", "buffalo", "bison",
+		"horse", "camel", "llama", "alpaca", "donkey",
+		"cow", "pig", "goat", "sheep", "chicken",
+		"rooster", "duck", "goose", "turkey", "bee"
+	]
+}

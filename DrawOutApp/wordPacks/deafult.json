@@ -1,0 +1,25 @@
+{	
+	"name": "default",
+	"words": [
+		"chair", "laptop", "notebook", "backpack", "scissors",
+		"pillow", "computer mouse", "trash can", "Eiffel tower", "Serbia",
+		"Earth", "air conditioning", "microphone", "coat hanger", "pencil sharpener",
+		"text", "actor", "clock", "movie", "spider",
+		"flower", "remote", "target", "water gun", "palm tree",
+		"nose ring", "nightclub", "hot sauce", "high five", "ice cream",
+		"scarecrow", "cookie jar", "sunglasses", "skateboard", "electric guitar",
+		"stove", "coaster", "drawer", "picture frame", "radiator",
+		"lamp", "magnet", "web browser", "deodorant", "phone charger",
+		"Shrek", "SpongeBob", "bread", "bridge", "apple pie",
+		"duct tape", "pot of gold", "credit card", "hitchhiker", "graduation",
+		"cheesecake", "burrito", "pudding", "shampoo", "bowling",
+		"back pain", "Milky Way", "Mona Lisa", "stop sign", "submarine",
+		"sunflower", "pharmacist", "overweight", "koala", "salad",
+		"fork", "door", "beer", "toy", "tea",
+		"sun", "pub", "tie", "tattoo", "vacuum cleaner",
+		"luggage", "speaker", "Saturn", "ice cream truck", "Tower of Pisa",
+		"can", "conversation", "snowman", "ketchup", "Minecraft",
+		"turtle", "island", "fridge", "farm", "Spider Man",
+		"horn", "flag", "prison", "mustache", "jellyfish"
+	]
+}

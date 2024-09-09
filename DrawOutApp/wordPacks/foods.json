@@ -1,0 +1,27 @@
+{
+	"name": "foods",
+	"words": [
+		"pizza", "burger", "pasta", "sushi", "tacos",
+		"burrito", "salad", "steak", "sandwich", "fries",
+		"hot dog", "barbecue", "soup", "chili", "noodles",
+		"rice", "curry", "omelette", "quiche", "pancakes",
+		"waffles", "muffin", "croissant", "bagel", "toast",
+		"cheese", "butter", "yogurt", "ice cream", "cake",
+		"pie", "cookies", "brownies", "chocolate", "candy",
+		"popcorn", "chips", "pretzels", "nuts", "fruit salad",
+		"smoothie", "milkshake", "coffee", "tea", "lemonade",
+		"soda", "water", "beer", "wine", "whiskey",
+		"vodka", "rum", "tequila", "cocktail", "martini",
+		"Pepsi", "Coca-Cola", "Red Bull", "Starbucks", "Sprite",
+		"spaghetti", "lasagna", "ravioli", "fettuccine", "macaroni",
+		"bacon", "sausage", "ham", "turkey", "chicken wings",
+		"meatloaf", "roast beef", "pulled pork", "ribs", "lobster",
+		"crab", "shrimp", "oysters", "salmon", "tuna",
+		"avocado", "guacamole", "hummus", "falafel", "shawarma",
+		"samosa", "spring roll", "dumplings", "sushi roll", "ceviche",
+		"paella", "risotto", "bruschetta", "tiramisu", "gelato",
+		"pudding", "sorbet", "popsicle", "jelly", "fudge",
+		"cappuccino", "espresso", "latte", "americano", "mocha",
+		"chai", "matcha", "gin", "sangria", "champagne"
+	]
+}

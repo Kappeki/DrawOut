@@ -1,0 +1,19 @@
+{
+	"name": "programming",
+	"words": [
+		"algorithm", "data structure", "binary", "recursion", "compiler", 
+		"interpreter", "syntax", "cloud storage", "variable", "constant", 
+		"url", "procedure", "object", "class", "null", 
+		"Git", "block", "ip address", "array", "linked list", 
+		"stack", "queue", "hash table", "tree", "binary tree", 
+		"binary search tree", "graph", "depth first search", "breadth first search", 
+		"sorting", "test", "database", "SQL", "monitor", 
+		"byte", "TypeScript", "Python", "smart phone", "processor",
+		"Kotlin", "Java", "Android", "iPhone", "password", 
+		"code editor", "laptop", "computer case", "motherboard", "artificial intelligence", 
+		"machine learning", "network", "computer mouse", "keyboard", "big data", 
+		"cloud computing", "cybersecurity", "blockchain", "quantum computing", "distributed systems", 
+		"parallel computing", "operating system", "back end", "front end", "bug", "click", "loop",
+		"object oriented programming", "react", "client", "server", "token", "Windows", "Linux"
+	]
+}

@@ -6,7 +6,7 @@
     <div class="settings-rows">
         <div class="setting-item">
             <span class="setting-label">
-                <img src="path/to/icon.png" alt="Icon" class="setting-icon">
+                <img src="alarm-clock.png" alt="Icon" class="setting-icon">
                 Draw Time
             </span>
             <select *ngIf="room" [(ngModel)]="room.roundTime" (ngModelChange)="updateDrawTime($event)"
@@ -19,7 +19,7 @@
 
         <div class="setting-item">
             <span class="setting-label">
-                <img src="path/to/icon.png" alt="Icon" class="setting-icon">
+                <img src="folder.png" alt="Icon" class="setting-icon">
                 Word Pack
             </span>
             <select *ngIf="room" [(ngModel)]="room.selectedWordPack" (ngModelChange)="updateWordPack($event)"
@@ -28,29 +28,12 @@
             </select>
         </div>
 
-        <!-- za change/remove/set password? mozda -->
-        <!-- <div class="password-container">
-            <p>Password</p>
-            <input type="password" [(ngModel)]="password">
-        </div> -->
-
-        <!-- za change admina sobe? -->
-        <!-- <div class="admin-contaier">
-
-        </div> -->
-
-        <!-- ovako je na skribbl ali ne nam ne treba -->
-        <!-- <div class="setting-item">
-            <span class="setting-label">Use custom words only</span>
-            <input type="checkbox" [(ngModel)]="useCustomWords" class="setting-checkbox">
-        </div> -->
-
         <!-- Custom Words Section as a Column -->
         <div class="setting-item-column">
             <span class="setting-label">Custom Words</span>
             <textarea *ngIf="room" [(ngModel)]="room.customWords" (ngModelChange)="updateCustomWords($event)"
                 [disabled]="!isRoomAdmin"
-                placeholder="Minimum of 10 words. 1-32 characters per word! 20000 characters maximum. Separated by a , (comma)"
+                placeholder="Separate the words by a , (comma)"
                 class="setting-textarea"></textarea>
         </div>
     </div>
