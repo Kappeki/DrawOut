@@ -2,6 +2,9 @@
 using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Services;
 using DrawOutApp.Server.Services.Contracts;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace DrawOutApp.Server.Controllers
 {
@@ -30,6 +33,14 @@ namespace DrawOutApp.Server.Controllers
                 SameSite = SameSiteMode.None
             };
             Response.Cookies.Append("UserSessionId", data.Data!._sessionKey, cookieOptions);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, data.Data!._sessionKey)
+            };
+            var identity = new ClaimsIdentity(claims, "User");
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
             return Ok(data.Data!);
         }
 
@@ -50,6 +61,18 @@ namespace DrawOutApp.Server.Controllers
                 Response.Cookies.Delete("UserSessionId");
                 return NotFound(error);
             }
+
+            if (!User.HasClaim(c => c.Type == "SessionId"))
+            {
+                // Add the session ID as a claim
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, sessionKey)
+                };
+                var identity = new ClaimsIdentity(claims, "UserSession");
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+            }
+
 
             return Ok(user);
         }

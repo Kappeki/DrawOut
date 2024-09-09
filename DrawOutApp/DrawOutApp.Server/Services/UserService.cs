@@ -104,31 +104,6 @@ namespace DrawOutApp.Server.Services
                 return $"Failed to update user with error : {error}";
             }
         }
-        public async Task<Result<bool,string>> JoinTeamAsync(string sessionId, bool blue)
-        {
-            var user = await _userRepo.GetUserAsync(sessionId);
-            
-            if(user == null)
-            {
-                return "User doesn't exist!";
-            }
-            if (!user.Roles!.Contains(Role.Player))
-            {
-                return "User isn't in any rooms!";
-            }
-
-            if (user.Roles.Contains(Role.Blue) || user.Roles.Contains(Role.Red))
-            {
-                user.Roles.Remove(Role.Blue);
-                user.Roles.Remove(Role.Red);
-            }
-
-            user.Roles.Add(blue ? Role.Blue : Role.Red);
-
-            await _userRepo.AddOrUpdateUserAsync(user);
-
-            return true;
-        }
         public async Task AddRolesAsync(string sessionId, IEnumerable<Role> roles)
         {
             var user = await _userRepo.GetUserAsync(sessionId);
@@ -168,5 +143,27 @@ namespace DrawOutApp.Server.Services
         {
             await _userRepo.DeleteUserAsync(sessionId);
         }
+
+        public async Task SetConnectionIdAsync(string sessionId, string connectionId, TimeSpan? expiry = null)
+        {
+            var user = await _userRepo.GetUserAsync(sessionId);
+            if (user != null)
+            {
+                await _userRepo.AddToHashSet(sessionId, _ => "ConnectionId", connectionId, expiry);
+            }
+            else
+            {
+                throw new KeyNotFoundException($"User not found with Session ID: {sessionId}");
+            }
+        }
+
+        public async Task<string?> GetConnectionIdAsync(string sessionKey)
+        {
+            // Retrieve the connection ID associated with the session key from Redis
+            return await _userRepo.GetFromHashSet<string>(sessionKey, "ConnectionId");
+        }
+
+
+
     }
 }

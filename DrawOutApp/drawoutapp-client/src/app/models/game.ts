@@ -1,28 +1,14 @@
-export interface Game {
-  _id?: string;
-  roomId?: string;
-  painterOrder?: string[];
-  teamLeaders?: { [team: string]: string };
-  totalRounds: number;
-  blueScore: number;
-  redScore: number;
-  gameState?: string;
-  currentPainter?: string;  // The user currently drawing
-  selectedWord?: string;  // The word being drawn
-  currentRound: number;  // The current round number
-  mainTimer: number;  // Timer for the drawing phase
-  stealTimer: number;  // Timer for the steal phase
-}
-
-export interface GameModel {
+export interface GameModelView {
   _id: string;
   roomId: string;
   teamLeaders: { [team: string]: string };
   painterOrder: string[];
   totalRounds: number;
+  mainTimer: number;
+  stealTimer: number;
 }
 
-export interface GameRound {
+export interface GameRoundView {
   _id: string;
   roomId: string;
   blueScore: number;
@@ -31,6 +17,4 @@ export interface GameRound {
   currentRound: number;
   currentPainter: string;
   selectedWord: string;
-  mainTimer: number;
-  stealTimer: number;
 }

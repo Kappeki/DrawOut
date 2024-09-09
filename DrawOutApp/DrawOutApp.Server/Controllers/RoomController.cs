@@ -1,4 +1,5 @@
-﻿using DrawOutApp.Server.Models;
+﻿using DrawOutApp.Server.Entities;
+using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -12,10 +13,12 @@ namespace DrawOutApp.Server.Controllers
     {
         private readonly IRoomService _roomService;
         private readonly IUserService _userService;
-        public RoomController(IRoomService roomService, IUserService userService)
+        private readonly IGameService _gameService;
+        public RoomController(IRoomService roomService, IUserService userService, IGameService gameService)
         {
             _roomService = roomService;
             _userService = userService;
+            _gameService = gameService;
         }
 
         //znaci na front mora se stavi samo da treba da se unese ime sobe i da se klikne na create room
@@ -67,6 +70,33 @@ namespace DrawOutApp.Server.Controllers
                 return NotFound($"No words found for pack {packName}.\n");
             }
             return Ok(words);
+        }
+
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet]
+        [Route("StartGame")]
+        public async Task<ActionResult> StartGame([FromQuery] string roomId)
+        {
+            var (isError, room, error) = await _roomService.GetRoomByIdAsync(roomId);
+            if (isError)
+            {
+                return NotFound($"Room with ID {roomId} not found.\n Error : {error}");
+            }
+            var usersInRoom = (await _roomService.GetPlayerIdsAsync(roomId)).Data;
+            var gameModel = new GameModel
+            {
+                _id = $"game:{roomId}",
+                RoomId = roomId,
+                TotalRounds = usersInRoom!.Count,
+                MainTimer = room!.RoundTime,
+                StealTimer = room!.RoundTime / 2
+            };
+
+            var gameRoundModel = await _gameService.CreateGameAsync(gameModel, usersInRoom!);
+
+            return Ok(gameModel);
         }
 
         /// <summary>

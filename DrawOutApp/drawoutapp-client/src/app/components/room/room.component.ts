@@ -13,7 +13,7 @@ import UserListComponent from "../user-list/user-list.component";
 import { RoomSettingsComponent } from '../room-settings/room-settings.component';
 import { SessionService } from '../../services/session.service';
 import { GameComponent } from '../game/game.component';
-import { Game } from '../../models/game';
+import { GameModelView } from '../../models/game';
 
 @Component({
   selector: 'app-room',
@@ -38,6 +38,8 @@ export class RoomComponent implements OnInit, OnDestroy {
   gameStarted: boolean = false;
   currentRound: number = 1;
   totalRounds: number = 8;
+
+  gameModel: GameModelView | null = null;
 
   currentTeam: string | null = null;
   chatInput: string = '';
@@ -175,8 +177,12 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   startGame() {
-    if (this.isRoomAdmin)
+    if (this.isRoomAdmin) {
       this.roomHubService.notifyGameStart(this.roomURL);
+      this.apiService.startGame(this.roomId).subscribe(gameModel => {
+        this.gameModel = gameModel;
+      });
+    }
     this.chatMessages = [];
   }
 

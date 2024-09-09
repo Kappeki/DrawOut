@@ -2,6 +2,7 @@
 using DrawOutApp.Server.Models;
 using DrawOutApp.Server.Repositories.Contracts;
 using DrawOutApp.Server.Settings;
+using MongoDB.Bson.Serialization.Conventions;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System.Text.Json.Serialization;
@@ -37,18 +38,19 @@ namespace DrawOutApp.Server.Repositories
                 CurrentPainter = hashEntries.FirstOrDefault(x => x.Name == "CurrentPainter").Value.ToString(),
                 SelectedWord = hashEntries.FirstOrDefault(x => x.Name == "SelectedWord").Value,
                 TeamLeaders = hashEntries.FirstOrDefault(x => x.Name == "TeamLeaders")
-                                .Value
-                                .ToString()
-                                .Split(',')
-                                .Select(s => s.Split(':'))
-                                .ToDictionary(split => split[0], split => split[1]),
+                            .Value
+                            .ToString()
+                            .Split(',')
+                            .Select(s => s.Split(new[] { ':' }, 2)) // Split only at the first colon
+                            .ToDictionary(split => split[0], split => split[1]),
                 MainTimer = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "MainTimer").Value!),
                 StealTimer = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "StealTimer").Value!)
             };
-            game.PainterOrder = (await _database.SetMembersAsync($"users-in-room:{game.RoomId}")).Select(x => x.ToString()).ToList();
+            game.PainterOrder = (await _database.SetMembersAsync($"painter-order:{game.RoomId}")).Select(x => x.ToString()).ToList();
 
             return game;
         }
+
         public async Task<string> SaveGameAsync(Game game, TimeSpan? expiry = null)
         {
             if (game == null) throw new ArgumentNullException(nameof(game));
@@ -91,20 +93,18 @@ namespace DrawOutApp.Server.Repositories
 
             return game._id;
         }
-        public async Task<bool> UpdateGameRoundAsync(GameRound gameRound, TimeSpan? expiry = null)
+        public async Task<Game?> UpdateGameRoundAsync(GameRoundModel gameRound, TimeSpan? expiry = null)
         {
             if (gameRound == null) throw new ArgumentNullException(nameof(gameRound));
 
             await _database.HashSetAsync(gameRound._gameId,
             [
-                new HashEntry("GameState", gameRound.GameState.ToString()),
+                new HashEntry("GameState", gameRound.GameState!.ToString()),
                 new HashEntry("BlueScore", gameRound.BlueScore.ToString()),
                 new HashEntry("RedScore", gameRound.RedScore.ToString()),
                 new HashEntry("CurrentRound", gameRound.CurrentRound.ToString()),
                 new HashEntry("CurrentPainter", gameRound.CurrentPainter ?? string.Empty),
-                new HashEntry("SelectedWord", gameRound.SelectedWord ?? string.Empty),
-                new HashEntry("MainTimer", gameRound.MainTimer.ToString()),
-                new HashEntry("StealTimer", gameRound.StealTimer.ToString())
+                new HashEntry("SelectedWord", gameRound.SelectedWord ?? string.Empty)
             ]);
 
             if (expiry.HasValue)
@@ -112,7 +112,7 @@ namespace DrawOutApp.Server.Repositories
                 await _database.KeyExpireAsync(gameRound._gameId, expiry);
             }
 
-            return true;
+            return await GetGameAsync(gameRound._gameId);
         }
 
         //vraca score, cisto kao provera za sad, mozda nepotrebno

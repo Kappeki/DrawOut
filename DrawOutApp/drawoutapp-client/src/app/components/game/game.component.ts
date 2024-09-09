@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WhiteboardComponent } from '../whiteboard/whiteboard.component';
-import { Game, GameModel, GameRound } from '../../models/game';
+import { GameModelView, GameRoundView } from '../../models/game';
 import { GameService } from '../../services/game.service';
 import { User } from '../../models/user';
 import { GameHubService } from '../../services/game-hub.service';
@@ -12,6 +12,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import { SessionService } from '../../services/session.service';
+import { dateTimestampProvider } from 'rxjs/internal/scheduler/dateTimestampProvider';
 @Component({
   selector: 'app-game',
   standalone: true,
@@ -27,293 +28,158 @@ export class GameComponent implements OnInit {
   @Input() isRoomAdmin: boolean = false;
   @Input() wordPack: string[] = [];
   @Input() chatMessages: any[] = [];
+
+  //treba za povezivanje sa chat componentom
   @Input() latestGuess$!: Observable<string | null>;
 
   @Output() roundChange = new EventEmitter<{ newRound: number, totalRounds: number }>();
+
+  //treba za iskljucivanje cheta ako ne sme
   @Output() guessEnabledChange = new EventEmitter<boolean>();
 
   @ViewChild('wordSelectionModal', { static: true }) wordSelectionModal!: TemplateRef<any>;
 
   private subscriptions: Subscription = new Subscription();
 
+  currentTimer = 0;
+  currentTimerName = '';
+  previousTimerName = '';
   winningTeam: string = '';
   drawEnabled = false;
   guessEnabled = false;
   blankCount = 0;
-  game: Game | null = null;
   msgNotificationsUI: any[] = [];
-  isPainter: boolean = false;
 
-  isStealState: boolean = false;
-  isInProgressState: boolean = false;
-
-  selectedWords: string[] = [];
+  selectables: string[] = [];
   hint: string = '';
 
-  private gameModel: GameModel | null = null;
-  private gameRound: GameRound | null = null;
-
+  gameModelView: GameModelView | null = null;
+  gameRoundView: GameRoundView | null = null;
 
   constructor(private gameHubService: GameHubService, public dialog: MatDialog, private sessionService: SessionService) {
   }
 
-  //korisnici ne smeju da joinuju dok je in progress to je poenta
-  //chat disable za team na osnvou current painter team
-
-
   async ngOnInit(): Promise<void> {
-
     await this.gameHubService.startConnection().then(() => {
       console.log('GameHub connection started.');
-      this.gameHubService.connectToGame(`game:${this.roomId}`);
+      this.subscriptions.add(this.gameHubService.gameModel$.subscribe(res => {
+        console.log(res);
+        this.gameModelView = res!;
+      }));
+      this.subscriptions.add(this.gameHubService.gameRound$.subscribe(res => {
+        console.log(res);
+        this.gameRoundView = res!;
+      }));
+      this.subscriptions.add(this.gameHubService.wordSelected$.subscribe((wordLength: number) => {
+        console.log('Word selected with length: ' + wordLength);
+        this.blankCount = wordLength;
+        this.hint = ''.repeat(this.blankCount);
+      }));
+      this.subscriptions.add(this.gameHubService.roundWinTeam$.subscribe((teamName: string) => {
+        this.winningTeam = teamName;
+      }));
+      this.subscriptions.add(this.gameHubService.timer$.subscribe((timerTime: number) => {
+        this.currentTimer = timerTime;
+      }));
+      this.subscriptions.add(this.gameHubService.currentTimer$.subscribe((timerName: string) => {
+        this.currentTimerName = timerName;
+      }));
+      this.subscriptions.add(this.gameHubService.previousTimer$.subscribe((timerName: string) => {
+        this.previousTimerName = timerName;
+      }));
+
+
+      this.subscriptions.add(
+        this.gameHubService.hubConnection.on('EnableGuessing', (res: boolean, timestamp: number) => {
+          res ? console.log('Guessing enabled at ' + timestamp) : console.log('Guessing disabled at ' + timestamp);
+          this.guessEnabled = res;
+          this.guessEnabledChange.emit(this.guessEnabled);
+        }));
+      this.subscriptions.add(
+        this.gameHubService.hubConnection.on('EnableDrawing', (res: boolean, timestamp: number) => {
+          res ? console.log('Drawing enabled at ' + timestamp) : console.log('Drawing disabled at ' + timestamp);
+          this.drawEnabled = res;
+        }));
+
+
+
+      let lastPromptTime = 0;
+      this.subscriptions.add(
+        this.gameHubService.hubConnection.on('PromptWordSelect', (res: boolean, timestamp: number) => {
+          res ? console.log('Prompting word select at ' + timestamp) : console.log('Not prompting word select at ' + timestamp);
+          const now = Date.now();
+          if (now - lastPromptTime < 1000) { // Debounce logic (1 second)
+            return;
+          }
+          lastPromptTime = now;
+          if (res && this.gameRoundView?.currentPainter === this.sessionService.getSessionId()) {
+            this.prepareWordSelection();
+            this.showWordSelectModal();
+          }
+          else {
+            this.showPainterSelectOverlay(this.users.find(u => u._sessionKey === this.gameRoundView?.currentPainter)?.nickname!);
+          }
+        }));
+
+      this.subscriptions.add(
+        this.latestGuess$.subscribe(res => {
+          if (res) {
+            this.gameHubService.submitGuess(res);
+          }
+        }));
     });
 
-    if (this.isRoomAdmin) {
-      this.game = this.createGameModel();
-      console.log(this.wordPack);
-      this.gameHubService.startGame(this.game);
-    }
+    await this.gameHubService.connectToGame(`game:${this.roomId}`);
 
-    this.subscriptions.add(this.gameHubService.hubConnection.on('UserConnected', (nickname: String) => {
-      console.log(`${nickname} connected to the game.`);
-    }));
+    if (this.isRoomAdmin) await this.gameHubService.startGame();
 
-    this.subscriptions.add(this.gameHubService.invokeStealPhase$.subscribe(({ res, timestamp }) => {
-      if (res) {
-        console.log('Starting steal phase at', timestamp);
-        this.isStealState = res;
-        this.gameHubService.startStealPhase(this.gameRound!);
-      }
-    }));
-
-    this.subscriptions.add(this.gameHubService.invokeEndRound$.subscribe(({ res, timestamp }) => {
-      if (res) {
-        console.log('Ending round at', timestamp);
-        this.gameHubService.endRound(this.gameRound!);
-      }
-    }));
-
-    this.subscriptions.add(this.gameHubService.invokeStartRound$.subscribe(({ res, timestamp }) => {
-      if (res) {
-        console.log('Starting round at', timestamp);
-        this.isInProgressState = res;
-        this.gameHubService.startRound(this.gameRound!);
-      }
-    }));
-
-    this.subscriptions.add(this.gameHubService.invokeHandleNoWord$.subscribe(({ res, timestamp }) => {
-      if (res && this.isRoomAdmin) {
-        console.log('Handling no word selected at', timestamp);
-        this.gameHubService.handleNoWordSelected();
-      }
-    }));
-
-    this.subscriptions.add(this.gameHubService.invokeStartNextRound$.subscribe(({ res, timestamp }) => {
-      if (res && this.isRoomAdmin) {
-        console.log('Starting next round at', timestamp);
-        this.gameHubService.startNextRound(this.gameRound!);
-      }
-    }));
-
-    this.subscriptions.add(this.gameHubService.invokeStartWordSelect$.subscribe(({ res, timestamp }) => {
-      if (res) {
-        console.log('Starting word selection at', timestamp);
-        this.gameHubService.startWordSelection(this.gameRound!);
-      }
-    }));
-
-    this.subscriptions.add(this.gameHubService.gameModel$.subscribe(res => {
-      this.gameModel = res!;
-      this.consolidateGame(res!, this.gameRound!);
-    }));
-    this.subscriptions.add(this.gameHubService.gameRound$.subscribe(res => {
-      this.gameRound = res;
-      this.consolidateGame(this.gameModel!, res!);
-    }));
-    this.subscriptions.add(this.gameHubService.messages$.subscribe(res => {
-      this.msgNotificationsUI = res;
-    }));
-    this.subscriptions.add(this.gameHubService.wordSelected$.subscribe(res => {
-      this.blankCount = res;
-      this.hint = "_".repeat(this.blankCount);
-    }));
-    this.subscriptions.add(this.gameHubService.mainTimer$.subscribe(res => {
-      if (this.game) {
-        this.game.mainTimer = res;
-      } else {
-        console.error("Game object is null. Cannot set mainTimer.");
-      }
-    }));
-    this.subscriptions.add(this.gameHubService.stealTimer$.subscribe(res => {
-      if (this.game) {
-        this.game.stealTimer = res;
-      } else {
-        console.error("Game object is null. Cannot set stealTimer.");
-      }
-    }));
-    this.subscriptions.add(this.gameHubService.enableDrawing$.subscribe(res => {
-      res ? console.log('Drawing enabled') : console.log('Drawing disabled');
-      this.drawEnabled = res;
-    }));
-    this.subscriptions.add(this.gameHubService.enableGuessing$.subscribe(res => {
-      res ? console.log('Guessing enabled') : console.log('Guessing disabled');
-      this.guessEnabled = res;
-      this.guessEnabledChange.emit(res);
-    }));
-    this.subscriptions.add(this.gameHubService.roundWinTeam$.subscribe(res => {
-      this.winningTeam = res!;
-    }));
-    this.subscriptions.add(this.gameHubService.correctWord$.subscribe(res => {
-      this.hint = res!;
-    }));
-
-
-    this.subscriptions.add(this.gameHubService.listenPromptWord$.subscribe(({ res, timestamp }) => {
-      console.log(this.game?.currentPainter);
-      console.log(this.sessionService.getSessionId());
-      if (this.game?.currentPainter === this.sessionService.getSessionId()) {
-        console.log('Im choosing a word at', timestamp);
-        this.prepareWordSelection();
-        this.showWordSelectModal();
-        this.isPainter = res;
-      }
-    }));
-
-    this.subscriptions.add(this.gameHubService.listenPainterSelect$.subscribe(({ res, timestamp }) => {
-      if (this.game?.currentPainter !== this.sessionService.getSessionId()) {
-        console.log('Painter is choosing a word at', timestamp);
-        this.showPainterSelectOverlay();
-        this.isPainter = !res;
-      }
-    }));
-
-    this.subscriptions.add(
-      this.latestGuess$.subscribe(guess => {
-        if (guess) {
-          this.submitGuess(guess);
-        }
-      }));
   }
 
   ngOnDestroy(): void {
-    this.game = null;
+    this.resetComponent;
     this.subscriptions.unsubscribe();
     this.gameHubService.stopConnection().then(() => {
       console.log('GameHub connection stopped.');
     });
   }
 
-  // ngAfterViewInit() {
-  //   if (this.isPainter) {
-  //     this.showWordSelectModal();
-  //   }
-  // }
-
-  private prepareWordSelection(): void {
-    if (this.wordPack && this.wordPack.length >= 4) {
-      this.selectedWords = [];
-      const shuffled = [...this.wordPack].sort(() => 0.5 - Math.random());
-      this.selectedWords = shuffled.slice(0, 4);
-    }
+  private resetComponent = () => {
+    this.winningTeam = '';
+    this.drawEnabled = false;
+    this.guessEnabled = false;
+    this.blankCount = 0;
+    this.msgNotificationsUI = [];
+    this.selectables = [];
+    this.hint = '';
+    this.gameModelView = null;
+    this.gameRoundView = null;
   }
 
-  selectWord(word: string) {
-    this.gameHubService.selectWord(`game:${this.roomId}`, word);
+  async selectWord(word: string) {
+    await this.gameHubService.selectWord(word);
     this.dialog.closeAll();
   }
 
-  submitGuess(guess: string) {
-    this.gameHubService.submitGuess(`game:${this.roomId}`, guess);
+  private prepareWordSelection(): void {
+    if (this.wordPack && this.wordPack.length >= 4) {
+      this.selectables = [];
+      const shuffled = [...this.wordPack].sort(() => 0.5 - Math.random());
+      this.selectables = shuffled.slice(0, 4);
+    }
   }
-
   private showWordSelectModal(): void {
-    if (this.selectedWords.length > 0) {
+    if (this.selectables.length > 0) {
       this.dialog.open(this.wordSelectionModal, {
-        data: { words: this.selectedWords },
+        data: { words: this.selectables },
         disableClose: true
       });
     }
   }
-  private showPainterSelectOverlay(): void {
+  private showPainterSelectOverlay(nickname: string): void {
     const overlay = document.createElement('div');
     overlay.className = 'painter-selecting-overlay';
-    overlay.innerText = 'Painter is selecting a word...';
+    overlay.innerText = `${nickname} is selecting a word...`;
     document.querySelector('.game-container')!.appendChild(overlay);
   }
-  private consolidateGame(gameModel: GameModel, gameRound: GameRound) {
-    if (gameModel && gameRound) {
-      const game: Game = {
-        _id: gameModel._id,
-        roomId: gameModel.roomId,
-        teamLeaders: gameModel.teamLeaders,
-        painterOrder: gameModel.painterOrder,
-        totalRounds: gameModel.totalRounds,
-        gameState: gameRound.gameState,
-        blueScore: gameRound.blueScore,
-        redScore: gameRound.redScore,
-        currentRound: gameRound.currentRound,
-        currentPainter: gameRound.currentPainter,
-        selectedWord: gameRound.selectedWord,
-        mainTimer: gameRound.mainTimer,
-        stealTimer: gameRound.stealTimer,
-      }
-      this.game = game;
-    }
-  }
-  private createGameModel(): Game {
-    const painterOrder = this.determinePainterOrder(this.users);
-    const teamLeaders = this.selectTeamLeaders(this.users);
-    const totalRounds = painterOrder.length;
 
-    return {
-      _id: `game:${this.roomId}`,
-      roomId: this.roomId,
-      teamLeaders: teamLeaders,
-      painterOrder: painterOrder,
-      totalRounds: totalRounds,
-      blueScore: 0,
-      redScore: 0,
-      currentRound: 0,
-      currentPainter: painterOrder[0],
-      selectedWord: '',
-      mainTimer: this.roundTime,
-      stealTimer: this.roundTime / 2
-    };
-  }
-  private determinePainterOrder(users: User[]): string[] {
-    const redTeam = users.filter(user => user.roles!.includes('Red'));
-    const blueTeam = users.filter(user => user.roles!.includes('Blue'));
-
-    const combinedOrder: string[] = [];
-    const firstTeam = Math.random() < 0.5 ? redTeam : blueTeam;
-    const secondTeam = firstTeam === redTeam ? blueTeam : redTeam;
-
-    let i = 0;
-    let j = 0;
-
-    while (i < firstTeam.length || j < secondTeam.length) {
-      if (i < firstTeam.length) {
-        combinedOrder.push(firstTeam[i]._sessionKey);
-        i++;
-      }
-      if (j < secondTeam.length) {
-        combinedOrder.push(secondTeam[j]._sessionKey);
-        j++;
-      }
-    }
-
-    return combinedOrder;
-  }
-  private selectTeamLeaders(users: User[]): { [team: string]: string } {
-    const redTeam = users.filter(user => user.roles!.includes('Red'));
-    const blueTeam = users.filter(user => user.roles!.includes('Blue'));
-
-    const redLeader = redTeam[Math.floor(Math.random() * redTeam.length)];
-    const blueLeader = blueTeam[Math.floor(Math.random() * blueTeam.length)];
-
-    return {
-      Red: redLeader._sessionKey,
-      Blue: blueLeader._sessionKey,
-    };
-  }
 }

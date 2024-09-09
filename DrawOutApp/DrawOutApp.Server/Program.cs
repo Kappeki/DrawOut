@@ -9,13 +9,31 @@ using StackExchange.Redis;
 using Microsoft.AspNetCore.CookiePolicy;
 using DrawOutApp.Server.Hubs;
 using DrawOutApp.Server.Mappers;
+using Microsoft.AspNetCore.SignalR;
+using DrawOutApp.Server;
+using Microsoft.AspNetCore.Authentication.Cookies;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<ITimerService, TimerService>();
+builder.Services.AddSingleton<IUserIdProvider, SessionIdProvider>();
+
+builder.Services.AddSingleton<GameFlowService>(); 
+builder.Services.AddHostedService(provider => provider.GetRequiredService<GameFlowService>());
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromDays(7); // Set the expiration time
+        options.SlidingExpiration = true; // Enable sliding expiration
+    });
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -110,11 +128,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseCors("CorsPolicy");
 
 app.UseSession();
 app.UseCookiePolicy();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

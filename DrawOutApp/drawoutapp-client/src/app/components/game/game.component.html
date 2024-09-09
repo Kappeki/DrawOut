@@ -4,7 +4,7 @@
         <div mat-dialog-content>
             <h2>Select a Word</h2>
             <div class="word-options">
-                <button mat-button *ngFor="let word of selectedWords" (click)="selectWord(word)">
+                <button mat-button *ngFor="let word of selectables" (click)="selectWord(word)">
                     {{ word }}
                 </button>
             </div>
@@ -14,16 +14,16 @@
 
     <div class="score-word-container">
         <div class="score-container redTeam">
-            <span>Red Team: {{game?.redScore}}</span>
+            <span>Red Team: {{gameRoundView?.redScore}}</span>
         </div>
 
         <div class="word-container">
-            <span *ngIf="this.drawEnabled && game?.selectedWord">{{game?.selectedWord}}</span>
+            <span *ngIf="this.drawEnabled && gameRoundView?.selectedWord">{{gameRoundView?.selectedWord}}</span>
             <span *ngIf="!this.drawEnabled">Guess the word! Hint : {{this.hint}}</span>
         </div>
 
         <div class="score-container blueTeam">
-            <span>Blue Team: {{game?.blueScore}}</span>
+            <span>Blue Team: {{gameRoundView?.blueScore}}</span>
         </div>
     </div>
 
@@ -31,11 +31,11 @@
         <!-- Timer and Round Info -->
         <div class="overlay">
             <div class="time-container">
-                <span *ngIf="isInProgressState">{{game?.mainTimer}}</span>
-                <span *ngIf="isStealState">{{game?.stealTimer}}</span>
+                <span>Time Left: ({{this.currentTimer}})</span>
+                <span>{{this.currentTimer}}</span>
             </div>
             <div class="round-container">
-                <span>Round {{game?.currentRound}} of {{game?.totalRounds}}</span>
+                <span>Round {{gameRoundView?.currentRound}} of {{gameModelView?.totalRounds}}</span>
             </div>
         </div>
 

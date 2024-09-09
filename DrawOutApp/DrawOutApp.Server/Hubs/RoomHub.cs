@@ -125,9 +125,9 @@ namespace DrawOutApp.Server.Hubs
                 Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             };
            
-            await _chatRepo.AddToChatAsync(roomId, msg);
+            await _chatRepo.AddToChatAsync(roomId!, msg);
             await Clients
-                .Group(roomId)
+                .Group(roomId!)
                 .SendAsync("ReceiveMessage", 
                 msg.Sender, 
                 msg.Content, 
@@ -256,7 +256,6 @@ namespace DrawOutApp.Server.Hubs
             var isRemoved = await _roomService.RemoveUserAsync(roomId!, seshKey!);
             if(!isRemoved.Data)
             {
-                await Clients.Caller.SendAsync("Error", isRemoved.Error);
                 await base.OnDisconnectedAsync(exception);
             }
             await Clients

@@ -1,16 +1,16 @@
-﻿using DrawOutApp.Server.Models;
+﻿using DrawOutApp.Server.Hubs;
+using DrawOutApp.Server.Models;
 
 namespace DrawOutApp.Server.Services.Contracts
 {
     public interface IGameService
     {
-        Task<string> CreateGameAsync(GameModel gameModel);
-        Task<Result<GameModel?,string>> GetGameAsync(string gameSessionId);
-        Task<Result<bool, string>> UpdateGameRoundAsync(GameRound gameRound);
+        Task StartGameAsync(string gameId, GameTimers gameTimers);
+        Task SelectWordAsync(string gameId, string word, GameTimers gameTimers);
+        Task SubmitGuessAsync(string userId, string gameId, string guess, GameTimers gameTimers);
+        Task<GameRoundModel> CreateGameAsync(GameModel gameModel, List<string> userIds);
         Task<Result<int, string>> IncrementScoreAsync(string gameId, string teamName, int incrementValue);
-        Task<Result<bool, string>> DecrementTimerAsync(string gameId, string timerName, int decrementValue);
         Task<bool> CheckGuessAsync(string gameId, string guess);
-        Task SetWordAsync(string gameId, string selectedWord);
         Task DeleteGameAsync(string gameSessionId);
     }
 }

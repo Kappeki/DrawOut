@@ -17,7 +17,7 @@ namespace DrawOutApp.Server.Mappers
                 .ForMember(dest => dest.Players, opt => opt.Ignore());
 
             CreateMap<RoomModel, Room>()
-                .ForMember(dest => dest.RoomState, opt => opt.MapFrom(src => Enum.Parse<GameState>(src.RoomState)))
+                .ForMember(dest => dest.RoomState, opt => opt.MapFrom(src => Enum.Parse<RoomState>(src.RoomState)))
                 .ForMember(dest => dest.RoundTime, opt => opt.MapFrom(src => (RoundTime)src.RoundTime))
                 .ForMember(dest => dest.Password, opt => opt.MapFrom(src => src.PasswordHash))
                 .ForMember(dest => dest._id, opt => opt.Ignore())

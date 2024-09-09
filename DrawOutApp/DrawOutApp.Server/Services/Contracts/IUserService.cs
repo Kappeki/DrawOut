@@ -18,5 +18,7 @@ namespace DrawOutApp.Server.Services.Contracts
         Task AddRolesAsync(string sessionId, IEnumerable<Role> roles);
         Task RemoveRolesAsync(string sessionId, IEnumerable<Role> roles);
         Task DeleteUserAsync(string sessionId);
+        Task SetConnectionIdAsync(string sessionId, string connectionId, TimeSpan? expiry = null);
+        Task<string?> GetConnectionIdAsync(string sessionKey);
     }
 }

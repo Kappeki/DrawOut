@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Room, RoomListItem } from '../models/room';
+import { GameModelView } from '../models/game';
 
 @Injectable({
   providedIn: 'root'
@@ -59,6 +60,11 @@ export class DrawOutAPIService {
   getWordsByPackName(packName: string): Observable<string[]> {
     const params = new HttpParams().set('packName', packName);
     return this.http.get<string[]>(`${this.API_URL}/Room/GetWordsByPackName`, { params });
+  }
+
+  startGame(roomId: string): Observable<GameModelView> {
+    const params = new HttpParams().set('roomId', roomId);
+    return this.http.get<GameModelView>(`${this.API_URL}/Room/StartGame`, { params });
   }
 
 }

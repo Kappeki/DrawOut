@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace DrawOutApp.Server.Entities
 {
-    public enum GameState { WaitingForPlayers, InProgress, Steal, RoundEnded }
+    public enum GameState { WaitingForPlayers, Standby, InProgress, Steal, RoundEnded}
     public class Game
     {
         //static once game is created
@@ -25,6 +25,7 @@ namespace DrawOutApp.Server.Entities
         public int MainTimer { get; set; }
         public int StealTimer { get; set; }
     }
+    
     public class GameHistory
     {
         [BsonId]

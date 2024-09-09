@@ -39,13 +39,27 @@ namespace DrawOutApp.Server.Repositories
         }
 
         //pomocna funkcija za dodavanje fielda u user hashu 
-        public async Task AddToHashSet<T>(string setKey, Func<T, string> keySelector, T value, TimeSpan expiry)
+        public async Task AddToHashSet<T>(string setKey, Func<T, string> keySelector, T value, TimeSpan? expiry = null)
         {
-            string serializedObject = JsonConvert.SerializeObject(value);
+            string serializedObject;
+
+            if (value is string stringValue)
+            {
+                serializedObject = stringValue;
+            }
+            else
+            {
+                serializedObject = JsonConvert.SerializeObject(value);
+            }
+
             await _database.HashSetAsync(setKey, [new HashEntry(keySelector(value), serializedObject)]);
-            await _database.KeyExpireAsync(setKey, expiry);
+
+            if (expiry.HasValue)
+            {
+                await _database.KeyExpireAsync(setKey, expiry);
+            }
         }
-        
+
         public async Task<T?> GetFromHashSet<T>(string setKey, string valueKey)
         {
             var value = await _database.HashGetAsync(setKey, valueKey);
@@ -53,7 +67,13 @@ namespace DrawOutApp.Server.Repositories
             {
                 return value.IsNullOrEmpty ? default(T) : (T)(object)value.ToString();
             }
-            return value.IsNullOrEmpty ? default(T) : JsonConvert.DeserializeObject<T>(value);
+            return value.IsNullOrEmpty ? default(T) : JsonConvert.DeserializeObject<T>(value!);
+        }
+
+        public async Task<string> GetConnIdFromHash(string setKey, string valueKey)
+        {
+            var value = await _database.HashGetAsync(setKey, valueKey);
+            return value.IsNullOrEmpty ? string.Empty : value.ToString();
         }
 
         public async Task DeleteUserAsync(string sessionKey)

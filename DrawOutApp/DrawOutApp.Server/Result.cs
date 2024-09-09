@@ -1,4 +1,7 @@
-﻿namespace DrawOutApp.Server
+﻿using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
+
+namespace DrawOutApp.Server
 {
     public readonly struct Result<TValue, TError>
     {
@@ -47,6 +50,14 @@
             isError = IsError;
             value = _value;
             error = _error;
+        }
+    }
+
+    public class SessionIdProvider : IUserIdProvider
+    {
+        public virtual string GetUserId(HubConnectionContext connection)
+        {
+            return connection.User?.FindFirst("SessionId")?.Value!;
         }
     }
 }
