@@ -9,13 +9,19 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.css'
 })
-export class ChatComponent {
+export class ChatComponent implements OnDestroy {
   @Input() messages: any[] = [];
   @Input() chatInput: string = '';
   @Input() enableGuessing: boolean = false;
   @Output() messageSent = new EventEmitter<string>();
   @Output() guessSent = new EventEmitter<string>();
   charCount: number = 0;
+
+  ngOnDestroy(): void {
+    this.messages = [];
+    this.messageSent.complete();
+    this.guessSent.complete();
+  }
 
   onSendMessage() {
     if (this.chatInput.trim()) {

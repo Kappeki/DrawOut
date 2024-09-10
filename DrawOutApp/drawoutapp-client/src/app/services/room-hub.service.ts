@@ -28,28 +28,15 @@ export class RoomHubService {
   public teams: any[] = [];
 
   constructor() {
-    this.hubConnection?.on('ReceiveMessage', (sender: string, content: string, timestamp: string) => {
-      this.messages = [...this.messages, { sender, content, timestamp }];
-      this.messages$.next(this.messages);
-    });
-    this.hubConnection?.on('ConnectedUsers', (users: User[]) => {
-      this.connectedUsers$.next(users);
-    });
-    this.hubConnection?.on('ConnectedRoom', (room: Room) => {
-      this.connectedRoom$.next(room);
-    });
-    this.hubConnection?.on('ReceiveTeamSwitch', (oldTeam: string | null, newTeam: string, nickname: string) => {
-      this.handleTeamSwitch(oldTeam, newTeam, nickname);
-    });
-    this.hubConnection?.on('RoomSettingsChanged', (settingName: string, settingValue: any) => {
-      this.roomSettings$.next({ settingName, settingValue });
-    });
+    this.setupListeners();
   }
 
   public async startConnection() {
     await this.hubConnection
       .start()
-      .then(() => console.log('Connection started'))
+      .then(() => {
+        console.log('Connection started');
+      })
       .catch(err => console.error('Error while starting connection: ' + err));
   }
 
@@ -105,5 +92,24 @@ export class RoomHubService {
   public async notifyGameStart(roomURL: string) {
     return await this.hubConnection?.invoke('NotifyGameStart', roomURL)
       .catch(err => console.error(err));
+  }
+
+  private setupListeners(): void {
+    this.hubConnection?.on('ReceiveMessage', (sender: string, content: string, timestamp: string) => {
+      this.messages = [...this.messages, { sender, content, timestamp }];
+      this.messages$.next(this.messages);
+    });
+    this.hubConnection?.on('ConnectedUsers', (users: User[]) => {
+      this.connectedUsers$.next(users);
+    });
+    this.hubConnection?.on('ConnectedRoom', (room: Room) => {
+      this.connectedRoom$.next(room);
+    });
+    this.hubConnection?.on('ReceiveTeamSwitch', (oldTeam: string | null, newTeam: string, nickname: string) => {
+      this.handleTeamSwitch(oldTeam, newTeam, nickname);
+    });
+    this.hubConnection?.on('RoomSettingsChanged', (settingName: string, settingValue: any) => {
+      this.roomSettings$.next({ settingName, settingValue });
+    });
   }
 }

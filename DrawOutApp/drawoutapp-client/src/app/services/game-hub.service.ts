@@ -24,9 +24,6 @@ export class GameHubService {
   public previousTimer$ = new BehaviorSubject<string>('');
 
   constructor() {
-    //EnableGuessing, EnableDrawing, PromptWordSelect fali, mozda u game comp direktno
-
-
   }
 
   public async startConnection() {
@@ -41,7 +38,16 @@ export class GameHubService {
   public async stopConnection() {
     await this.hubConnection
       .stop()
-      .then(() => console.log('Connection stopped'))
+      .then(() => {
+        this.gameModel$.next(null);
+        this.gameRound$.next(null);
+        this.wordSelected$.next(0);
+        this.roundWinTeam$.next('');
+        this.timer$.next(0);
+        this.currentTimer$.next('');
+        this.previousTimer$.next('');
+        console.log('Connection stopped')
+      })
       .catch(err => console.error('Error while stopping connection: ' + err));
   }
 

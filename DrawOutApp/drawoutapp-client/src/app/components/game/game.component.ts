@@ -12,7 +12,8 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import { SessionService } from '../../services/session.service';
-import { dateTimestampProvider } from 'rxjs/internal/scheduler/dateTimestampProvider';
+
+
 @Component({
   selector: 'app-game',
   standalone: true,
@@ -27,7 +28,6 @@ export class GameComponent implements OnInit {
   @Input() roomId: string = '';
   @Input() isRoomAdmin: boolean = false;
   @Input() wordPack: string[] = [];
-  @Input() chatMessages: any[] = [];
 
   //treba za povezivanje sa chat componentom
   @Input() latestGuess$!: Observable<string | null>;
@@ -49,6 +49,7 @@ export class GameComponent implements OnInit {
   guessEnabled = false;
   blankCount = 0;
   msgNotificationsUI: any[] = [];
+  notificationText: string = '';
 
   selectables: string[] = [];
   hint: string = '';
@@ -69,11 +70,23 @@ export class GameComponent implements OnInit {
       this.subscriptions.add(this.gameHubService.gameRound$.subscribe(res => {
         console.log(res);
         this.gameRoundView = res!;
+        if (this.gameRoundView.gameState === 'Standby') {
+          this.displayNotification('Get ready for the next round!');
+        }
+        else if (this.gameRoundView.gameState === 'InProgress') {
+          this.displayNotification('Game started!');
+        }
+        else if (this.gameRoundView.gameState === 'Steal') {
+          this.displayNotification('Steal time!');
+        }
+        else if (this.gameRoundView.gameState === 'RoundEnded') {
+          this.displayNotification(`${this.winningTeam} won the round!`);
+        }
       }));
       this.subscriptions.add(this.gameHubService.wordSelected$.subscribe((wordLength: number) => {
         console.log('Word selected with length: ' + wordLength);
         this.blankCount = wordLength;
-        this.hint = ''.repeat(this.blankCount);
+        this.hint = '_'.repeat(this.blankCount);
       }));
       this.subscriptions.add(this.gameHubService.roundWinTeam$.subscribe((teamName: string) => {
         this.winningTeam = teamName;
@@ -88,7 +101,6 @@ export class GameComponent implements OnInit {
         this.previousTimerName = timerName;
       }));
 
-
       this.subscriptions.add(
         this.gameHubService.hubConnection.on('EnableGuessing', (res: boolean, timestamp: number) => {
           res ? console.log('Guessing enabled at ' + timestamp) : console.log('Guessing disabled at ' + timestamp);
@@ -100,8 +112,6 @@ export class GameComponent implements OnInit {
           res ? console.log('Drawing enabled at ' + timestamp) : console.log('Drawing disabled at ' + timestamp);
           this.drawEnabled = res;
         }));
-
-
 
       let lastPromptTime = 0;
       this.subscriptions.add(
@@ -158,6 +168,13 @@ export class GameComponent implements OnInit {
   async selectWord(word: string) {
     await this.gameHubService.selectWord(word);
     this.dialog.closeAll();
+  }
+
+  private displayNotification(message: string): void {
+    this.notificationText = message;
+    setTimeout(() => {
+      this.notificationText = '';
+    }, 3000); // Display the notification for 3 seconds
   }
 
   private prepareWordSelection(): void {

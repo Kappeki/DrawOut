@@ -12,6 +12,13 @@
     </ng-template>
 
 
+    <div class="notification-overlay" *ngIf="notificationText">
+        <div class="notification-content">
+            {{ notificationText }}
+        </div>
+    </div>
+
+
     <div class="score-word-container">
         <div class="score-container redTeam">
             <span>Red Team: {{gameRoundView?.redScore}}</span>
@@ -19,7 +26,7 @@
 
         <div class="word-container">
             <span *ngIf="this.drawEnabled && gameRoundView?.selectedWord">{{gameRoundView?.selectedWord}}</span>
-            <span *ngIf="!this.drawEnabled">Guess the word! Hint : {{this.hint}}</span>
+            <span *ngIf="!this.drawEnabled">Guess the word! -> {{this.hint}}</span>
         </div>
 
         <div class="score-container blueTeam">
@@ -31,7 +38,7 @@
         <!-- Timer and Round Info -->
         <div class="overlay">
             <div class="time-container">
-                <span>Time Left: ({{this.currentTimer}})</span>
+                <span>Time Left: ({{this.currentTimerName}})</span>
                 <span>{{this.currentTimer}}</span>
             </div>
             <div class="round-container">
@@ -40,7 +47,7 @@
         </div>
 
         <!-- Whiteboard Component -->
-        <!-- <app-whiteboard></app-whiteboard> -->
+        <app-whiteboard *ngIf="this.drawEnabled"></app-whiteboard>
     </div>
     <!-- Mozda crtanje, boje itd da bude ovde a ne u whiteboard -->
 </div>

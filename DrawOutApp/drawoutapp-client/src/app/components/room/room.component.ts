@@ -30,6 +30,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   private roomURL: string = '';
   private subscriptions: Subscription = new Subscription();
+  private latestGuessSubject = new BehaviorSubject<string | null>(null);
 
   room: Room | null = null;
   redTeam: string[] = [];
@@ -50,9 +51,9 @@ export class RoomComponent implements OnInit, OnDestroy {
   isRoomAdmin: boolean = false;
   roomId: string = '';
   enableGuessing = true;
+
   //imati u vidu da NECE game da se pokrene ako admin ne udje iz room liste
 
-  private latestGuessSubject = new BehaviorSubject<string | null>(null);
 
   constructor(
     private roomHubService: RoomHubService,
@@ -64,85 +65,93 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
 
-    //dodati listener ako admin izadje iz sobe da se popupuje room closed i da se vrati na home posle neko vreme il kako god
+    await this.roomHubService.startConnection().then(() => {
 
-    await this.roomHubService.startConnection();
+      this.subscriptions.add(
+        this.roomHubService.connectedRoom$.subscribe(res => {
+          this.room = res!;
+          this.roomURL = this.room?.roomURL!;
+          const sessionId = this.sessionService.getSessionId();
+          this.isRoomAdmin = this.room && this.room?.roomAdminId === sessionId;
+        }));
 
-    this.subscriptions.add(this.roomHubService.connectedRoom$.subscribe(res => {
-      this.room = res!;
-      this.roomURL = this.room?.roomURL!;
-      const sessionId = this.sessionService.getSessionId();
-      this.isRoomAdmin = this.room && this.room?.roomAdminId === sessionId;
-    }));
+      this.subscriptions.add(
+        this.roomHubService.messages$.subscribe(res => {
+          this.chatMessages = res;
+        }));
 
-    this.subscriptions.add(this.roomHubService.messages$.subscribe(res => {
-      this.chatMessages = res;
-    }));
+      this.subscriptions.add(
+        this.roomHubService.connectedUsers$.subscribe(res => {
+          this.users = res;
+          this.redTeam = [];
+          this.blueTeam = [];
+          this.users.forEach(user => {
+            if (user.roles?.includes('Red')) {
+              this.redTeam.push(user.nickname);
+            } else if (user.roles?.includes('Blue')) {
+              this.blueTeam.push(user.nickname);
+            }
+          });
+        }));
 
-    this.subscriptions.add(this.roomHubService.connectedUsers$.subscribe(res => {
-      this.users = res;
-      this.redTeam = [];
-      this.blueTeam = [];
-      this.users.forEach(user => {
-        if (user.roles?.includes('Red')) {
-          this.redTeam.push(user.nickname);
-        } else if (user.roles?.includes('Blue')) {
-          this.blueTeam.push(user.nickname);
+      this.subscriptions.add(
+        this.roomHubService.teams$.subscribe(res => {
+          const userIndex = this.users.findIndex(user => user.nickname === res.nickname);
+          if (userIndex !== -1) {
+            const user = this.users[userIndex];
+            user.roles = user.roles!.filter(role => role !== 'Red' && role !== 'Blue');
+            user.roles.push(res.newTeam);
+            this.users[userIndex] = user;
+          }
+          if (res.oldTeam) {
+            if (res.oldTeam === 'Red' && res.newTeam === 'Blue') {
+              this.redTeam = this.redTeam.filter(name => name !== res.nickname);
+              this.blueTeam.push(res.nickname);
+            } else if (res.oldTeam === 'Blue' && res.newTeam === 'Red') {
+              this.blueTeam = this.blueTeam.filter(name => name !== res.nickname);
+              this.redTeam.push(res.nickname);
+            }
+          } else {
+            if (res.newTeam === 'Red') {
+              this.redTeam.push(res.nickname);
+            } else if (res.newTeam === 'Blue') {
+              this.blueTeam.push(res.nickname);
+            }
+          }
+        }));
+
+      this.subscriptions.add(
+        this.roomHubService.roomSettings$.subscribe(setting => {
+          if (setting && this.room) {
+            switch (setting.settingName) {
+              case 'RoundTime':
+                this.room.roundTime = setting.settingValue;
+                break;
+              case 'SelectedWordPack':
+                this.room.selectedWordPack = setting.settingValue;
+                this.getWordsFromPack();
+                break;
+              case 'CustomWords':
+                this.room.customWords = setting.settingValue.split(',');
+                break;
+            }
+          }
+        }));
+
+
+    });
+
+    this.subscriptions.add(
+      this.route.paramMap.subscribe(params => {
+        if (this.route.snapshot.url[1].path === 'by-id') {
+          this.roomId = params.get('roomId')!;
+          this.roomHubService.joinRoomById(this.roomId);
+        } else if (this.route.snapshot.url[1].path === 'by-url') {
+          this.roomURL = params.get('roomURL')!;
+          this.roomHubService.joinRoomByURL(this.roomURL);
         }
-      });
-    }));
+      }));
 
-    this.subscriptions.add(this.roomHubService.teams$.subscribe(res => {
-      const userIndex = this.users.findIndex(user => user.nickname === res.nickname);
-      if (userIndex !== -1) {
-        const user = this.users[userIndex];
-        user.roles = user.roles!.filter(role => role !== 'Red' && role !== 'Blue');
-        user.roles.push(res.newTeam);
-        this.users[userIndex] = user;
-      }
-      if (res.oldTeam) {
-        if (res.oldTeam === 'Red' && res.newTeam === 'Blue') {
-          this.redTeam = this.redTeam.filter(name => name !== res.nickname);
-          this.blueTeam.push(res.nickname);
-        } else if (res.oldTeam === 'Blue' && res.newTeam === 'Red') {
-          this.blueTeam = this.blueTeam.filter(name => name !== res.nickname);
-          this.redTeam.push(res.nickname);
-        }
-      } else {
-        if (res.newTeam === 'Red') {
-          this.redTeam.push(res.nickname);
-        } else if (res.newTeam === 'Blue') {
-          this.blueTeam.push(res.nickname);
-        }
-      }
-    }));
-
-    this.subscriptions.add(this.roomHubService.roomSettings$.subscribe(setting => {
-      if (setting && this.room) {
-        switch (setting.settingName) {
-          case 'RoundTime':
-            this.room.roundTime = setting.settingValue;
-            break;
-          case 'SelectedWordPack':
-            this.room.selectedWordPack = setting.settingValue;
-            this.getWordsFromPack();
-            break;
-          case 'CustomWords':
-            this.room.customWords = setting.settingValue.split(',');
-            break;
-        }
-      }
-    }));
-
-    this.subscriptions.add(this.route.paramMap.subscribe(params => {
-      if (this.route.snapshot.url[1].path === 'by-id') {
-        this.roomId = params.get('roomId')!;
-        this.roomHubService.joinRoomById(this.roomId);
-      } else if (this.route.snapshot.url[1].path === 'by-url') {
-        this.roomURL = params.get('roomURL')!;
-        this.roomHubService.joinRoomByURL(this.roomURL);
-      }
-    }));
   }
   async ngOnDestroy(): Promise<void> {
     this.subscriptions.unsubscribe();
@@ -161,7 +170,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.roomId = '';
     await this.roomHubService.leaveRoom();
   }
-
 
   get roomGameInfo(): { users: User[], roundTime: number } | null {
     if (this.isRoomAdmin) {
@@ -186,7 +194,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.chatMessages = [];
   }
 
-  endGame() { }
   copyInviteLink() { }
 
   sendMessage(message: string) {

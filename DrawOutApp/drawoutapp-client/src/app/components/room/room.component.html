@@ -32,7 +32,7 @@
       <div class="whiteboard-container">
         <app-game *ngIf="room?.roomState === 'InGame'" (roundChange)="handleRoundChange($event)"
           (guessEnabledChange)="handleGuessEnabled($event)" [isRoomAdmin]="isRoomAdmin" [users]="users!"
-          [roundTime]="room?.roundTime!" [roomId]="roomId" [wordPack]="availableWords" [chatMessages]="chatMessages"
+          [roundTime]="room?.roundTime!" [roomId]="roomId" [wordPack]="availableWords"
           [latestGuess$]="latestGuess$"></app-game>
 
         <!-- Settings overlay -->

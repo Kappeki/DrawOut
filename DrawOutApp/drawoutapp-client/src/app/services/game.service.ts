@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { GameModelView, GameRoundView } from '../models/game';
 import { BehaviorSubject } from 'rxjs';
-import { WaitingForPlayersState } from '../models/states/waiting-for-players-state';
-import { GameState } from '../models/states/game-state';
+
 import { User } from '../models/user';
 
 @Injectable({

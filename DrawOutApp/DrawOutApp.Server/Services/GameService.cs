@@ -271,7 +271,7 @@ namespace DrawOutApp.Server.Services
                 var painterConnId = await _userService.GetConnectionIdAsync(painterId);
                 if (painterConnId == null) throw new Exception("Painter connectionId not found! ERROR!");
                 await _hubContext.Clients.Clients(guessingTeamConnIds).SendAsync("EnableGuessing", true, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-                await _hubContext.Clients.Clients(guessingTeamConnIds).SendAsync("EnableDrawing", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                await _hubContext.Clients.GroupExcept(gameId, painterConnId).SendAsync("EnableDrawing", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                 await _hubContext.Clients.Client(painterConnId).SendAsync("EnableDrawing",true, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
             }
