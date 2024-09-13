@@ -255,6 +255,28 @@ namespace DrawOutApp.Server.Services
             await _roomRepository.UpdateRoomAsync(filter, update);
         }
 
+        public async Task<bool> OnAdminDisconnectedAsync(string roomId, string newAdminId)
+        {
+            var filter = Builders<Room>.Filter.Eq(r => r._id, ObjectId.Parse(roomId));
+            var update = Builders<Room>.Update.Set(r => r.RoomAdminId, newAdminId);
+            await _roomRepository.UpdateRoomAsync(filter, update);
+            return true;
+        }
+        public async Task<bool> CheckPasswordProtection(string roomId)
+        {
+            var room = await _roomRepository.GetRoomAsync(roomId);
+            if (room == null)
+            {
+                return false;
+            }
+            if (room.Password != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+
         public async Task DeleteRoomAsync(string roomId)
         {
             await _roomRepository.DeleteRoomAsync(roomId);

@@ -16,6 +16,7 @@ import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatOptionModule } from '@angular/material/core';
+import { SelectableDirective } from './directives/selectable.directive';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { MatOptionModule } from '@angular/material/core';
     MatFormFieldModule,
     MatSelectModule,
     MatLabel,
-    MatOptionModule
+    MatOptionModule,
+    SelectableDirective
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [],

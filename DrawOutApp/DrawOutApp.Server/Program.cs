@@ -51,6 +51,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddAutoMapper(typeof(UserMapper));
 builder.Services.AddAutoMapper(typeof(RoomMapper));
 builder.Services.AddAutoMapper(typeof(GameMapper));
+builder.Services.AddAutoMapper(typeof(DrawingActionMapper));
 #endregion
 
 #region MongoDB
@@ -108,12 +109,17 @@ builder.Services.AddSession(options =>
 builder.Services.AddTransient<IChatMessageRepo, ChatMessageRepository>();
 builder.Services.AddTransient<IGameRepo, GameRepository>();
 builder.Services.AddTransient<IUserRepo, UserRepository>();
+builder.Services.AddTransient<IDrawingActionRepo, DrawingActionRepository>();
 
 //services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IDrawingActionService, DrawingActionService>();
 
 #endregion
+
+builder.Logging.AddConsole(); 
+builder.Logging.AddDebug(); 
 
 var app = builder.Build();
 

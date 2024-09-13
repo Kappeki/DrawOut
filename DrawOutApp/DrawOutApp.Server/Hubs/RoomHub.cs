@@ -70,18 +70,27 @@ namespace DrawOutApp.Server.Hubs
             var usersInfo = new List<UserModel>();
             foreach (var userId in users!)
             {
-                if(userId == Context.Items["SeshKey"]!.ToString()!)
-                {
-                    var userRoles = Context.Items["Roles"] as List<string>;
-                    userRoles?.Add("Player");
-                    Context.Items["Roles"] = userRoles;
-                }
                 await _userService.AddRolesAsync(userId, [Role.Player]);
                 var (userIsError, user, userError) = await _userService.GetUserAsync(userId);
                 if (userIsError)
                 {
                     throw new HubException(userError);
                 }
+
+                if(userId == Context.Items["SeshKey"]!.ToString()!)
+                {
+                    var userRoles = Context.Items["Roles"] as List<string>;
+                    userRoles?.Add("Player");
+                    Context.Items["Roles"] = userRoles;
+                }
+
+                if(user!.Roles!.Contains(Role.RoomAdmin.ToString()))
+                {
+                    var roles = Context.Items["Roles"] as List<string>;
+                    roles?.Add("RoomAdmin");
+                    Context.Items["Roles"] = roles;
+                }
+
                 usersInfo.Add(user!);
             }
 
@@ -246,10 +255,43 @@ namespace DrawOutApp.Server.Hubs
             }
             
             var seshKey = Context.Items["SeshKey"]!.ToString();
+            var roomId = Context.Items["RoomId"]!.ToString();
+
+            var (isError, userIds, error) = await _roomService.GetPlayerIdsAsync(Context.Items["RoomId"]!.ToString()!);
+
+
+            var isProtected = await _roomService.CheckPasswordProtection(roomId!);
+            if (userIds != null)
+            {
+                userIds!.Remove(seshKey!);
+                if (AdminDisconnected() && userIds!.Count > 1 && !isProtected)
+                {
+                    Random random = new Random();
+                    var newAdmin = userIds![random.Next(userIds!.Count)];
+                    await _userService.AddRolesAsync(newAdmin, [Role.RoomAdmin]);
+                    await _userService.RemoveRolesAsync(seshKey!, [Role.RoomAdmin]);
+                    var user = await _userService.GetUserAsync(newAdmin);
+                    var success = await _roomService.OnAdminDisconnectedAsync(roomId!, newAdmin);
+
+                    if (success)
+                    {
+                        var roles = Context.Items["Roles"] as List<string>;
+                        roles?.Remove("RoomAdmin");
+                        Context.Items["Roles"] = roles;
+
+                        await Clients.Group(roomId!).SendAsync(
+                            "ReceiveMessage",
+                            "Server",
+                            $"{user.Data!.Nickname} is the new admin!", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                    }
+                    else
+                    {
+                        throw new HubException("Couldn't set new admin");
+                    }
+                }
+            }
 
             await _userService.RemoveRolesAsync(seshKey!, [Role.RoomAdmin, Role.Player, Role.Red, Role.Blue, Role.Painter, Role.TeamLeader]);
-
-            var roomId = Context.Items["RoomId"]!.ToString();
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId!);
 
@@ -258,14 +300,20 @@ namespace DrawOutApp.Server.Hubs
             {
                 await base.OnDisconnectedAsync(exception);
             }
+
             await Clients
                 .Group(roomId!)
                 .SendAsync("ReceiveMessage", "Server", $"{Context.Items["Nickname"]!.ToString()} has left the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
-
             await SendConnectedRoomById(roomId!);
             await SendConnectedUsers(roomId!);
+            
             await base.OnDisconnectedAsync(exception);
+        }
+        private bool AdminDisconnected()
+        {
+            var roles = Context.Items["Roles"] as List<string>;
+            return roles != null && roles.Contains("RoomAdmin");
         }
     }
 }

@@ -31,9 +31,10 @@
       <!-- Whiteboard and Settings -->
       <div class="whiteboard-container">
         <app-game *ngIf="room?.roomState === 'InGame'" (roundChange)="handleRoundChange($event)"
-          (guessEnabledChange)="handleGuessEnabled($event)" [isRoomAdmin]="isRoomAdmin" [users]="users!"
-          [roundTime]="room?.roundTime!" [roomId]="roomId" [wordPack]="availableWords"
-          [latestGuess$]="latestGuess$"></app-game>
+          (guessEnabledChange)="handleGuessEnabled($event)" (chatClear)="handleChatClear($event)"
+          [isRoomAdmin]="isRoomAdmin" [users]="users!" [roomId]="roomId" [wordPack]="availableWords"
+          [latestGuess$]="latestGuess$">
+        </app-game>
 
         <!-- Settings overlay -->
         <div *ngIf="room?.roomState === 'Waiting'" class="settings-overlay">
@@ -52,7 +53,7 @@
 
     <div class="below-canvas-container">
       <!-- Spectators Section -->
-      <div class="spectator-container">
+      <div class="spectator-container" *ngIf="room?.roomState === 'Waiting'">
         <app-user-list class="user-team-list" [users]="users" [team]=" this.redTeam.concat(this.blueTeam)"
           [currentTeam]="currentTeam" className="Spectators" (teamChange)="handleTeamJoin($event)"></app-user-list>
       </div>

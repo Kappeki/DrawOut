@@ -1,43 +1,60 @@
+.selected {
+    border: 4px solid red;
+}
+
 .canvas-controls-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    z-index: 20;
+    width: 100%;
+    height: calc(100vh - 200px);
+    margin: 0 auto;
 }
-  
+
 canvas {
     width: 100%;
-    height: 550px;
+    height: 100%;
     border: 2px solid #000;
     border-radius: 8px;
+    z-index: 20;
+    cursor: url('/pencil.png') 0 30, auto;
 }
 
 .game-controls-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    width: 60%;
-    margin-top: 30px;
+    justify-content: space-evenly;
+    width: 100%;
+    max-width: 1000px;
+    margin-top: 20px;
 }
-  
+
 .game-paint-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
+    width: 100%;
+    position: relative;
+    z-index: 20;
 }
 
 .color-palette {
     display: grid;
-    grid-template-columns: repeat(15, 20px); /* Adjust for more colors */
+    grid-template-columns: repeat(15, 30px);
     grid-gap: 5px;
+    width: 300px;
+    margin: 0 auto;
+    margin-left: 5px;
 }
 
 .color-box {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     border: 1px solid #000;
     cursor: pointer;
 }
@@ -46,6 +63,8 @@ canvas {
     display: flex;
     align-items: center;
     justify-content: center;
+    margin: 0 10px;
+    cursor: pointer;
 }
 
 .brush-size {
@@ -64,8 +83,7 @@ canvas {
     margin-left: 10px;
 }
 
-.tool-button,
-.action-button {
+.tool-button {
     background-color: #fff;
     border: 2px solid #000;
     cursor: pointer;
@@ -74,13 +92,27 @@ canvas {
     border-radius: 5px;
 }
 
+.action-button {
+    background-color: #fff;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: none;
+}
+
 .tool-button:hover,
 .action-button:hover {
     background-color: #f0f0f0;
 }
 
-.brush-options, .color-options, .undo-option {
+.brush-options,
+.color-options,
+.undo-option {
     display: flex;
     align-items: center;
     margin: 0 10px;
+}
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.5;
 }

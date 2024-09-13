@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { BehaviorSubject } from 'rxjs';
 import { GameModelView, GameRoundView } from '../models/game';
+import { DrawingActionView } from '../models/drawing-action';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,12 @@ export class GameHubService {
   public timer$ = new BehaviorSubject<number>(0);
   public currentTimer$ = new BehaviorSubject<string>('');
   public previousTimer$ = new BehaviorSubject<string>('');
+
+  public drawingActions$ = new BehaviorSubject<DrawingActionView[]>([]);
+  drawingActions: DrawingActionView[] = [];
+
+  public currentStroke$ = new BehaviorSubject<string>('');
+  public currentStrokeId: string = '';
 
   constructor() {
   }
@@ -49,6 +56,26 @@ export class GameHubService {
         console.log('Connection stopped')
       })
       .catch(err => console.error('Error while stopping connection: ' + err));
+  }
+
+
+  public async sendDrawingAction(action: DrawingActionView[]) {
+    await this.hubConnection.invoke('Draw', action)
+      .catch(err => console.error(err));
+  }
+
+  public async clearCanvas() {
+    await this.hubConnection.invoke('ClearBoard')
+      .catch(err => console.error(err));
+  }
+
+  public async undoAction(strokeId: string) {
+    await this.hubConnection.invoke('UndoLastStroke', strokeId)
+      .catch(err => console.error(err));
+  }
+  public async sendMementoSave() {
+    await this.hubConnection.invoke('SendMementoSave')
+      .catch(err => console.error(err));
   }
 
   public async startGame() {
@@ -98,6 +125,22 @@ export class GameHubService {
       this.currentTimer$.next('');
       this.previousTimer$.next(timerName);
     });
-  }
 
+    //drawing actions
+    this.hubConnection.on('UpdateDrawing', (actions: DrawingActionView[]) => {
+      this.drawingActions = [...this.drawingActions, ...actions];
+
+      this.drawingActions$.next(actions);
+    });
+    this.hubConnection.on('ClearBoard', (res: number) => {
+      console.log('Clearing board...' + res);
+      this.drawingActions = [];
+      this.drawingActions$.next([]);
+    });
+
+    this.hubConnection.on('UndoAction', (strokeId: string) => {
+      this.currentStrokeId = strokeId;
+      this.currentStroke$.next(this.currentStrokeId);
+    });
+  }
 }

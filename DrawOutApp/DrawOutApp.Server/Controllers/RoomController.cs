@@ -96,7 +96,12 @@ namespace DrawOutApp.Server.Controllers
 
             var gameRoundModel = await _gameService.CreateGameAsync(gameModel, usersInRoom!);
 
-            return Ok(gameModel);
+            if(gameRoundModel == null)
+            {
+                return BadRequest("Error while creating game.");
+            }
+
+            return Ok("Game created, starting...");
         }
 
         /// <summary>

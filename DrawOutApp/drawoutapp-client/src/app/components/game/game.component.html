@@ -38,16 +38,17 @@
         <!-- Timer and Round Info -->
         <div class="overlay">
             <div class="time-container">
-                <span>Time Left: ({{this.currentTimerName}})</span>
+                <img src="hourglass.png" alt="Timer Icon">
                 <span>{{this.currentTimer}}</span>
             </div>
             <div class="round-container">
                 <span>Round {{gameRoundView?.currentRound}} of {{gameModelView?.totalRounds}}</span>
             </div>
         </div>
-
-        <!-- Whiteboard Component -->
-        <app-whiteboard *ngIf="this.drawEnabled"></app-whiteboard>
     </div>
+
+    <!-- Whiteboard Component -->
+    <app-whiteboard [drawEnabled]="this.drawEnabled" [gameId]="gameModelView?._id!">
+    </app-whiteboard>
     <!-- Mozda crtanje, boje itd da bude ovde a ne u whiteboard -->
 </div>

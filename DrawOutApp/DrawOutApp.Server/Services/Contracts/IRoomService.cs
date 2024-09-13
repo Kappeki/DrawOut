@@ -6,10 +6,8 @@ namespace DrawOutApp.Server.Services.Contracts
 {
     public interface IRoomService
     {
-        // ovo se poziva kad se klikne create room
+       
         Task<Result<RoomModel,string>> CreateRoomAsync(string creatingUserId, string roomName, string? password = null);
-        // ovo se poziva kad se klikne join room
-        //Task<Result<RoomModel, string>> AddPlayerAsync(RoomModel roomModel, string sessionId, string? password = null);
         Task<Result<bool, string>> AddPlayerAsync(string roomId, string sessionId, string? password = null);
         Task<Result<bool, string>> RemoveUserAsync(string roomId, string sessionId);
         Task<Result<RoomModel?,string>> GetRoomByIdAsync(string roomId);
@@ -19,6 +17,8 @@ namespace DrawOutApp.Server.Services.Contracts
         Task<Result<List<RoomListItem>?, string>> GetMyRoomsAsync(string sessionId);
         Task<Result<bool,string>> UpdateRoomAsync(RoomModel roomModel);
         Task UpdateRoomStateAsync(string roomId, RoomState roomState);
+        Task<bool> OnAdminDisconnectedAsync(string roomId, string newAdminId);
+        Task<bool> CheckPasswordProtection(string roomId);
         Task DeleteRoomAsync(string roomId);
         Task<string?> GetIdFromURL(string roomURL);
         Task<Result<List<string>?, string>> GetPlayerIdsAsync(string roomId);

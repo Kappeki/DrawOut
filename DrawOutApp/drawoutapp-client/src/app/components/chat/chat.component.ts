@@ -22,7 +22,6 @@ export class ChatComponent implements OnDestroy {
     this.messageSent.complete();
     this.guessSent.complete();
   }
-
   onSendMessage() {
     if (this.chatInput.trim()) {
       if (this.enableGuessing) {
@@ -33,18 +32,15 @@ export class ChatComponent implements OnDestroy {
       this.chatInput = '';
     }
   }
-
   handleKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       this.onSendMessage();
     }
   }
-
   formatTimestamp(timestamp: number): string {
     const date = new Date(timestamp * 1000); // Assuming timestamp is in seconds
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); // You can customize the format as needed
   }
-
   updateCharacterCount(): void {
     this.charCount = this.chatInput.length;
   }

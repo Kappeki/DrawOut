@@ -36,11 +36,8 @@ export class RoomComponent implements OnInit, OnDestroy {
   redTeam: string[] = [];
   blueTeam: string[] = [];
   chatMessages: any[] = [];
-  gameStarted: boolean = false;
   currentRound: number = 1;
   totalRounds: number = 8;
-
-  gameModel: GameModelView | null = null;
 
   currentTeam: string | null = null;
   chatInput: string = '';
@@ -53,6 +50,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   enableGuessing = true;
 
   //imati u vidu da NECE game da se pokrene ako admin ne udje iz room liste
+  //trebalo bi i ovo da se ispravi kasnije
 
 
   constructor(
@@ -64,7 +62,6 @@ export class RoomComponent implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit(): Promise<void> {
-
     await this.roomHubService.startConnection().then(() => {
 
       this.subscriptions.add(
@@ -137,8 +134,6 @@ export class RoomComponent implements OnInit, OnDestroy {
             }
           }
         }));
-
-
     });
 
     this.subscriptions.add(
@@ -153,6 +148,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       }));
 
   }
+
   async ngOnDestroy(): Promise<void> {
     this.subscriptions.unsubscribe();
     await this.handleWindowClose(null);
@@ -171,13 +167,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     await this.roomHubService.leaveRoom();
   }
 
-  get roomGameInfo(): { users: User[], roundTime: number } | null {
-    if (this.isRoomAdmin) {
-      return { users: this.users, roundTime: this.room?.roundTime! };
-    }
-    return null;
-  }
-
   getWordsFromPack(): void {
     this.apiService.getWordsByPackName(this.room?.selectedWordPack!).subscribe(words => {
       this.availableWords = words;
@@ -187,19 +176,17 @@ export class RoomComponent implements OnInit, OnDestroy {
   startGame() {
     if (this.isRoomAdmin) {
       this.roomHubService.notifyGameStart(this.roomURL);
-      this.apiService.startGame(this.roomId).subscribe(gameModel => {
-        this.gameModel = gameModel;
+      this.apiService.startGame(this.roomId).subscribe(res => {
+        console.log(res);
       });
     }
-    this.chatMessages = [];
   }
 
   copyInviteLink() { }
 
   sendMessage(message: string) {
     this.roomHubService.sendMessageToRoom(this.roomURL, message);
-    //send to game if guess enabled
-    if (this.enableGuessing) {
+    if (this.enableGuessing && this.room?.roomState === 'InGame') {
       this.latestGuessSubject.next(message);
     }
   }
@@ -223,8 +210,13 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.roomHubService.changeRoomSettings(this.roomURL, event.settingName, event.settingValue);
     }
   }
+
   handleGuessEnabled(event: boolean) {
     this.enableGuessing = event;
+  }
+
+  handleChatClear(event: string[]) {
+    this.chatMessages = event;
   }
 
 }

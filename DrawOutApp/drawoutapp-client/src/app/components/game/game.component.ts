@@ -3,7 +3,6 @@ import { Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild 
 import { FormsModule } from '@angular/forms';
 import { WhiteboardComponent } from '../whiteboard/whiteboard.component';
 import { GameModelView, GameRoundView } from '../../models/game';
-import { GameService } from '../../services/game.service';
 import { User } from '../../models/user';
 import { GameHubService } from '../../services/game-hub.service';
 import { Observable, Subscription } from 'rxjs';
@@ -24,28 +23,28 @@ import { SessionService } from '../../services/session.service';
 export class GameComponent implements OnInit {
 
   @Input() users: User[] = [];
-  @Input() roundTime: number = 0;
   @Input() roomId: string = '';
   @Input() isRoomAdmin: boolean = false;
   @Input() wordPack: string[] = [];
-
-  //treba za povezivanje sa chat componentom
   @Input() latestGuess$!: Observable<string | null>;
 
   @Output() roundChange = new EventEmitter<{ newRound: number, totalRounds: number }>();
-
-  //treba za iskljucivanje cheta ako ne sme
   @Output() guessEnabledChange = new EventEmitter<boolean>();
+  @Output() chatClear = new EventEmitter<string[]>();
 
   @ViewChild('wordSelectionModal', { static: true }) wordSelectionModal!: TemplateRef<any>;
+  @ViewChild(WhiteboardComponent) whiteboard!: WhiteboardComponent;
+
 
   private subscriptions: Subscription = new Subscription();
+
+  private autoCloseTimeout: any;
 
   currentTimer = 0;
   currentTimerName = '';
   previousTimerName = '';
   winningTeam: string = '';
-  drawEnabled = false;
+  drawEnabled = true;
   guessEnabled = false;
   blankCount = 0;
   msgNotificationsUI: any[] = [];
@@ -71,16 +70,20 @@ export class GameComponent implements OnInit {
         console.log(res);
         this.gameRoundView = res!;
         if (this.gameRoundView.gameState === 'Standby') {
+          this.chatClear.emit([]);
           this.displayNotification('Get ready for the next round!');
         }
         else if (this.gameRoundView.gameState === 'InProgress') {
+          this.chatClear.emit([]);
           this.displayNotification('Game started!');
         }
         else if (this.gameRoundView.gameState === 'Steal') {
+          this.chatClear.emit([]);
           this.displayNotification('Steal time!');
         }
         else if (this.gameRoundView.gameState === 'RoundEnded') {
           this.displayNotification(`${this.winningTeam} won the round!`);
+          this.whiteboard.clearCanvas();
         }
       }));
       this.subscriptions.add(this.gameHubService.wordSelected$.subscribe((wordLength: number) => {
@@ -166,17 +169,19 @@ export class GameComponent implements OnInit {
   }
 
   async selectWord(word: string) {
+    if (this.autoCloseTimeout) {
+      clearTimeout(this.autoCloseTimeout);
+    }
     await this.gameHubService.selectWord(word);
     this.dialog.closeAll();
   }
 
-  private displayNotification(message: string): void {
+  private displayNotification(message: string, timeoutInterval: number = 3000): void {
     this.notificationText = message;
     setTimeout(() => {
       this.notificationText = '';
-    }, 3000); // Display the notification for 3 seconds
+    }, timeoutInterval); // Display the notification for 3 seconds
   }
-
   private prepareWordSelection(): void {
     if (this.wordPack && this.wordPack.length >= 4) {
       this.selectables = [];
@@ -184,14 +189,20 @@ export class GameComponent implements OnInit {
       this.selectables = shuffled.slice(0, 4);
     }
   }
+
   private showWordSelectModal(): void {
     if (this.selectables.length > 0) {
       this.dialog.open(this.wordSelectionModal, {
         data: { words: this.selectables },
         disableClose: true
       });
+      this.autoCloseTimeout = setTimeout(() => {
+        this.gameHubService.selectWord(this.selectables[Math.floor(Math.random() * this.selectables.length)]);
+        this.dialog.closeAll();
+      }, 15000);
     }
   }
+
   private showPainterSelectOverlay(nickname: string): void {
     const overlay = document.createElement('div');
     overlay.className = 'painter-selecting-overlay';

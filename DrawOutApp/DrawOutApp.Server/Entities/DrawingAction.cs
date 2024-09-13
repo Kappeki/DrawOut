@@ -1,44 +1,27 @@
 ﻿using DrawOutApp.Server.Models;
 using MongoDB.Bson.IO;
 using Newtonsoft.Json;
+using System.Drawing;
 
 namespace DrawOutApp.Server.Entities
 {
+
+    public enum ActionType { Start, Move, End }
+    public enum ToolType { Brush, Fill, Eraser }
     public class DrawingAction
     {
-        public string Tool { get; set; }
-        public string Action { get; set; }
-        public String Color { get; set; }
+        public string _id { get; set; } = null!;
+        public string GameId { get; set; } = null!;
+        public string StrokeId { get; set; } = null!;
+
+        public ActionType ActionType { get; set; }
+        public ToolType ToolType { get; set; }
+
+        public float X { get; set; }
+        public float Y { get; set; }
+        public string Color { get; set; } = "#FFFFFF";
         public int BrushSize { get; set; }
-        public string StrokePathSerialized { get; set; } 
-        public bool IsFilled { get; set; }
-        public bool ClearCanvas { get; set; }
-
-        public DrawingAction() { }
-
-        public DrawingAction(DrawingActionModel action)
-        {
-            Tool = action.Tool.ToString();
-            Action = action.Action.ToString();
-            Color = action.Color;
-            BrushSize = action.BrushSize;
-            StrokePathSerialized = Newtonsoft.Json.JsonConvert.SerializeObject(action.StrokePath);
-            IsFilled = action.IsFilled;
-            ClearCanvas = action.ClearCanvas;
-        }
-
-        public DrawingActionModel ToBusinessModel()
-        {
-            return new DrawingActionModel
-            {
-                Tool = Enum.Parse<ToolType>(this.Tool),
-                Action = Enum.Parse<ActionType>(this.Action),
-                Color = this.Color,
-                BrushSize = this.BrushSize,
-                StrokePath = Newtonsoft.Json.JsonConvert.DeserializeObject<List<(int X, int Y)>>(StrokePathSerialized),
-                IsFilled = this.IsFilled,
-                ClearCanvas = this.ClearCanvas
-            };
-        }
+        public long Timestamp { get; set; } //used as score for the sorted set
+        public string? PainterName { get; set; }
     }
 }

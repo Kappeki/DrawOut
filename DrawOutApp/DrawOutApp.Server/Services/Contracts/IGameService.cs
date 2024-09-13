@@ -11,6 +11,6 @@ namespace DrawOutApp.Server.Services.Contracts
         Task<GameRoundModel> CreateGameAsync(GameModel gameModel, List<string> userIds);
         Task<Result<int, string>> IncrementScoreAsync(string gameId, string teamName, int incrementValue);
         Task<bool> CheckGuessAsync(string gameId, string guess);
-        Task DeleteGameAsync(string gameSessionId);
+        Task<GameRoundModel> GetGameRoundAsync(string gameId);
     }
 }
