@@ -5,7 +5,6 @@ using System.Drawing;
 
 namespace DrawOutApp.Server.Entities
 {
-
     public enum ActionType { Start, Move, End }
     public enum ToolType { Brush, Fill, Eraser }
     public class DrawingAction

@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css'
 })
-export default class UserListComponent {
+export class UserListComponent {
   @Input() users: User[] = [];
   @Input() team: string[] = [];
   @Input() className: 'Spectators' | 'Red' | 'Blue' = 'Spectators';

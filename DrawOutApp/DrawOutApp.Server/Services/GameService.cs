@@ -40,6 +40,8 @@ namespace DrawOutApp.Server.Services
             _gameFlowService = gameFlowService;
         }
 
+
+        //game flow mechanics
         public async Task StartGameAsync(string gameId, GameTimers gameTimers)
         {
             _gameFlowService.EnqueueEvent(async () =>
@@ -54,6 +56,7 @@ namespace DrawOutApp.Server.Services
 
                 var isComplete = await SendGameLoadAsync(gameRoundModel, gameModel);
                 if (!isComplete) throw new Exception("Error loading game! ERROR!");
+
     
                 await InitNextRound(gameRoundModel, gameTimers);
             });
@@ -76,7 +79,7 @@ namespace DrawOutApp.Server.Services
                 await SendGameUpdateAsync(_mapper.Map<GameRoundModel>(updatedModel));
                 await SendWordSelectPromptAsync(currentPainter, gameId);
                 //ceka se kraj tajmera za svaki sluc
-                var isDone = await gameTimers.StartWordSelectTimer(gameId, 15, _hubContext.Clients);
+                var isDone = await gameTimers.StartWordSelectTimer(gameId, 18, _hubContext.Clients);
 
                 await StartRound(gameId, gameTimers);
             });
@@ -188,6 +191,7 @@ namespace DrawOutApp.Server.Services
             //game.TotalRounds = 0;
         }
 
+        //public methods are revealed to the clients through the hub
         public async Task SelectWordAsync(string gameId, string word, GameTimers gameTimers)
         {
             var game = await _gameRepo.GetGameAsync(gameId);
@@ -384,7 +388,8 @@ namespace DrawOutApp.Server.Services
             if (game == null) throw new Exception("Game not found! ERROR!");
             return game.SelectedWord == guess;
         }
-        //helper methods
+        
+        //helper methods for object creation
         private List<string> InitializePlayerOrder(List<UserModel> users)
         {
             var redTeam = users.Where(user => user.Roles != null && user.Roles.Contains("Red")).ToList();

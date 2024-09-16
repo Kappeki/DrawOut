@@ -71,11 +71,11 @@ export class GameComponent implements OnInit {
         this.gameRoundView = res!;
         if (this.gameRoundView.gameState === 'Standby') {
           this.chatClear.emit([]);
-          this.displayNotification('Get ready for the next round!');
+          this.displayNotification('Get ready for the next round!', 3000);
         }
         else if (this.gameRoundView.gameState === 'InProgress') {
           this.chatClear.emit([]);
-          this.displayNotification('Game started!');
+          this.displayNotification('Round started!', 2000);
         }
         else if (this.gameRoundView.gameState === 'Steal') {
           this.chatClear.emit([]);
@@ -83,6 +83,10 @@ export class GameComponent implements OnInit {
         }
         else if (this.gameRoundView.gameState === 'RoundEnded') {
           this.displayNotification(`${this.winningTeam} won the round!`);
+          this.whiteboard.clearCanvas();
+        }
+        else if (this.gameRoundView.gameState === 'WaitingForPlayers') {
+          this.displayNotification(`${this.winningTeam} won the game!`);
           this.whiteboard.clearCanvas();
         }
       }));
@@ -130,7 +134,8 @@ export class GameComponent implements OnInit {
             this.showWordSelectModal();
           }
           else {
-            this.showPainterSelectOverlay(this.users.find(u => u._sessionKey === this.gameRoundView?.currentPainter)?.nickname!);
+            const painterNickname = this.users.find(u => u._sessionKey === this.gameRoundView?.currentPainter)?.nickname!;
+            this.displayNotification(`${painterNickname} is selecting a word...`, 12000);
           }
         }));
 
@@ -175,7 +180,6 @@ export class GameComponent implements OnInit {
     await this.gameHubService.selectWord(word);
     this.dialog.closeAll();
   }
-
   private displayNotification(message: string, timeoutInterval: number = 3000): void {
     this.notificationText = message;
     setTimeout(() => {
@@ -189,7 +193,6 @@ export class GameComponent implements OnInit {
       this.selectables = shuffled.slice(0, 4);
     }
   }
-
   private showWordSelectModal(): void {
     if (this.selectables.length > 0) {
       this.dialog.open(this.wordSelectionModal, {
@@ -202,7 +205,6 @@ export class GameComponent implements OnInit {
       }, 15000);
     }
   }
-
   private showPainterSelectOverlay(nickname: string): void {
     const overlay = document.createElement('div');
     overlay.className = 'painter-selecting-overlay';

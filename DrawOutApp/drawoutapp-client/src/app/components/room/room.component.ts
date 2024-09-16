@@ -7,20 +7,17 @@ import { RoomHubService } from '../../services/room-hub.service';
 import { User } from '../../models/user';
 import { FormsModule } from '@angular/forms';
 import { ChatComponent } from '../chat/chat.component';
-import { WhiteboardComponent } from '../whiteboard/whiteboard.component';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import UserListComponent from "../user-list/user-list.component";
+import { UserListComponent } from "../user-list/user-list.component";
 import { RoomSettingsComponent } from '../room-settings/room-settings.component';
 import { SessionService } from '../../services/session.service';
 import { GameComponent } from '../game/game.component';
-import { GameModelView } from '../../models/game';
 
 @Component({
   selector: 'app-room',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ChatComponent,
-    WhiteboardComponent, UserListComponent, RoomSettingsComponent,
+    CommonModule, FormsModule, ChatComponent, UserListComponent, RoomSettingsComponent,
     GameComponent
   ],
   templateUrl: './room.component.html',
@@ -49,9 +46,9 @@ export class RoomComponent implements OnInit, OnDestroy {
   roomId: string = '';
   enableGuessing = true;
 
-  //imati u vidu da NECE game da se pokrene ako admin ne udje iz room liste
+  //imati u vidu da NECE game da se pokrene ako admin NE udje iz room liste odnosno preko URL
+  //ili da model podataka sadrzi id
   //trebalo bi i ovo da se ispravi kasnije
-
 
   constructor(
     private roomHubService: RoomHubService,
@@ -134,6 +131,7 @@ export class RoomComponent implements OnInit, OnDestroy {
             }
           }
         }));
+
     });
 
     this.subscriptions.add(
@@ -152,6 +150,10 @@ export class RoomComponent implements OnInit, OnDestroy {
   async ngOnDestroy(): Promise<void> {
     this.subscriptions.unsubscribe();
     await this.handleWindowClose(null);
+  }
+
+  get latestGuess$() {
+    return this.latestGuessSubject.asObservable();
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -182,17 +184,18 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
-  copyInviteLink() { }
+  copyInviteLink() {
+    const inviteLink = `${window.location.origin}/room/by-url/${this.room?.roomURL}`;
+    navigator.clipboard.writeText(inviteLink).then(() => {
+      alert('Invite link copied to clipboard!');
+    });
+  }
 
   sendMessage(message: string) {
     this.roomHubService.sendMessageToRoom(this.roomURL, message);
     if (this.enableGuessing && this.room?.roomState === 'InGame') {
       this.latestGuessSubject.next(message);
     }
-  }
-
-  get latestGuess$() {
-    return this.latestGuessSubject.asObservable();
   }
 
   handleRoundChange(event: { newRound: number, totalRounds: number }): void {

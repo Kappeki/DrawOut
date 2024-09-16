@@ -11,60 +11,11 @@ import { DrawOutAPIService } from '../../services/draw-out-api.service';
   templateUrl: './room-settings.component.html',
   styleUrl: './room-settings.component.css'
 })
-// @Input() room: Room | null = null;
-// @Input() currentUser: any;
-// drawTime: number = 60;
-// wordPack: string = 'default';
-// customWords: string = '';
-// useCustomWords: boolean = false;
-
-// constructor(private apiService: DrawOutAPIService) {
-
-// }
-
-// getCustomWordsArray(): string[] {
-//   return this.customWords.split(',').map(word => word.trim()).filter(word => word.length > 0);
-// }
-
-// // get isRoomAdmin(): boolean {
-// //   return this.room && this.room.roomAdminId === this.currentUser.id;
-// // }
-
-// updateDrawTime(newDrawTime: number) {
-//   if (this.room) {
-//     this.room.roundTime = newDrawTime;
-//     this.updateRoom();
-//   }
-// }
-
-// updateWordPack(newWordPack: string) {
-//   if (this.room) {
-//     this.room.selectedWordPack = newWordPack;
-//     this.updateRoom();
-//   }
-// }
-
-// updateCustomWords(newCustomWords: string[]) {
-//   if (this.room) {
-//     this.room.customWords = newCustomWords;
-//     this.updateRoom();
-//   }
-// }
-
-// updateRoom() {
-//   if (this.room) {
-//     this.apiService.updateRoom(this.room).subscribe(
-//       response => console.log('Room updated successfully'),
-//       error => console.error('Error updating room:', error)
-//     );
-//   }
-// }
 export class RoomSettingsComponent {
   @Input() room: Room | null = null;
-  @Input() isRoomAdmin: boolean = false;  // Determine if the current user is an admin
+  @Input() isRoomAdmin: boolean = false;
   @Output() settingChanged = new EventEmitter<{ settingName: string, settingValue: any }>();
 
-  // Bind directly to the room properties
   drawTime: number = 60;
   wordPack: string = 'default';
   customWords: string = '';
@@ -81,7 +32,6 @@ export class RoomSettingsComponent {
       this.customWords = this.room.customWords?.join(', ') || '';
       this.useCustomWords = !!this.room.customWords?.length;
     }
-
     this.apiService.getAllWordPacks().subscribe((packs) => {
       this.wordPacks = packs;
     });
@@ -101,13 +51,13 @@ export class RoomSettingsComponent {
     }
   }
 
-  //treba nesto posebno za custom words da se stavi
   updateCustomWords(newCustomWords: string) {
     if (this.isRoomAdmin && this.room) {
-      const customWordsArray = newCustomWords.split(',').map(word => word.trim());
       this.customWords = newCustomWords;
-      this.settingChanged.emit({ settingName: 'CustomWords', settingValue: customWordsArray });
+      this.settingChanged.emit({ settingName: 'CustomWords', settingValue: newCustomWords });
     }
   }
+  //emituje se nazad room komponenti i onda se za taj game ubace reci u odabrani word pack na startGame()
+  //alternativa da bude dugme save i onda se cuva u bazi
 
 }

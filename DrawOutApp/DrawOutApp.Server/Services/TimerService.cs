@@ -60,7 +60,6 @@ namespace DrawOutApp.Server.Services
 
             return await _tcs.Task;
         }
-
         public async Task<bool> StartMainTimer(string gameId, int mainTimer, IHubClients clients)
         {
             StopAllTimers();
@@ -87,7 +86,6 @@ namespace DrawOutApp.Server.Services
 
             return await _tcs.Task;
         }
-
         public async Task<bool> StartStealTimer(string gameId, int stealTimer, IHubClients clients)
         {
             StopAllTimers();
@@ -113,7 +111,6 @@ namespace DrawOutApp.Server.Services
 
             return await _tcs.Task;
         }
-
         public async Task StopWordSelectTimer(string gameId, IHubClients clients)
         {
             lock (_lock)
@@ -132,7 +129,6 @@ namespace DrawOutApp.Server.Services
             await clients.Group(gameId).SendAsync("TimerStopped", "WordSelectTimer");
             StopCountdown();
         }
-
         public async Task StopRunningTimer(string gameId, IHubClients clients)
         {
             lock (_lock)
@@ -162,7 +158,6 @@ namespace DrawOutApp.Server.Services
 
             StopCountdown();
         }
-
         private void StartCountdown(string gameId, IHubClients clients)
         {
             _countdownUpdateTimer = new Timer(async _ =>
@@ -178,14 +173,12 @@ namespace DrawOutApp.Server.Services
                 }
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         }
-
         private void StopCountdown()
         {
             _countdownUpdateTimer?.Change(Timeout.Infinite, Timeout.Infinite);
             _countdownUpdateTimer?.Dispose();
             _countdownUpdateTimer = null;
         }
-
         private void StopAllTimers()
         {
             _wasStopped = true;

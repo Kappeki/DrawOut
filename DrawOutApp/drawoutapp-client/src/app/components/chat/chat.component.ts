@@ -44,4 +44,6 @@ export class ChatComponent implements OnDestroy {
   updateCharacterCount(): void {
     this.charCount = this.chatInput.length;
   }
+
+
 }

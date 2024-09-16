@@ -11,7 +11,6 @@ namespace DrawOutApp.Server.Hubs
 {
     public class RoomHub : Hub
     {
-        // Method for clients to call to join a room
         private readonly IChatMessageRepo _chatRepo;
         private readonly IUserService _userService;
         private readonly IRoomService _roomService;
@@ -30,16 +29,22 @@ namespace DrawOutApp.Server.Hubs
             var seshKey = Context.Items["SeshKey"]!.ToString();
             var roles = Context.Items["Roles"] as List<string>;
             Context.Items["RoomId"] = roomId;
-            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
             if (roles != null && roles.Count > 0)
             {
                 await Clients.Caller.SendAsync("ReceiveMessage", "Server", "You cannot join multiple rooms simultaneously.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                 return false;
             }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+            
             await Clients.Group(roomId).SendAsync("ReceiveMessage", "Server", $"{nickname} has joined the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            
             await _roomService.AddPlayerAsync(roomId, seshKey!, password);
+            
             await SendConnectedRoomById(roomId, true);
+            
             await SendConnectedUsers(roomId);
+            
             return true;
         }
         public async Task JoinRoomById(string roomId, string? password = null)
@@ -155,15 +160,11 @@ namespace DrawOutApp.Server.Hubs
             {
                 throw new HubException(error);
             }
-            /*if (room!.Players!.Count < 4)
-            {
-                throw new HubException("Not enough players to start the game.");
-            }*/
+            //if (room!.Players!.Count < 4)
+            //{
+            //    throw new HubException("Not enough players to start the game.");
+            //}
             await _roomService.UpdateRoomStateAsync(roomId!, RoomState.InGame);
-            
-            await Clients
-                .Group(roomId!)
-                .SendAsync("StartingGame", true);
 
             await SendConnectedRoomById(roomId!);
         }
@@ -234,14 +235,12 @@ namespace DrawOutApp.Server.Hubs
         }
         public override async Task OnConnectedAsync()
         {
-            var sessionId = Context.GetHttpContext()!.Request.Cookies["UserSessionId"];
-            
-            var (isError, user, error) = await _userService.GetUserAsync(sessionId!);
+            var (isError, user, error) = await _userService.GetUserSessionAsync(Context.GetHttpContext()!.Request);
             if (isError)
             {
                 throw new HubException(error);
             }
-            Context.Items["SeshKey"] = sessionId;
+            Context.Items["SeshKey"] = user!._sessionKey;
             Context.Items["Nickname"] = user!.Nickname;
             Context.Items["Roles"] = user!.Roles;
 
@@ -258,9 +257,8 @@ namespace DrawOutApp.Server.Hubs
             var roomId = Context.Items["RoomId"]!.ToString();
 
             var (isError, userIds, error) = await _roomService.GetPlayerIdsAsync(Context.Items["RoomId"]!.ToString()!);
-
-
             var isProtected = await _roomService.CheckPasswordProtection(roomId!);
+
             if (userIds != null)
             {
                 userIds!.Remove(seshKey!);
@@ -295,18 +293,20 @@ namespace DrawOutApp.Server.Hubs
 
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId!);
 
-            var isRemoved = await _roomService.RemoveUserAsync(roomId!, seshKey!);
+            var isRemoved = await _roomService.RemovePlayerAsync(roomId!, seshKey!);
             if(!isRemoved.Data)
             {
                 await base.OnDisconnectedAsync(exception);
             }
 
-            await Clients
-                .Group(roomId!)
-                .SendAsync("ReceiveMessage", "Server", $"{Context.Items["Nickname"]!.ToString()} has left the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-
-            await SendConnectedRoomById(roomId!);
-            await SendConnectedUsers(roomId!);
+            if (userIds!.Count >= 1)
+            {
+                await Clients
+                    .Group(roomId!)
+                    .SendAsync("ReceiveMessage", "Server", $"{Context.Items["Nickname"]!.ToString()} has left the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                await SendConnectedRoomById(roomId!);
+                await SendConnectedUsers(roomId!);
+            }
             
             await base.OnDisconnectedAsync(exception);
         }

@@ -16,20 +16,18 @@ namespace DrawOutApp.Server.Hubs
     {
         private readonly IGameService _gameService;
         private readonly IUserService _userService;
-        private readonly IRoomService _roomService;
         private readonly ITimerService _timerService;
         private readonly IDrawingActionService _drawingActionService;
+
         public GameHub(
             IGameService gameService, 
             IUserService userService,
-            IRoomService roomService, 
             ITimerService timerService,
             IDrawingActionService drawingActionService
             )
         {
             _gameService = gameService;
             _userService = userService;
-            _roomService = roomService;
             _timerService = timerService;
             _drawingActionService = drawingActionService;
         }
@@ -73,11 +71,6 @@ namespace DrawOutApp.Server.Hubs
             var gameId = Context.Items["GameKey"]!.ToString();
             var seshKey = Context.Items["SeshKey"]!.ToString();
             await Clients.GroupExcept(gameId!, Context.ConnectionId).SendAsync("UpdateDrawing", actions);
-
-            //var gameRoundModel = await _gameService.GetGameRoundAsync(gameId!);
-
-            //await _drawingActionService.AddDrawingActionAsync(actionModel);
-            
         }
         public async Task ClearBoard()
         {
@@ -88,7 +81,6 @@ namespace DrawOutApp.Server.Hubs
             if(gameRoundModel.CurrentPainter == seshKey)
             {
                 var painterName = Context.Items["Nickname"]!.ToString();
-               // await _drawingActionService.ClearDrawingActionsAsync(gameId!.Split(':')[1], painterName!);
                 await Clients.GroupExcept(gameId!, Context.ConnectionId).SendAsync("ClearBoard", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             }
         }
@@ -96,16 +88,7 @@ namespace DrawOutApp.Server.Hubs
         {
             var gameId = Context.Items["GameKey"]!.ToString();
             await Clients.GroupExcept(gameId!, Context.ConnectionId).SendAsync("UndoAction", strokeId);
-
-            //var gameRoundModel = await _gameService.GetGameRoundAsync(gameId!);
-
-            //if (gameRoundModel.CurrentPainter == seshKey)
-            //{
-            //    var painterName = Context.Items["Nickname"]!.ToString();
-            //    //await _drawingActionService.UndoStrokeAsync(gameId!.Split(':')[1], painterName!, strokeId);
-            //}
         }
-
         public async Task SendMementoSave()
         {
             var gameId = Context.Items["GameKey"]!.ToString();
@@ -114,17 +97,16 @@ namespace DrawOutApp.Server.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            var sessionId = Context.GetHttpContext()!.Request.Cookies["UserSessionId"];
-            var (isError, user, error) = await _userService.GetUserAsync(sessionId!);
+            var (isError, user, error) = await _userService.GetUserSessionAsync(Context.GetHttpContext()!.Request);
             if (isError)
             {
                 throw new HubException(error);
             }
-            Context.Items["SeshKey"] = sessionId;
+            Context.Items["SeshKey"] = user!._sessionKey;
             Context.Items["Nickname"] = user!.Nickname;
             Context.Items["Roles"] = user!.Roles;
 
-            await _userService.SetConnectionIdAsync(sessionId!, Context.ConnectionId, TimeSpan.FromDays(7));
+            await _userService.SetConnectionIdAsync(user!._sessionKey, Context.ConnectionId, TimeSpan.FromDays(7));
 
             await base.OnConnectedAsync();
         }
@@ -144,9 +126,6 @@ namespace DrawOutApp.Server.Hubs
                 await _userService.RemoveRolesAsync(seshKey, [Role.Red, Role.Blue, Role.Painter, Role.TeamLeader]);
                 await Groups.RemoveFromGroupAsync(seshKey, gameKey!);
             }
-
-            if(IsAdmin()) await _roomService.UpdateRoomStateAsync(gameKey!.Split(':')[1], RoomState.Waiting);
-
             await base.OnDisconnectedAsync(exception);
         }
         private bool IsAdmin()

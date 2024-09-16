@@ -17,6 +17,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatOptionModule } from '@angular/material/core';
 import { SelectableDirective } from './directives/selectable.directive';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [
@@ -39,7 +41,9 @@ import { SelectableDirective } from './directives/selectable.directive';
     MatSelectModule,
     MatLabel,
     MatOptionModule,
-    SelectableDirective
+    SelectableDirective,
+    MatChipsModule,
+    MatIconModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [],

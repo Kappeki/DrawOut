@@ -104,66 +104,6 @@ namespace DrawOutApp.Server.Controllers
             return Ok("Game created, starting...");
         }
 
-        /// <summary>
-        /// METODE KORISCENJE ISKLJUCIVO ZA TESTIRANJE
-        /// </summary>
-        /// <param name="roomId"></param><button class="join-team-btn">Join</button>
-        /// <returns></returns>
-        /*[ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpPost("joinBtn")]
-        public async Task<IActionResult> JoinRoomById([FromBody] JoinRoomRequest request)
-        {
-            var sessionId = Request.Cookies["UserSessionId"];
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                return BadRequest("User session is not found.");
-            }
-            var (isError, username, error) = await _roomService.AddUserByIdAsync(request.RoomId!, sessionId, request.Password);
-            if(isError)
-                return BadRequest(error);
-            return Ok(username!.Value);
-            
-        }
-
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpPost("joinUrl")]
-        public async Task<IActionResult> JoinRoomByUrl([FromBody] JoinRoomRequest request)
-        {
-            var sessionId = Request.Cookies["UserSessionId"];
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                return BadRequest("User session is not found.");
-            }
-            var (isError, username, error) = await _roomService.AddUserByUrlAsync(request.RoomUrl!, sessionId, request.Password);
-            if(isError)
-                if(error == "Invalid password.")
-                    return Unauthorized("Invalid password.");
-                else
-                    return BadRequest(error);
-            return Ok(username!.Value);
-        }
-
-        //korisnik SAM izlazi iz sobe, negde drugde mora kad bi korisnik bio kickovan
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [HttpPost("{roomId}/leave")]
-        public async Task<IActionResult> LeaveRoom(string roomId)
-        {
-            var sessionId = Request.Cookies["UserSessionId"];
-            if (string.IsNullOrEmpty(sessionId))
-            {
-                return BadRequest("User session is not found.");
-            }
-            var (isError, nickname, error) = await _roomService.RemoveUserAsync(roomId, sessionId);
-            if (isError)
-            {
-                return BadRequest(error);
-            }
-            return Ok(nickname!.Value);
-        }*/
-
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("{roomId}/get")]
@@ -190,7 +130,6 @@ namespace DrawOutApp.Server.Controllers
             }
             return Ok(room);
         }
-
 
         //GET /rooms?isAscending=true&isProtected=false
         [ProducesResponseType(StatusCodes.Status200OK)]

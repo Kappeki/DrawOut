@@ -18,9 +18,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<ITimerService, TimerService>();
+
 builder.Services.AddSingleton<IUserIdProvider, SessionIdProvider>();
 
+builder.Services.AddSingleton<ITimerService, TimerService>();
 builder.Services.AddSingleton<GameFlowService>(); 
 builder.Services.AddHostedService(provider => provider.GetRequiredService<GameFlowService>());
 

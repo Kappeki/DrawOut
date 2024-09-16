@@ -9,7 +9,6 @@ namespace DrawOutApp.Server.Services
 {
     public class UserService : IUserService
     {
-
         private readonly IUserRepo _userRepo;
         private readonly IMapper _mapper;
 
@@ -58,9 +57,6 @@ namespace DrawOutApp.Server.Services
             }
             return userModel;
         }
-
-        //ove dve funkcije bi trebalo da se trigeruju ili kad se promeni icon/username na front page
-        //ili kad se klikne na play dugme - ovo je verovatno jednostavnije
         public async Task<Result<UserModel, string>> CreateUserSessionAsync(UserPreferences userModel)
         {
             try
@@ -138,12 +134,7 @@ namespace DrawOutApp.Server.Services
             }
         }
 
-        //za testiranje
-        public async Task DeleteUserAsync(string sessionId)
-        {
-            await _userRepo.DeleteUserAsync(sessionId);
-        }
-
+        //koriste se za signalr komunikaciju
         public async Task SetConnectionIdAsync(string sessionId, string connectionId, TimeSpan? expiry = null)
         {
             var user = await _userRepo.GetUserAsync(sessionId);
@@ -156,14 +147,16 @@ namespace DrawOutApp.Server.Services
                 throw new KeyNotFoundException($"User not found with Session ID: {sessionId}");
             }
         }
-
         public async Task<string?> GetConnectionIdAsync(string sessionKey)
         {
-            // Retrieve the connection ID associated with the session key from Redis
             return await _userRepo.GetFromHashSet<string>(sessionKey, "ConnectionId");
         }
 
 
-
+        //za testiranje
+        public async Task DeleteUserAsync(string sessionId)
+        {
+            await _userRepo.DeleteUserAsync(sessionId);
+        }
     }
 }

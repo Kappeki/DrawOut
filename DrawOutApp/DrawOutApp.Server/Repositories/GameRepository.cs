@@ -88,6 +88,7 @@ namespace DrawOutApp.Server.Repositories
 
             if (expiry.HasValue)
             {
+                await _database.KeyExpireAsync($"painter-order:{game.RoomId}", expiry);
                 await _database.KeyExpireAsync(game._id, expiry);
             }
 

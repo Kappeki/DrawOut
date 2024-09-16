@@ -12,13 +12,6 @@ using MongoDB.Driver;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
-
-namespace DrawOutApp.Server 
-{
-    public record class Username(string Value);
-}
-
-
 namespace DrawOutApp.Server.Services
 {
     public class RoomService : IRoomService
@@ -323,7 +316,7 @@ namespace DrawOutApp.Server.Services
                 return $"Error joining room. : {error}";
             }
         }
-        public async Task<Result<bool,string>> RemoveUserAsync(string roomId, string sessionId)
+        public async Task<Result<bool,string>> RemovePlayerAsync(string roomId, string sessionId)
         {
             try
             {

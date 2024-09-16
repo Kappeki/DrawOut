@@ -32,8 +32,7 @@
         <div class="setting-item-column">
             <span class="setting-label">Custom Words</span>
             <textarea *ngIf="room" [(ngModel)]="room.customWords" (ngModelChange)="updateCustomWords($event)"
-                [disabled]="!isRoomAdmin"
-                placeholder="Separate the words by a , (comma)"
+                [disabled]="!isRoomAdmin" placeholder="Separate the words by a , (comma)"
                 class="setting-textarea"></textarea>
         </div>
     </div>
