@@ -29,10 +29,6 @@ export class HomeComponent implements OnInit {
     };
   }
 
-  //nedostaje chat component 
-
-  //home compoentn i room component bind preko pass
-  //room list component i room component bind preko roomid i pass
   constructor(private apiService: DrawOutAPIService, private router: Router, private sessionService: SessionService) { }
 
   ngOnInit(): void {
@@ -112,8 +108,6 @@ export class HomeComponent implements OnInit {
         console.log('Room creation completed');
       }
     });
-
-    // Close the modal
     this.closeRoomModal();
   }
 

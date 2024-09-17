@@ -12,6 +12,7 @@ using DrawOutApp.Server.Mappers;
 using Microsoft.AspNetCore.SignalR;
 using DrawOutApp.Server;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using DrawOutApp.Server.Games;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -22,8 +23,8 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<IUserIdProvider, SessionIdProvider>();
 
 builder.Services.AddSingleton<ITimerService, TimerService>();
-builder.Services.AddSingleton<GameFlowService>(); 
-builder.Services.AddHostedService(provider => provider.GetRequiredService<GameFlowService>());
+builder.Services.AddSingleton<GameFlowInvoker>(); 
+builder.Services.AddHostedService(provider => provider.GetRequiredService<GameFlowInvoker>());
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 

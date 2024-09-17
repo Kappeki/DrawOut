@@ -14,7 +14,7 @@ export class SelectableDirective implements OnChanges {
 
   @HostListener('click')
   onClick() {
-    //this.el.nativeElement.classList.add('selected');
+    this.el.nativeElement.classList.add('selected');
     this.selectedValueChange.emit(this.selectableValue);
     this.updateSelectedState();
   }

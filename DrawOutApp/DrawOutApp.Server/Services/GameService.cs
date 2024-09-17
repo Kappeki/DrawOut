@@ -2,6 +2,7 @@
 using Amazon.Runtime.Internal.Transform;
 using AutoMapper;
 using DrawOutApp.Server.Entities;
+using DrawOutApp.Server.Games;
 using DrawOutApp.Server.Hubs;
 using DrawOutApp.Server.Mappers;
 using DrawOutApp.Server.Models;
@@ -20,9 +21,8 @@ namespace DrawOutApp.Server.Services
     {
         private readonly IGameRepo _gameRepo;
         private readonly IMapper _mapper;
-
         private readonly IUserService _userService;
-        private readonly GameFlowService _gameFlowService;
+        private readonly GameFlowInvoker _invoker;
         private readonly IHubContext<GameHub> _hubContext;
 
         public GameService(
@@ -30,165 +30,47 @@ namespace DrawOutApp.Server.Services
             IMapper mapper, 
             IUserService userService, 
             IHubContext<GameHub> hubContext,
-            GameFlowService gameFlowService
+            GameFlowInvoker invoker
             )
         {
             _mapper = mapper;
             _gameRepo = gameRepo;
             _userService = userService;
             _hubContext = hubContext;
-            _gameFlowService = gameFlowService;
+            _invoker = invoker;
         }
 
 
         //game flow mechanics
         public async Task StartGameAsync(string gameId, GameTimers gameTimers)
         {
-            _gameFlowService.EnqueueEvent(async () =>
-            {
-                var game = await _gameRepo.GetGameAsync(gameId);
-                if (game == null) throw new Exception("Game not found! ERROR!");
-                var gameRoundModel = _mapper.Map<GameRoundModel>(game);
-                var gameModel = _mapper.Map<GameModel>(game);
-            
-                await _userService.AddRolesAsync(gameModel.TeamLeaders!["Red"], [Role.TeamLeader]);
-                await _userService.AddRolesAsync(gameModel.TeamLeaders!["Blue"], [Role.TeamLeader]);
-
-                var isComplete = await SendGameLoadAsync(gameRoundModel, gameModel);
-                if (!isComplete) throw new Exception("Error loading game! ERROR!");
-
-    
-                await InitNextRound(gameRoundModel, gameTimers);
-            });
+            var command = new StartGameCommand(this, _userService, gameId, gameTimers);
+            _invoker.EnqueueCommand(gameId, command);
         }
-        private async Task InitNextRound(GameRoundModel gameRoundModel, GameTimers gameTimers)
+        public async Task InitNextRoundAsync(GameRoundModel gameRoundModel, GameTimers gameTimers)
         {
-            _gameFlowService.EnqueueEvent(async () =>
-            {
-                await _userService.AddRolesAsync(gameRoundModel.CurrentPainter!, [Role.Painter]);
-
-                var currentPainter = gameRoundModel.CurrentPainter!;
-                var gameId = gameRoundModel._gameId;
-
-                gameRoundModel.CurrentRound++;
-                gameRoundModel.GameState = GameState.Standby.ToString();
-            
-                var updatedModel = await _gameRepo.UpdateGameRoundAsync(gameRoundModel);
-                if (updatedModel == null) throw new Exception("Error updating game round! ERROR!");
-
-                await SendGameUpdateAsync(_mapper.Map<GameRoundModel>(updatedModel));
-                await SendWordSelectPromptAsync(currentPainter, gameId);
-                //ceka se kraj tajmera za svaki sluc
-                var isDone = await gameTimers.StartWordSelectTimer(gameId, 18, _hubContext.Clients);
-
-                await StartRound(gameId, gameTimers);
-            });
+            var command = new InitializeNextRoundCommand(this, _userService, _hubContext.Clients, gameTimers, gameRoundModel);
+            _invoker.EnqueueCommand(gameRoundModel._gameId, command);      
         }
-        private async Task StartRound(string gameId, GameTimers gameTimers)
+        public async Task StartRoundAsync(string gameId, GameTimers gameTimers)
         {
-            _gameFlowService.EnqueueEvent(async () =>
-            {
-                var game = await _gameRepo.GetGameAsync(gameId);
-                var gameRound = _mapper.Map<GameRoundModel>(game);
-
-                gameRound.GameState = GameState.InProgress.ToString();
-                var currentPainter = gameRound.CurrentPainter;
-                var updatedModel = await _gameRepo.UpdateGameRoundAsync(gameRound);
-                if (updatedModel == null) throw new Exception("Error updating game round! ERROR!");
-
-                await SendPermitToPlayersAsync(currentPainter!, gameId);
-                await SendGameUpdateAsync(_mapper.Map<GameRoundModel>(updatedModel));
-
-                var isDone = await gameTimers.StartMainTimer(gameId, game!.MainTimer, _hubContext.Clients);
-                if(isDone)
-                {
-                    await EndRound(gameId, gameTimers);
-                }
-                else
-                {
-                    await StartSteal(gameId, gameTimers);
-                }
-            });
+            var command = new StartRoundCommand(this, _hubContext.Clients, gameId, gameTimers);
+            _invoker.EnqueueCommand(gameId, command);   
         }
-        private async Task StartSteal(string gameId, GameTimers gameTimers)
+        public async Task StartStealAsync(string gameId, GameTimers gameTimers)
         {
-            _gameFlowService.EnqueueEvent(async () =>
-            {
-                var game = await _gameRepo.GetGameAsync(gameId);
-                var gameRound = _mapper.Map<GameRoundModel>(game);
-
-                gameRound.GameState = GameState.Steal.ToString();
-                var currentPainter = gameRound.CurrentPainter;
-            
-                var updatedModel = await _gameRepo.UpdateGameRoundAsync(gameRound);
-                if (updatedModel == null) throw new Exception("Error updating game round! ERROR!");
-
-                await SendGameUpdateAsync(_mapper.Map<GameRoundModel>(updatedModel));
-                await SendStealPermitAsync(currentPainter!, gameId);
-
-                var isDone = await gameTimers.StartStealTimer(gameId, game!.StealTimer, _hubContext.Clients);
-
-                await EndRound(gameId,gameTimers);
-            });
+            var command = new StartStealCommand(this, _hubContext.Clients, gameId, gameTimers);
+            _invoker.EnqueueCommand(gameId, command);
         }
-        private async Task EndRound(string gameId, GameTimers gameTimers)
+        public async Task EndRoundAsync(string gameId, GameTimers gameTimers)
         {
-            _gameFlowService.EnqueueEvent(async () =>
-            {
-                var game = await _gameRepo.GetGameAsync(gameId);
-                var gameRound = _mapper.Map<GameRoundModel>(game);
-
-                gameRound.GameState = GameState.RoundEnded.ToString();
-                var updatedModel = await _gameRepo.UpdateGameRoundAsync(gameRound);
-                if (updatedModel == null) throw new Exception("Error updating game round! ERROR!");
-
-                await SendGameUpdateAsync(_mapper.Map<GameRoundModel>(updatedModel));
-
-                if (gameRound.CurrentRound < game!.TotalRounds)
-                {
-                    await _userService.RemoveRolesAsync(gameRound.CurrentPainter!, [Role.Painter]);
-
-                    var gameRoundModel = _mapper.Map<GameRoundModel>(game);
-                    gameRoundModel.CurrentPainter = game.PainterOrder![gameRoundModel.CurrentRound];
-
-                    _ = Task.Delay(3000);
-
-                    await InitNextRound(gameRoundModel, gameTimers);
-                }
-                else
-                {
-                    await EndGame(gameId);
-                }
-            });
+            var command = new EndRoundCommand(this, _userService, gameId, gameTimers);
+            _invoker.EnqueueCommand(gameId, command);
         }
-        private async Task EndGame(string gameId)
+        public async Task EndGameAsync(string gameId)
         {
-            _gameFlowService.EnqueueEvent(async () =>
-            {
-                var game = await _gameRepo.GetGameAsync(gameId);
-                if (game == null) throw new Exception("Game not found! ERROR!");
-                var gameRound = _mapper.Map<GameRoundModel>(game);
-                gameRound.GameState = GameState.WaitingForPlayers.ToString();
-                var updatedModel = await _gameRepo.UpdateGameRoundAsync(gameRound);
-                if (updatedModel == null) throw new Exception("Error updating game round! ERROR!");
-
-                await SendGameUpdateAsync(_mapper.Map<GameRoundModel>(updatedModel));
-                
-                foreach (var userIds in game.PainterOrder!)
-                {
-                    await _userService.RemoveRolesAsync(userIds, [Role.Painter, Role.TeamLeader, Role.Blue, Role.Red]);
-                }
-
-                await _hubContext.Clients.Group(gameId).SendAsync("GameEnded", "Waiting");
-            });
-
-            //ovo bi trebalo cim se ubaci u GameHistory, za to mora provera da li soba ima password 
-            //game.CurrentPainter = null;
-            //game.SelectedWord = null;
-            //game.CurrentRound = 0;
-            //game.PainterOrder = null;
-            //game.TeamLeaders = null;
-            //game.TotalRounds = 0;
+            var command = new EndGameCommand(this, _userService, gameId);
+            _invoker.EnqueueCommand(gameId, command);
         }
 
         //public methods are revealed to the clients through the hub
@@ -243,7 +125,7 @@ namespace DrawOutApp.Server.Services
         }
 
         //hub notifications
-        private async Task<bool> SendGameLoadAsync(GameRoundModel gameRoundModel, GameModel gameModel)
+        public async Task<bool> SendGameLoadAsync(GameRoundModel gameRoundModel, GameModel gameModel)
         {
             try
             {
@@ -255,7 +137,7 @@ namespace DrawOutApp.Server.Services
                 throw new HubException("Error loading game! ERROR!" + ex.Message);
             }
         }
-        private async Task SendWordSelectPromptAsync(string painterId, string gameId)
+        public async Task SendWordSelectPromptAsync(string painterId, string gameId)
         {
 
             try
@@ -273,7 +155,7 @@ namespace DrawOutApp.Server.Services
                 throw new HubException("Error starting word selection! ERROR!" + ex.Message);
             }
         }
-        private async Task SendGameUpdateAsync(GameRoundModel gameRoundModel)
+        public async Task SendGameUpdateAsync(GameRoundModel gameRoundModel)
         {
             try
             {
@@ -284,7 +166,7 @@ namespace DrawOutApp.Server.Services
                 throw new HubException("Error updating game! ERROR!" + ex.Message);
             }
         }
-        private async Task SendPermitToPlayersAsync(string painterId, string gameId)
+        public async Task SendPermitToPlayersAsync(string painterId, string gameId)
         {
             try
             {
@@ -308,7 +190,7 @@ namespace DrawOutApp.Server.Services
                 throw new HubException("Error updating game! ERROR!" + ex.Message);
             }
         }
-        private async Task SendStealPermitAsync(string painterId, string gameId)
+        public async Task SendStealPermitAsync(string painterId, string gameId)
         {
             try
             {
@@ -336,9 +218,36 @@ namespace DrawOutApp.Server.Services
                 throw new HubException("Error updating game! ERROR!" + ex.Message); ;
             }
         }
+        public async Task SendGameEndAsync(string gameId)
+        {
+            try
+            {
+                var game = await _gameRepo.GetGameAsync(gameId);
+                if (game == null) throw new Exception("Game not found! ERROR!");
+
+                string winningTeam = game.BlueScore > game.RedScore ? "Blue" : "Red";
+
+                if(game.BlueScore == game.RedScore)
+                {
+                    winningTeam = "Tie";
+                }
+
+                await _hubContext.Clients.Group(gameId).SendAsync("GameEnded", "Waiting", winningTeam);
+            }
+            catch (Exception ex)
+            {
+                throw new HubException("Error ending game! ERROR!" + ex.Message);
+            }
+        }
         //------------------
-       
+
         //default business methods
+        public async Task<GameModel> GetGameModelAsync(string gameId)
+        {
+            var game = await _gameRepo.GetGameAsync(gameId);
+            if (game == null) throw new Exception("Game not found! ERROR!");
+            return _mapper.Map<GameModel>(game);
+        }
         public async Task<GameRoundModel> GetGameRoundAsync(string gameId)
         {
             var game = await _gameRepo.GetGameAsync(gameId);
@@ -372,6 +281,12 @@ namespace DrawOutApp.Server.Services
             await _gameRepo.UpdateGameRoundAsync(gameRoundModel);
 
             return gameRoundModel;
+        }
+        public async Task<GameRoundModel> UpdateGameRoundAsync(GameRoundModel gameRoundModel)
+        {
+            var updatedModel = await _gameRepo.UpdateGameRoundAsync(gameRoundModel);
+            if (updatedModel == null) throw new Exception("Error updating game round! ERROR!");
+            return _mapper.Map<GameRoundModel>(updatedModel);
         }
         public async Task<Result<int, string>> IncrementScoreAsync(string gameId, string teamName, int incrementValue)
         {

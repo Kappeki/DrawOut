@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;700&display=swap');
 
-  
+
 .room-container {
     display: flex;
     flex-direction: column;
@@ -105,7 +105,7 @@
     font-size: 40px;
     width: 100%;
 }
-  
+
 .start-button:hover {
     background-color: #45a049;
 }
@@ -115,7 +115,8 @@
     text-align: center;
     align-items: center;
     padding: 10px 0;
-    font-size: 20px;
+    font-size: 25px;
+    user-select: none;
 }
 
 .invite-container button {
@@ -125,7 +126,7 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .invite-container button:hover {

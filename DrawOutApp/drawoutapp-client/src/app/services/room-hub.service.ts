@@ -89,8 +89,8 @@ export class RoomHubService {
       .catch(err => console.error(err));
   }
 
-  public async notifyGameStart(roomURL: string) {
-    return await this.hubConnection?.invoke('NotifyGameStart', roomURL)
+  public async updateRoomState(roomURL: string, state: string) {
+    return await this.hubConnection?.invoke('UpdateRoomState', roomURL, state)
       .catch(err => console.error(err));
   }
 

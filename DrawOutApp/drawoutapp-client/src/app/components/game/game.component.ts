@@ -31,6 +31,7 @@ export class GameComponent implements OnInit {
   @Output() roundChange = new EventEmitter<{ newRound: number, totalRounds: number }>();
   @Output() guessEnabledChange = new EventEmitter<boolean>();
   @Output() chatClear = new EventEmitter<string[]>();
+  @Output() roomStateChange = new EventEmitter<string>();
 
   @ViewChild('wordSelectionModal', { static: true }) wordSelectionModal!: TemplateRef<any>;
   @ViewChild(WhiteboardComponent) whiteboard!: WhiteboardComponent;
@@ -62,10 +63,12 @@ export class GameComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     await this.gameHubService.startConnection().then(() => {
       console.log('GameHub connection started.');
+
       this.subscriptions.add(this.gameHubService.gameModel$.subscribe(res => {
         console.log(res);
         this.gameModelView = res!;
       }));
+
       this.subscriptions.add(this.gameHubService.gameRound$.subscribe(res => {
         console.log(res);
         this.gameRoundView = res!;
@@ -75,7 +78,7 @@ export class GameComponent implements OnInit {
         }
         else if (this.gameRoundView.gameState === 'InProgress') {
           this.chatClear.emit([]);
-          this.displayNotification('Round started!', 2000);
+          this.displayNotification('Round started!');
         }
         else if (this.gameRoundView.gameState === 'Steal') {
           this.chatClear.emit([]);
@@ -86,10 +89,10 @@ export class GameComponent implements OnInit {
           this.whiteboard.clearCanvas();
         }
         else if (this.gameRoundView.gameState === 'WaitingForPlayers') {
-          this.displayNotification(`${this.winningTeam} won the game!`);
           this.whiteboard.clearCanvas();
         }
       }));
+
       this.subscriptions.add(this.gameHubService.wordSelected$.subscribe((wordLength: number) => {
         console.log('Word selected with length: ' + wordLength);
         this.blankCount = wordLength;
@@ -110,22 +113,27 @@ export class GameComponent implements OnInit {
 
       this.subscriptions.add(
         this.gameHubService.hubConnection.on('EnableGuessing', (res: boolean, timestamp: number) => {
-          res ? console.log('Guessing enabled at ' + timestamp) : console.log('Guessing disabled at ' + timestamp);
           this.guessEnabled = res;
           this.guessEnabledChange.emit(this.guessEnabled);
         }));
       this.subscriptions.add(
         this.gameHubService.hubConnection.on('EnableDrawing', (res: boolean, timestamp: number) => {
-          res ? console.log('Drawing enabled at ' + timestamp) : console.log('Drawing disabled at ' + timestamp);
           this.drawEnabled = res;
+        }));
+      this.subscriptions.add(
+        this.gameHubService.hubConnection.on('GameEnded', (roomState: string, team: string) => {
+          if (roomState) {
+            this.displayNotification(`${team} won the game!`, 5000);
+            this.roomStateChange.emit(roomState);
+            this.guessEnabledChange.emit(true);
+          }
         }));
 
       let lastPromptTime = 0;
       this.subscriptions.add(
         this.gameHubService.hubConnection.on('PromptWordSelect', (res: boolean, timestamp: number) => {
-          res ? console.log('Prompting word select at ' + timestamp) : console.log('Not prompting word select at ' + timestamp);
           const now = Date.now();
-          if (now - lastPromptTime < 1000) { // Debounce logic (1 second)
+          if (now - lastPromptTime < 1000) {
             return;
           }
           lastPromptTime = now;
@@ -135,7 +143,7 @@ export class GameComponent implements OnInit {
           }
           else {
             const painterNickname = this.users.find(u => u._sessionKey === this.gameRoundView?.currentPainter)?.nickname!;
-            this.displayNotification(`${painterNickname} is selecting a word...`, 12000);
+            this.displayNotification(`${painterNickname} is selecting a word...`);
           }
         }));
 
@@ -150,7 +158,6 @@ export class GameComponent implements OnInit {
     await this.gameHubService.connectToGame(`game:${this.roomId}`);
 
     if (this.isRoomAdmin) await this.gameHubService.startGame();
-
   }
 
   ngOnDestroy(): void {
@@ -184,15 +191,17 @@ export class GameComponent implements OnInit {
     this.notificationText = message;
     setTimeout(() => {
       this.notificationText = '';
-    }, timeoutInterval); // Display the notification for 3 seconds
+    }, timeoutInterval);
   }
+
   private prepareWordSelection(): void {
     if (this.wordPack && this.wordPack.length >= 4) {
       this.selectables = [];
       const shuffled = [...this.wordPack].sort(() => 0.5 - Math.random());
-      this.selectables = shuffled.slice(0, 4);
+      this.selectables = shuffled.slice(0, 3);
     }
   }
+
   private showWordSelectModal(): void {
     if (this.selectables.length > 0) {
       this.dialog.open(this.wordSelectionModal, {

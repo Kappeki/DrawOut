@@ -19,36 +19,38 @@
     </div>
 
 
-    <div class="score-word-container">
-        <div class="score-container redTeam">
-            <span>Red Team: {{gameRoundView?.redScore}}</span>
-        </div>
-
-        <div class="word-container">
-            <span *ngIf="this.drawEnabled && gameRoundView?.selectedWord">{{gameRoundView?.selectedWord}}</span>
-            <span *ngIf="!this.drawEnabled">Guess the word! -> {{this.hint}}</span>
-        </div>
-
-        <div class="score-container blueTeam">
-            <span>Blue Team: {{gameRoundView?.blueScore}}</span>
-        </div>
-    </div>
-
-    <div class="whiteboard-wrapper">
-        <!-- Timer and Round Info -->
-        <div class="overlay">
-            <div class="time-container">
-                <img src="hourglass.png" alt="Timer Icon">
-                <span>{{this.currentTimer}}</span>
+    <div class="game-canvas-container">
+        <div class="score-word-container">
+            <div class="score-container redTeam">
+                <span>Red Team: {{gameRoundView?.redScore}}</span>
             </div>
-            <div class="round-container">
-                <span>Round {{gameRoundView?.currentRound}} of {{gameModelView?.totalRounds}}</span>
+
+            <div class="word-container">
+                <span *ngIf="this.drawEnabled && gameRoundView?.selectedWord">{{gameRoundView?.selectedWord}}</span>
+                <span *ngIf="!this.drawEnabled">Guess the word! -> {{this.hint}}</span>
+            </div>
+
+            <div class="score-container blueTeam">
+                <span>Blue Team: {{gameRoundView?.blueScore}}</span>
             </div>
         </div>
-    </div>
 
-    <!-- Whiteboard Component -->
-    <app-whiteboard [drawEnabled]="this.drawEnabled" [gameId]="gameModelView?._id!">
-    </app-whiteboard>
+        <div class="whiteboard-wrapper">
+            <!-- Timer and Round Info -->
+            <div class="overlay">
+                <div class="time-container">
+                    <img src="palette.png" alt="Timer Icon">
+                    <span class="timer-text">{{this.currentTimer}}</span>
+                </div>
+                <div class="round-container">
+                    <span>Round {{gameRoundView?.currentRound}} of {{gameModelView?.totalRounds}}</span>
+                </div>
+            </div>
+            <app-whiteboard [drawEnabled]="this.drawEnabled" [gameId]="gameModelView?._id!">
+            </app-whiteboard>
+        </div>
+
+        <!-- Whiteboard Component -->
+    </div>
     <!-- Mozda crtanje, boje itd da bude ovde a ne u whiteboard -->
 </div>

@@ -1,5 +1,5 @@
 .selected {
-    border: 4px solid red;
+    border: 4px solid red !important;
 }
 
 .canvas-controls-container {
@@ -19,7 +19,6 @@ canvas {
     border: 2px solid #000;
     border-radius: 8px;
     z-index: 20;
-    cursor: url('/pencil.png') 0 30, auto;
 }
 
 .game-controls-container {
@@ -61,8 +60,7 @@ canvas {
 
 .brush-options {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-wrap: wrap;
     margin: 0 10px;
     cursor: pointer;
 }
@@ -81,6 +79,7 @@ canvas {
     align-items: center;
     justify-content: center;
     margin-left: 10px;
+    user-select: none;
 }
 
 .tool-button {

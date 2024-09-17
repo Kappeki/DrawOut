@@ -89,13 +89,6 @@ namespace DrawOutApp.Server.Hubs
                     Context.Items["Roles"] = userRoles;
                 }
 
-                if(user!.Roles!.Contains(Role.RoomAdmin.ToString()))
-                {
-                    var roles = Context.Items["Roles"] as List<string>;
-                    roles?.Add("RoomAdmin");
-                    Context.Items["Roles"] = roles;
-                }
-
                 usersInfo.Add(user!);
             }
 
@@ -147,26 +140,23 @@ namespace DrawOutApp.Server.Hubs
                 msg.Content, 
                 msg.Timestamp);
         }
-        public async Task NotifyGameStart(string roomUrl)
+        public async Task UpdateRoomState(string roomUrl, string roomState)
         {
             var roomId = await _roomService.GetIdFromURL(roomUrl);
-            var roles = Context.Items["Roles"] as List<string>;
-            if (roles == null || !roles.Contains("RoomAdmin"))
-            {
-                throw new HubException("You do not have permission to start the game.");
-            }
             var (isError, room, error) = await _roomService.GetRoomByUrlAsync(roomUrl);
             if (isError)
             {
                 throw new HubException(error);
             }
-            //if (room!.Players!.Count < 4)
-            //{
-            //    throw new HubException("Not enough players to start the game.");
-            //}
-            await _roomService.UpdateRoomStateAsync(roomId!, RoomState.InGame);
+            if(room!.RoomAdminId != Context.Items["SeshKey"]!.ToString())
+            {
+                throw new HubException("You do not have permission to change room state.");
+            }
+
+            await _roomService.UpdateRoomStateAsync(roomId!, Enum.Parse<RoomState>(roomState));
 
             await SendConnectedRoomById(roomId!);
+            await SendConnectedUsers(roomId!);
         }
         public async Task ChangeRoomSettings(string roomURL, string settingName, string settingValue)
         {
@@ -261,7 +251,6 @@ namespace DrawOutApp.Server.Hubs
 
             if (userIds != null)
             {
-                userIds!.Remove(seshKey!);
                 if (AdminDisconnected() && userIds!.Count > 1 && !isProtected)
                 {
                     Random random = new Random();
@@ -273,10 +262,6 @@ namespace DrawOutApp.Server.Hubs
 
                     if (success)
                     {
-                        var roles = Context.Items["Roles"] as List<string>;
-                        roles?.Remove("RoomAdmin");
-                        Context.Items["Roles"] = roles;
-
                         await Clients.Group(roomId!).SendAsync(
                             "ReceiveMessage",
                             "Server",
@@ -287,6 +272,7 @@ namespace DrawOutApp.Server.Hubs
                         throw new HubException("Couldn't set new admin");
                     }
                 }
+                userIds!.Remove(seshKey!);
             }
 
             await _userService.RemoveRolesAsync(seshKey!, [Role.RoomAdmin, Role.Player, Role.Red, Role.Blue, Role.Painter, Role.TeamLeader]);
@@ -299,7 +285,7 @@ namespace DrawOutApp.Server.Hubs
                 await base.OnDisconnectedAsync(exception);
             }
 
-            if (userIds!.Count >= 1)
+            if (userIds?.Count >= 1)
             {
                 await Clients
                     .Group(roomId!)

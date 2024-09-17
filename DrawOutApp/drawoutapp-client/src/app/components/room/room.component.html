@@ -28,12 +28,13 @@
           className="Blue" (teamChange)="handleTeamJoin($event)"></app-user-list>
       </div>
 
+      <!-- *ngIf="room?.roomState === 'InGame'" -->
       <!-- Whiteboard and Settings -->
       <div class="whiteboard-container">
         <app-game *ngIf="room?.roomState === 'InGame'" (roundChange)="handleRoundChange($event)"
           (guessEnabledChange)="handleGuessEnabled($event)" (chatClear)="handleChatClear($event)"
-          [isRoomAdmin]="isRoomAdmin" [users]="users!" [roomId]="roomId" [wordPack]="availableWords"
-          [latestGuess$]="latestGuess$">
+          (roomStateChange)="handleGameEnd($event)" [isRoomAdmin]="isRoomAdmin" [users]="users!" [roomId]="roomId"
+          [wordPack]="availableWords" [latestGuess$]="latestGuess$">
         </app-game>
 
         <!-- Settings overlay -->

@@ -39,6 +39,8 @@ export class RoomComponent implements OnInit, OnDestroy {
   currentTeam: string | null = null;
   chatInput: string = '';
 
+  password: string = '';
+
   //game important properties
   availableWords: string[] = [];
   users: User[] = [];
@@ -59,6 +61,12 @@ export class RoomComponent implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit(): Promise<void> {
+    const sessionId = this.sessionService.getSessionId();
+    if (!sessionId) {
+      this.router.navigate(['/']);
+      return;
+    }
+
     await this.roomHubService.startConnection().then(() => {
 
       this.subscriptions.add(
@@ -177,7 +185,7 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   startGame() {
     if (this.isRoomAdmin) {
-      this.roomHubService.notifyGameStart(this.roomURL);
+      this.roomHubService.updateRoomState(this.roomURL, "InGame");
       this.apiService.startGame(this.roomId).subscribe(res => {
         console.log(res);
       });
@@ -221,5 +229,12 @@ export class RoomComponent implements OnInit, OnDestroy {
   handleChatClear(event: string[]) {
     this.chatMessages = event;
   }
+
+  handleGameEnd(event: string) {
+    if (this.isRoomAdmin) {
+      this.roomHubService.updateRoomState(this.roomURL, event);
+    }
+  }
+
 
 }
