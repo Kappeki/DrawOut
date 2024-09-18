@@ -8,12 +8,10 @@ namespace DrawOutApp.Server.Repositories
 {
     public class ChatMessageRepository : IChatMessageRepo
     {
-        private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
-        public ChatMessageRepository(IRedisSettings settings)
+        public ChatMessageRepository(IConnectionMultiplexer redis)
         {
-            _redis = ConnectionMultiplexer.Connect(settings.ConnectionString);
-            _database = _redis.GetDatabase();
+            _database = redis.GetDatabase();
         }
 
         public async Task AddToChatAsync(string roomId, ChatMessage msg)

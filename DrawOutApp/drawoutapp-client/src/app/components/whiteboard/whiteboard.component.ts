@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { DrawingActionView } from '../../models/drawing-action';
 import { v4 as uuidv4 } from 'uuid';
 import { GameHubService } from '../../services/game-hub.service';
@@ -17,7 +17,7 @@ import { throttleTime } from 'rxjs/operators';
   templateUrl: './whiteboard.component.html',
   styleUrl: './whiteboard.component.css'
 })
-export class WhiteboardComponent implements OnInit, AfterViewInit {
+export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
   colors: string[] = [
     '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
     '#FFFF00', '#00FFFF', '#FF00FF', '#C0C0C0', '#808080',
@@ -54,6 +54,7 @@ export class WhiteboardComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
   }
 
+
   ngAfterViewInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D;
     this.originator = new DrawingOriginator(this.ctx!);
@@ -64,6 +65,19 @@ export class WhiteboardComponent implements OnInit, AfterViewInit {
       .pipe(throttleTime(20)) // Adjust the time as needed (in ms)
       .subscribe(event => this.onMouseMove(event));
 
+  }
+
+  ngOnDestroy(): void {
+    this.resetComponent;
+    this.subscriptions.unsubscribe();
+  }
+
+  private resetComponent = () => {
+    this.ctx!.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.actions = [];
+    this.pendingActions = [];
+    this.lastSendTime = 0;
+    this.caretaker = new DrawingCareTaker();
   }
 
   private setupCanvasEvents(): void {

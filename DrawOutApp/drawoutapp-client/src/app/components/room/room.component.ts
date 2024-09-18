@@ -36,10 +36,11 @@ export class RoomComponent implements OnInit, OnDestroy {
   currentRound: number = 1;
   totalRounds: number = 8;
 
+  hasPassword: boolean = false;
+  password: string = '';
+
   currentTeam: string | null = null;
   chatInput: string = '';
-
-  password: string = '';
 
   //game important properties
   availableWords: string[] = [];
@@ -61,6 +62,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   ) { }
 
   async ngOnInit(): Promise<void> {
+
     const sessionId = this.sessionService.getSessionId();
     if (!sessionId) {
       this.router.navigate(['/']);
@@ -68,10 +70,10 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
 
     await this.roomHubService.startConnection().then(() => {
-
       this.subscriptions.add(
         this.roomHubService.connectedRoom$.subscribe(res => {
           this.room = res!;
+          this.roomId = this.room?.roomId!;
           this.roomURL = this.room?.roomURL!;
           const sessionId = this.sessionService.getSessionId();
           this.isRoomAdmin = this.room && this.room?.roomAdminId === sessionId;
@@ -139,14 +141,14 @@ export class RoomComponent implements OnInit, OnDestroy {
             }
           }
         }));
-
     });
 
     this.subscriptions.add(
       this.route.paramMap.subscribe(params => {
         if (this.route.snapshot.url[1].path === 'by-id') {
           this.roomId = params.get('roomId')!;
-          this.roomHubService.joinRoomById(this.roomId);
+          this.hasPassword = this.route.snapshot.queryParamMap.get('passwd') === 'true';
+          this.attemptJoinRoomById(this.roomId);
         } else if (this.route.snapshot.url[1].path === 'by-url') {
           this.roomURL = params.get('roomURL')!;
           this.roomHubService.joinRoomByURL(this.roomURL);
@@ -164,6 +166,14 @@ export class RoomComponent implements OnInit, OnDestroy {
     return this.latestGuessSubject.asObservable();
   }
 
+  async attemptJoinRoomById(roomId: string): Promise<void> {
+    if (this.hasPassword) {
+      this.password = prompt('This room is password protected. Please enter the password:') || '';
+    }
+    await this.roomHubService.joinRoomById(roomId, this.password, this.router);
+  }
+
+
   @HostListener('window:beforeunload', ['$event'])
   @HostListener('window:popstate', ['$event'])
   async handleWindowClose(event: any) {
@@ -174,6 +184,7 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.blueTeam = [];
     this.currentTeam = null;
     this.roomId = '';
+    this.password = '';
     await this.roomHubService.leaveRoom();
   }
 
@@ -235,6 +246,4 @@ export class RoomComponent implements OnInit, OnDestroy {
       this.roomHubService.updateRoomState(this.roomURL, event);
     }
   }
-
-
 }

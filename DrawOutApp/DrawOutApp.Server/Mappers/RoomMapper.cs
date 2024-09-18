@@ -11,6 +11,7 @@ namespace DrawOutApp.Server.Mappers
         public RoomMapper()
         {
             CreateMap<Room, RoomModel>()
+                .ForMember(dest => dest.RoomId, opt => opt.MapFrom(src=>src.ObjectId))
                 .ForMember(dest => dest.RoomState, opt => opt.MapFrom(src => src.RoomState.ToString()))
                 .ForMember(dest => dest.RoundTime, opt => opt.MapFrom(src => (int)src.RoundTime))
                 .ForMember(dest => dest.PasswordHash, opt=>opt.MapFrom(src => src.Password))

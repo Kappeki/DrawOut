@@ -6,9 +6,9 @@
 
 .nav-tabs {
   display: inline-flex;
-  justify-content: center;
   margin-bottom: 20px;
   list-style: none;
+  margin-left: 25%;
   /* Add a border to distinguish the tab area */
 }
 
@@ -20,6 +20,7 @@
 
 .nav-tabs .nav-link {
   border: none;
+  text-wrap: nowrap;
   font-size: 40px;
   font-weight: bold;
   color: #333;
@@ -55,11 +56,14 @@
   padding: 10px;
   text-align: center;
   font-family: 'Courier New', Courier, monospace;
+  font-size: larger;
 }
 
 .room-list-header {
-  font-size: 40px;
-  margin-bottom: 40px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  align-items: center;
 }
 
 .room-table {
@@ -117,4 +121,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.filters {
+  margin: 10px 0;
+  z-index: 10;
+}
+
+.filters button {
+  padding: 8px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.filters button img {
+  width: 84px;
+  height: 84px;
 }

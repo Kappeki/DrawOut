@@ -39,6 +39,10 @@ namespace DrawOutApp.Server.Entities
         [BsonElement("timeElapsed")]
         public DateTime TimeElapsed { get; set; }
 
+        [BsonElement("expirationTime")]
+        [BsonIgnoreIfNull]
+        public DateTime? ExpirationTime { get; set; }
+
         [BsonIgnore]
         public string ObjectId { get { return _id.ToString(); } }
 

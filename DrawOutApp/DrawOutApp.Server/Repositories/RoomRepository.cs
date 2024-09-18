@@ -15,48 +15,57 @@ namespace DrawOutApp.Server.Repositories
         private readonly IMongoCollection<WordPack> _wordPacksCollection;
         private readonly IMongoClient _mongoClient;
 
-        private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
-        public RoomRepository(IMongoDBSettings mongoSettings, IMongoClient mongoClient, IRedisSettings redisSettings)
+        public RoomRepository(IMongoDBSettings mongoSettings, IMongoClient mongoClient, IConnectionMultiplexer redis)
         {
             var database = mongoClient.GetDatabase(mongoSettings.DatabaseName);
             _mongoClient = mongoClient;
             _roomsCollection = database.GetCollection<Room>(mongoSettings.RoomsCollectionName);
             _wordPacksCollection = database.GetCollection<WordPack>(mongoSettings.WordPacksCollectionName);
 
-            _redis = ConnectionMultiplexer.Connect(redisSettings.ConnectionString);
-            _database = _redis.GetDatabase();
+            _database = redis.GetDatabase();
 
-
-            //CreateIndexesAsync();
         }
-        private async Task CreateIndexesAsync()
+        public async Task CreateIndexesAsync()
         {
-            await _roomsCollection.Indexes.CreateOneAsync(
-                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomName),
-                new CreateIndexOptions { Unique = true }));
-            
-            //ovo da se brze hvata soba po url-u
-            await _roomsCollection.Indexes.CreateOneAsync(
-                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomURL), 
-                new CreateIndexOptions { Unique = true}));
-            
-            await _roomsCollection.Indexes.CreateOneAsync(
-                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.PlayerCount))); 
-            
-            //da filtrira sobe koje nisu in-game
-            await _roomsCollection.Indexes.CreateOneAsync(
-                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomState)));
-            
-            await _roomsCollection.Indexes.CreateOneAsync(
-                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.Password == null)));
-            
-            //ovaj index za myrooms tab da se otvori brze
-            await _roomsCollection.Indexes.CreateOneAsync(
-                new CreateIndexModel<Room>(Builders<Room>.IndexKeys.Ascending(r => r.RoomAdminId)));
-            //moze da se doda index da expiruje soba to cemo kasnije da vidimo
+            var indexModels = new List<CreateIndexModel<Room>>
+            {
+                // Create unique index on RoomName
+                new CreateIndexModel<Room>(
+                Builders<Room>.IndexKeys.Ascending(r => r.RoomName),
+                new CreateIndexOptions { Unique = true }),
 
+                // Create unique index on RoomURL for faster search
+                new CreateIndexModel<Room>(
+                Builders<Room>.IndexKeys.Ascending(r => r.RoomURL),
+                new CreateIndexOptions { Unique = true }),
+
+                // Index on PlayerCount for filtering rooms based on number of players
+                new CreateIndexModel<Room>(
+                Builders<Room>.IndexKeys.Ascending(r => r.PlayerCount)),
+
+                // Index on RoomState for faster filtering of rooms that are not in-game
+                new CreateIndexModel<Room>(
+                Builders<Room>.IndexKeys.Ascending(r => r.RoomState)),
+
+                // Index on rooms with no password for expiration logic
+                //new CreateIndexModel<Room>(
+                //Builders<Room>.IndexKeys.Ascending(r => string.IsNullOrEmpty(r.Password))),
+
+                // Index on RoomAdminId for faster retrieval in "my rooms" section
+                new CreateIndexModel<Room>(
+                Builders<Room>.IndexKeys.Ascending(r => r.RoomAdminId)),
+
+                // Create the TTL index for room expiration (initially not applied)
+                new CreateIndexModel<Room>(
+                Builders<Room>.IndexKeys.Ascending(r => r.ExpirationTime),
+                new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) })
+            };
+
+            // Create all indexes in a single batch
+            await _roomsCollection.Indexes.CreateManyAsync(indexModels);
         }
+
 
         public async Task<List<string>> GetAllPackNamesAsync()
         {
@@ -149,15 +158,6 @@ namespace DrawOutApp.Server.Repositories
             await _roomsCollection.DeleteManyAsync(filter);
         }
 
-        public virtual async Task InsertIntoListAsync<TItem>(
-        Expression<Func<Room, bool>> filter,
-        Expression<Func<Room, IEnumerable<TItem>>> listProperty,
-        TItem item, IClientSessionHandle? sesh = null)
-        {
-            var updateDefinition = Builders<Room>.Update.Push(listProperty, item);
-            await UpdateRoomAsync(filter, updateDefinition, sesh);
-        }
-
         public async Task<Room?> GetRoomByFilterAsync(Expression<Func<Room, bool>> filter, 
             IClientSessionHandle? sesh = null)
         {
@@ -171,27 +171,16 @@ namespace DrawOutApp.Server.Repositories
             }
         }
 
-        //conditional remove from list
-        public virtual async Task RemoveFromListAsync<TItem>(
-        FilterDefinition<Room> filter,
-        Expression<Func<Room, IEnumerable<TItem>>> listProperty,
-        Expression<Func<TItem, bool>> condition, 
-        IClientSessionHandle? sesh = null) where TItem : class
+        public async Task CreateTTLIndexAsync(string collectionName, string fieldName, int expireAfterSeconds)
         {
-            var update = Builders<Room>.Update.PullFilter(listProperty, Builders<TItem>.Filter.Where(condition));
-            await UpdateRoomAsync(filter, update, sesh);
-        }
-        
-        //normal remove from list
-        public virtual async Task RemoveFromListAsync<TItem>(Expression<Func<Room, bool>> filter,
-        Expression<Func<Room, IEnumerable<TItem>>> listProperty, TItem value, 
-        IClientSessionHandle? sesh = null)
-        {
-            var update = Builders<Room>.Update.Pull(listProperty, value);
-            await UpdateRoomAsync(filter, update, sesh);
-        }
+            var indexKeysDefinition = Builders<Room>.IndexKeys.Ascending(fieldName);
+            var indexModel = new CreateIndexModel<Room>(indexKeysDefinition, new CreateIndexOptions
+            {
+                ExpireAfter = TimeSpan.FromSeconds(expireAfterSeconds)
+            });
 
-
+            await _roomsCollection.Indexes.CreateOneAsync(indexModel);
+        }
 
     }
 }

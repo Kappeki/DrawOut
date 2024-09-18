@@ -8,7 +8,7 @@ namespace DrawOutApp.Server.Services.Contracts
     {
        
         Task<Result<RoomModel,string>> CreateRoomAsync(string creatingUserId, string roomName, string? password = null);
-        Task<Result<bool, string>> AddPlayerAsync(string roomId, string sessionId, string? password = null);
+        Task<Result<bool, string>> AddPlayerAsync(string roomId, string sessionId, string? password = null, bool urlJoin = false);
         Task<Result<bool, string>> RemovePlayerAsync(string roomId, string sessionId);
         Task<Result<RoomModel?,string>> GetRoomByIdAsync(string roomId);
         Task<Result<RoomModel?, string>> GetRoomByUrlAsync(string roomUrl);
@@ -24,5 +24,6 @@ namespace DrawOutApp.Server.Services.Contracts
         Task<Result<List<string>?, string>> GetPlayerIdsAsync(string roomId);
         Task<List<string>> GetAllWordPacksAsync();
         Task<List<string>> GetWordsByPackNameAsync(string packName);
+        Task SetRoomExpirationAsync(string roomId);
     }
 }

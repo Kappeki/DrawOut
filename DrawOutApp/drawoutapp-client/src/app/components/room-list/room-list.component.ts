@@ -4,6 +4,7 @@ import { DrawOutAPIService } from '../../services/draw-out-api.service';
 import { Router } from '@angular/router';
 import { RoomItemComponent } from '../room-item/room-item.component';
 import { CommonModule } from '@angular/common';
+import { query } from '@angular/animations';
 
 @Component({
   selector: 'app-room-list',
@@ -68,7 +69,17 @@ export class RoomListComponent {
     });
   }
 
-  onRoomSelected(roomId: string): void {
-    this.router.navigate(['/room/by-id', roomId]);
+  toggleAscending(): void {
+    this.isAscending = !this.isAscending;
+    this.loadRooms();
+  }
+
+  toggleProtected(): void {
+    this.isProtected = !this.isProtected;
+    this.loadRooms();
+  }
+
+  onRoomSelected(roomItem: RoomListItem): void {
+    this.router.navigate(['/room/by-id', roomItem.roomId], { queryParams: { passwd: roomItem.hasPassword } });
   }
 }

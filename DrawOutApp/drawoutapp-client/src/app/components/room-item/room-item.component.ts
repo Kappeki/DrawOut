@@ -11,14 +11,14 @@ import { CommonModule } from '@angular/common';
 })
 export class RoomItemComponent implements OnInit {
   @Input() room!: RoomListItem;
-  @Output() roomSelected = new EventEmitter<string>();
+  @Output() roomSelected = new EventEmitter<RoomListItem>();
 
   constructor() { }
 
   ngOnInit(): void { }
 
   onJoinRoom(): void {
-    this.roomSelected.emit(this.room.roomId);
+    this.roomSelected.emit(this.room);
   }
 
 }

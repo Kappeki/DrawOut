@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { User } from '../models/user';
 import { Room } from '../models/room';
 import { __values } from 'tslib';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -50,18 +51,21 @@ export class RoomHubService {
     }).catch(err => console.error('Error stopping connection:', err));
   }
 
-  public async joinRoomById(roomId: string, password?: string) {
+  public async joinRoomById(roomId: string, password?: string, router?: Router) {
     return await this.hubConnection.invoke('JoinRoomById', roomId, password)
-      .catch(err => console.error(err));
+      .catch(err => {
+        router?.navigate(['/']);
+        alert("Wrong password!");
+      });
   }
 
-  public async joinRoomByURL(roomURL: string, password?: string) {
+  public async joinRoomByURL(roomURL: string) {
     if (this.hubConnection?.state !== 'Connected') {
       console.error('Connection not established yet');
       return;
     }
 
-    return this.hubConnection.invoke('JoinRoomByURL', roomURL, password)
+    return this.hubConnection.invoke('JoinRoomByURL', roomURL)
       .catch(err => console.error(err));
   }
 

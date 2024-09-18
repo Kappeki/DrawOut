@@ -84,7 +84,24 @@ builder.Services.AddSingleton<IRedisSettings>(sp =>
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var settings = sp.GetRequiredService<IOptions<RedisSettings>>().Value;
-    return ConnectionMultiplexer.Connect(settings.ConnectionString);
+
+    var configurationOptions = ConfigurationOptions.Parse(settings.ConnectionString);
+    configurationOptions.ReconnectRetryPolicy = new ExponentialRetry(5000); // Retry every 5 seconds with an exponential backoff
+
+    var redis = ConnectionMultiplexer.Connect(configurationOptions);
+
+    // Set up event handlers for connection failures and restores
+    redis.ConnectionFailed += (sender, args) =>
+    {
+        Console.WriteLine("Redis connection failed: " + args.Exception.Message);
+    };
+
+    redis.ConnectionRestored += (sender, args) =>
+    {
+        Console.WriteLine("Redis connection restored.");
+    };
+
+    return redis;
 });
 
 builder.Services.AddStackExchangeRedisCache(options =>
@@ -124,6 +141,13 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug(); 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roomRepo = scope.ServiceProvider.GetRequiredService<IRoomRepo>();
+    await roomRepo.CreateIndexesAsync(); 
+    await roomRepo.CreateTTLIndexAsync("rooms", "expirationTime", 0);
+}
 
 app.UseDefaultFiles();
 app.UseHttpsRedirection();

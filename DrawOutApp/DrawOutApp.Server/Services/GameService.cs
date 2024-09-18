@@ -45,32 +45,39 @@ namespace DrawOutApp.Server.Services
         public async Task StartGameAsync(string gameId, GameTimers gameTimers)
         {
             var command = new StartGameCommand(this, _userService, gameId, gameTimers);
-            _invoker.EnqueueCommand(gameId, command);
+            //_invoker.EnqueueCommand(gameId, command);
+            await _invoker.EnqueueCommandAsync(gameId, command);
         }
         public async Task InitNextRoundAsync(GameRoundModel gameRoundModel, GameTimers gameTimers)
         {
             var command = new InitializeNextRoundCommand(this, _userService, _hubContext.Clients, gameTimers, gameRoundModel);
-            _invoker.EnqueueCommand(gameRoundModel._gameId, command);      
+            //_invoker.EnqueueCommand(gameRoundModel._gameId, command);
+            await _invoker.EnqueueCommandAsync(gameRoundModel._gameId, command);
         }
         public async Task StartRoundAsync(string gameId, GameTimers gameTimers)
         {
             var command = new StartRoundCommand(this, _hubContext.Clients, gameId, gameTimers);
-            _invoker.EnqueueCommand(gameId, command);   
+            //_invoker.EnqueueCommand(gameId, command);
+            await _invoker.EnqueueCommandAsync(gameId, command);
         }
+
         public async Task StartStealAsync(string gameId, GameTimers gameTimers)
         {
             var command = new StartStealCommand(this, _hubContext.Clients, gameId, gameTimers);
-            _invoker.EnqueueCommand(gameId, command);
+            //_invoker.EnqueueCommand(gameId, command);
+            await _invoker.EnqueueCommandAsync(gameId, command);
         }
         public async Task EndRoundAsync(string gameId, GameTimers gameTimers)
         {
             var command = new EndRoundCommand(this, _userService, gameId, gameTimers);
-            _invoker.EnqueueCommand(gameId, command);
+            //_invoker.EnqueueCommand(gameId, command);
+            await _invoker.EnqueueCommandAsync(gameId, command);
         }
         public async Task EndGameAsync(string gameId)
         {
             var command = new EndGameCommand(this, _userService, gameId);
-            _invoker.EnqueueCommand(gameId, command);
+            //_invoker.EnqueueCommand(gameId, command);
+            await _invoker.EnqueueCommandAsync(gameId, command);
         }
 
         //public methods are revealed to the clients through the hub
@@ -139,7 +146,6 @@ namespace DrawOutApp.Server.Services
         }
         public async Task SendWordSelectPromptAsync(string painterId, string gameId)
         {
-
             try
             {
                 var painterConnId = await _userService.GetConnectionIdAsync(painterId);
@@ -147,7 +153,7 @@ namespace DrawOutApp.Server.Services
                 //disable po default na pocetak runde da ne moze da se pogadja
                 await _hubContext.Clients.Group(gameId).SendAsync("EnableGuessing", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                 await _hubContext.Clients.Client(painterConnId).SendAsync("PromptWordSelect", true, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-                await _hubContext.Clients.AllExcept(painterConnId).SendAsync("PromptWordSelect", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                await _hubContext.Clients.GroupExcept(gameId, painterConnId).SendAsync("PromptWordSelect", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                 
             }
             catch (Exception ex)

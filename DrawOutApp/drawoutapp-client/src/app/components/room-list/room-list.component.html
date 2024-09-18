@@ -1,16 +1,29 @@
 <div class="room-list-container">
 
   <!-- Tabs navigation -->
-  <ul class="nav nav-tabs" id="roomTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-      <a class="nav-link" [class.active]="activeTab === 'available'" (click)="selectTab('available')">Available
-        Rooms</a>
-    </li>
-    <li class="nav-item" role="presentation">
-      <a class="nav-link" [class.active]="activeTab === 'myrooms'" (click)="selectTab('myrooms')">My Rooms</a>
-    </li>
-  </ul>
+  <div class="room-list-header">
+    <ul class="nav nav-tabs" id="roomTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" [class.active]="activeTab === 'available'" (click)="selectTab('available')">Available
+          Rooms</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" [class.active]="activeTab === 'myrooms'" (click)="selectTab('myrooms')">My Rooms</a>
+      </li>
+    </ul>
 
+
+    <div class="filters">
+      <button (click)="toggleAscending()">
+        <img *ngIf="isAscending" src="sort-ascending.png" alt="Ascending">
+        <img *ngIf="!isAscending" src="sort-descending.png" alt="Descending">
+      </button>
+      <button (click)="toggleProtected()">
+        <img *ngIf="isProtected" src="padlock.png" alt="Protected Rooms Only">
+        <img *ngIf="!isProtected" src="unlocked.png" alt="Show All Rooms">
+      </button>
+    </div>
+  </div>
   <!-- Tabs content -->
   <div class="tab-content" id="roomTabsContent">
     <div *ngIf="activeTab === 'available'" class="tab-pane fade show active">

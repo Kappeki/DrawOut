@@ -86,7 +86,12 @@ export class HomeComponent implements OnInit {
     }
   }
 
+
   openRoomModal() {
+    if (this.nicknameText === '') {
+      alert('Please enter a nickname first!');
+      return;
+    }
     this.isModalOpen = true;
   }
 
@@ -95,7 +100,6 @@ export class HomeComponent implements OnInit {
   }
 
   createRoom() {
-    // name check if exists
     this.apiService.createRoom(this.roomName, this.password!).subscribe({
       next: (response: any) => {
         this.router.navigate(['/room/by-url', response.roomUrl]);
@@ -110,5 +114,4 @@ export class HomeComponent implements OnInit {
     });
     this.closeRoomModal();
   }
-
 }

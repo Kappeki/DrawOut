@@ -12,12 +12,10 @@ namespace DrawOutApp.Server.Repositories
 {
     public class UserRepository : IUserRepo
     {
-        private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
-        public UserRepository(IRedisSettings settings)
+        public UserRepository(IConnectionMultiplexer redis)
         {
-            _redis = ConnectionMultiplexer.Connect(settings.ConnectionString);
-            _database = _redis.GetDatabase();
+            _database = redis.GetDatabase();
         }
 
         public async Task AddOrUpdateUserAsync(User user, TimeSpan? expiry = null)

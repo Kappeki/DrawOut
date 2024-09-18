@@ -12,6 +12,7 @@ export class RoomListItem {
 //izmena da room ima id
 
 export interface Room {
+    roomId: string;
     roomName: string;
     passwordHash?: string;
     roomURL?: string;

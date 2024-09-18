@@ -8,12 +8,10 @@ namespace DrawOutApp.Server.Repositories
 {
     public class DrawingActionRepository : IDrawingActionRepo
     {
-        private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
-        public DrawingActionRepository(IRedisSettings settings)
+        public DrawingActionRepository(IConnectionMultiplexer redis)
         {
-            _redis = ConnectionMultiplexer.Connect(settings.ConnectionString);
-            _database = _redis.GetDatabase();
+            _database = redis.GetDatabase();
         }
 
         public async Task AddDrawingActionAsync(DrawingAction action)

@@ -247,7 +247,6 @@ namespace DrawOutApp.Server.Services
             var update = Builders<Room>.Update.Set(r => r.RoomState, roomState);
             await _roomRepository.UpdateRoomAsync(filter, update);
         }
-
         public async Task<bool> OnAdminDisconnectedAsync(string roomId, string newAdminId)
         {
             var filter = Builders<Room>.Filter.Eq(r => r._id, ObjectId.Parse(roomId));
@@ -282,12 +281,12 @@ namespace DrawOutApp.Server.Services
             var uniquePart = Guid.NewGuid().ToString().Substring(0, 8); 
             return $"{sanitizedRoomName}-{uniquePart}";
         }
-        public async Task<Result<bool,string>> AddPlayerAsync(string roomId, string sessionId, string? password = null)
+        public async Task<Result<bool,string>> AddPlayerAsync(string roomId, string sessionId, string? password = null, bool urlJoin = false)
         { 
             try
             {
                 var room = await _roomRepository.GetRoomAsync(roomId);
-                if (room!.Password != null)
+                if (room!.Password != null && !urlJoin)
                 {
                     if (password == null)
                     {
@@ -344,12 +343,49 @@ namespace DrawOutApp.Server.Services
         }
         public async Task<Result<List<string>?,string>> GetPlayerIdsAsync(string roomId)
         {
-            var playerSet = await _roomRepository.GetPlayerSetAsync(roomId);
-            if(playerSet.Count == 0 || playerSet == null)
+            try
             {
-                return "No player id's found! ERROR!!";
+                var playerSet = await _roomRepository.GetPlayerSetAsync(roomId);
+                if (playerSet.Count == 0 || playerSet == null)
+                {
+                    return "No player id's found! ERROR!!";
+                }
+                return playerSet;
             }
-            return playerSet;
+            catch (Exception ex)
+            {
+                string error = ErrorHandler.HandleError(ex);
+                return $"Error getting player id's. : {error}";
+            }
+        }
+
+        public async Task SetRoomExpirationAsync(string roomId)
+        {
+            try
+            {
+                var filter = Builders<Room>.Filter.Eq(r => r._id, ObjectId.Parse(roomId));
+                var room = await _roomRepository.GetRoomAsync(roomId) ?? throw new Exception("Room not found.");
+                if(room.Password != null)
+                {
+                    return;
+                }
+
+                DateTime? exp;
+                if (room.PlayerCount == 0)
+                {
+                    exp = DateTime.UtcNow.AddMinutes(30);
+                }
+                else
+                {
+                    exp = null;
+                }
+                var update = Builders<Room>.Update.Set(r => r.ExpirationTime, exp);
+                await _roomRepository.UpdateRoomAsync(filter, update);
+            }
+            catch (Exception ex)
+            {
+                string error = ErrorHandler.HandleError(ex);
+            }
         }
 
         public async Task<List<string>> GetAllWordPacksAsync()
@@ -361,6 +397,7 @@ namespace DrawOutApp.Server.Services
         {
             return await _roomRepository.GetWordsByPackNameAsync(packName.ToLower());
         }
+
 
     }
 }

@@ -24,7 +24,7 @@ namespace DrawOutApp.Server.Hubs
             _mapper = mapper;
         }
 
-        private async Task<bool> TryJoinRoom(string roomId, string nickname, string? password)
+        private async Task<bool> TryJoinRoom(string roomId, string nickname, string? password, bool urlJoin = false)
         {
             var seshKey = Context.Items["SeshKey"]!.ToString();
             var roles = Context.Items["Roles"] as List<string>;
@@ -39,8 +39,12 @@ namespace DrawOutApp.Server.Hubs
             
             await Clients.Group(roomId).SendAsync("ReceiveMessage", "Server", $"{nickname} has joined the room.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             
-            await _roomService.AddPlayerAsync(roomId, seshKey!, password);
-            
+            var (isError, success, error) = await _roomService.AddPlayerAsync(roomId, seshKey!, password, urlJoin);
+            if (isError)
+            {
+                throw new HubException(error);
+            }
+
             await SendConnectedRoomById(roomId, true);
             
             await SendConnectedUsers(roomId);
@@ -54,10 +58,10 @@ namespace DrawOutApp.Server.Hubs
                 return;
             }
         }
-        public async Task JoinRoomByURL(string roomURL, string? password = null)
+        public async Task JoinRoomByURL(string roomURL)
         {
             var roomId = await _roomService.GetIdFromURL(roomURL) ?? throw new HubException("Room not found.");
-            if (!await TryJoinRoom(roomId, Context.Items["Nickname"]!.ToString()!, password))
+            if (!await TryJoinRoom(roomId, Context.Items["Nickname"]!.ToString()!, null, true))
             {
                 return;
             }
@@ -271,6 +275,8 @@ namespace DrawOutApp.Server.Hubs
                     {
                         throw new HubException("Couldn't set new admin");
                     }
+
+
                 }
                 userIds!.Remove(seshKey!);
             }
@@ -294,6 +300,7 @@ namespace DrawOutApp.Server.Hubs
                 await SendConnectedUsers(roomId!);
             }
             
+            await _roomService.SetRoomExpirationAsync(roomId!);
             await base.OnDisconnectedAsync(exception);
         }
         private bool AdminDisconnected()

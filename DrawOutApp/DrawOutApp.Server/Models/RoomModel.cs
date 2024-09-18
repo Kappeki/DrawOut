@@ -21,6 +21,7 @@ namespace DrawOutApp.Server.Models
 
     public class RoomModel
     {
+        public string RoomId { get; init; } = null!;
         public string RoomName { get; set; } = null!;
         public string? PasswordHash { get; set; }
         public string? RoomURL { get; set; }

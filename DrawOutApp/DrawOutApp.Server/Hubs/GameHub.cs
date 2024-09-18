@@ -50,6 +50,7 @@ namespace DrawOutApp.Server.Hubs
         }
         public async Task SelectWord(string word)
         {
+            if(Context.Items["GameKey"] == null) return;
             var gameId = Context.Items["GameKey"]!.ToString();
             if(_timerService.TryGetValue(gameId!, out var timers)) 
             {
@@ -58,6 +59,7 @@ namespace DrawOutApp.Server.Hubs
         }
         public async Task SubmitGuess(string guess)
         {
+            if(Context.Items["GameKey"] == null || Context.Items["SeshKey"] == null) return;
             var gameId = Context.Items["GameKey"]!.ToString();
             var seshKey = Context.Items["SeshKey"]!.ToString();
             if (_timerService.TryGetValue(gameId!, out var timers))
