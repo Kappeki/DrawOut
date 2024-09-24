@@ -22,16 +22,16 @@
     <div class="game-canvas-container">
         <div class="score-word-container">
             <div class="score-container redTeam">
-                <span>Red Team: {{gameRoundView?.redScore}}</span>
+                <span>Red Team - {{gameRoundView?.redScore}}</span>
             </div>
 
             <div class="word-container">
                 <span *ngIf="this.drawEnabled && gameRoundView?.selectedWord">{{gameRoundView?.selectedWord}}</span>
-                <span *ngIf="!this.drawEnabled">Guess the word! -> {{this.hint}}</span>
+                <span *ngIf="this.drawEnabled">Guess the word! -> {{this.hint}}</span>
             </div>
 
             <div class="score-container blueTeam">
-                <span>Blue Team: {{gameRoundView?.blueScore}}</span>
+                <span>{{gameRoundView?.blueScore}} - Blue Team</span>
             </div>
         </div>
 
@@ -39,7 +39,7 @@
             <!-- Timer and Round Info -->
             <div class="overlay">
                 <div class="time-container">
-                    <img src="palette.png" alt="Timer Icon">
+                    <img src="stopwatch.png" alt="Timer Icon">
                     <span class="timer-text">{{this.currentTimer}}</span>
                 </div>
                 <div class="round-container">

@@ -54,7 +54,6 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
   }
 
-
   ngAfterViewInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d', { willReadFrequently: true }) as CanvasRenderingContext2D;
     this.originator = new DrawingOriginator(this.ctx!);
@@ -64,7 +63,6 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent<MouseEvent>(this.canvas.nativeElement, 'mousemove')
       .pipe(throttleTime(20)) // Adjust the time as needed (in ms)
       .subscribe(event => this.onMouseMove(event));
-
   }
 
   ngOnDestroy(): void {

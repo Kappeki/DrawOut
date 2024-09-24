@@ -55,7 +55,7 @@
       </div>
 
       <!-- Start Button -->
-      <div class="start-button-container" *ngIf="isRoomAdmin && room?.roomState === 'Waiting'">
+      <div class="start-button-container" *ngIf="!isRoomAdmin && room?.roomState === 'Waiting'">
         <button (click)="startGame()" class="start-button">Start!</button>
       </div>
 
