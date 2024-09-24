@@ -1,8 +1,12 @@
 <div class="canvas-controls-container">
     <canvas #canvas></canvas>
 
-    <div class="game-controls-container">
-        <div class="game-paint-container">
+    <div class="game-paint-container">
+
+        <div class="color-container">
+            <!-- Display for Selected Color -->
+            <div class="selected-color-display" [style.background-color]="selectedColor"></div>
+
             <!-- Color Palette -->
             <div class="color-palette">
                 <div appSelectable *ngFor="let color of colors" [selectableValue]="color"
@@ -10,39 +14,39 @@
                     [style.background-color]="color" class="color-box" [class.disabled]="!drawEnabled">
                 </div>
             </div>
+        </div>
 
-            <!-- Brush Size Selector -->
-            <div class="brush-options">
-                <button appSelectable *ngFor="let size of brushSizes" [selectableValue]="size"
-                    [selectedValue]="selectedBrushSize" (selectedValueChange)="drawEnabled && selectBrushSize($event)"
-                    [style.width.px]="size+10" [style.height.px]="size+10" class="brush-size"
-                    [class.disabled]="!drawEnabled"></button>
-            </div>
+        <!-- Brush Size Selector -->
+        <div class="brush-options">
+            <button appSelectable *ngFor="let size of brushSizes" [selectableValue]="size"
+                [selectedValue]="selectedBrushSize" (selectedValueChange)="drawEnabled && selectBrushSize($event)"
+                [style.width.px]="size+10" [style.height.px]="size+10" class="brush-size"
+                [class.disabled]="!drawEnabled"></button>
+        </div>
 
-            <!-- Tool Options -->
-            <div class="tool-options">
-                <button (click)="drawEnabled && selectTool('Brush')" class="tool-button"
-                    [class.disabled]="!drawEnabled">
-                    B
-                </button>
-                <button (click)="drawEnabled && selectTool('Fill')" class="tool-button" [class.disabled]="!drawEnabled">
-                    F
-                </button>
-                <button (click)="drawEnabled && selectTool('Eraser')" class="tool-button"
-                    [class.disabled]="!drawEnabled">
-                    E
-                </button>
-            </div>
+        <!-- Tool Options -->
+        <div class="tool-options">
+            <button (click)="drawEnabled && selectTool('Brush')" class="tool-button"
+                [class.disabled]="!drawEnabled">
+                <img src="brush.png" alt="Brush">
+            </button>
+            <button (click)="drawEnabled && selectTool('Fill')" class="tool-button" [class.disabled]="!drawEnabled">
+                <img src="fill.png" alt="Fill">
+            </button>
+            <button (click)="drawEnabled && selectTool('Eraser')" class="tool-button"
+                [class.disabled]="!drawEnabled">
+                <img src="eraser.png" alt="Eraser">
+            </button>
+        </div>
 
-            <!-- Undo and Clear Options -->
-            <div class="action-options">
-                <button (click)="drawEnabled && undoLastStroke()" class="action-button" [class.disabled]="!drawEnabled">
-                    <img src="undo.png" alt="Undo">
-                </button>
-                <button (click)="drawEnabled && clearCanvas()" class="action-button" [class.disabled]="!drawEnabled">
-                    <img src="trash.png" alt="Clear">
-                </button>
-            </div>
+        <!-- Undo and Clear Options -->
+        <div class="action-options">
+            <button (click)="drawEnabled && undoLastStroke()" class="action-button" [class.disabled]="!drawEnabled">
+                <img src="undo.png" alt="Undo">
+            </button>
+            <button (click)="drawEnabled && clearCanvas()" class="action-button" [class.disabled]="!drawEnabled">
+                <img src="trash.png" alt="Clear">
+            </button>
         </div>
     </div>
 </div>

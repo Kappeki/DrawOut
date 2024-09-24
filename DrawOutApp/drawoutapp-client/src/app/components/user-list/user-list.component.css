@@ -1,6 +1,6 @@
 .user-list-container {
     width: 100%;
-    border-radius: 8px;
+    border-radius: 10px;
 }
 
 .user-list-name {
@@ -13,71 +13,74 @@
 .join-team-btn {
     flex: 1;
     padding: 5px 5px;
-    margin-left: 10px;
+    margin-left: 30px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
     border: none;
     font-weight: bold;
     transition: background-color 0.3s, color 0.3s;
+    font-family: 'Fredoka', sans-serif;
 }
 
 .red-team .join-team-btn {
-    background-color: white;
-    color: #ff4d4d;
-    border: 2px solid #ff4d4d;
+    background-color: #da2b2b;
+    color: white;
+    border: 1px solid black;
 }
 
 .red-team .join-team-btn:hover {
-    background-color: #ff4d4d;
-    color: white;
+    background-color: #931313;
 }
 
 .blue-team .join-team-btn {
-    background-color: white;
-    color: #3399ff;
-    border: 2px solid #3399ff;
+    background-color: #2475c5;
+    color: white;
+    border: 1px solid black;
 }
 
 .blue-team .join-team-btn:hover {
-    background-color: #3399ff;
-    color: white;
+    background-color: #164c82;
 }
 
 .red-team {
-    background-color: #ffcccc;
+    background-color: #ee6d6d;
+    border: 1px solid black;
 }
 
 .blue-team {
-    background-color: #cce5ff;
+    background-color: #64a6ed;
+    border: 1px solid black;
 }
 
 .spectator-team {
-    background-color: #5eda17;
+    background-color: #eeeeee;
 }
 
 ul,
 li {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 .user-item {
     display: flex;
     align-items: center;
-    padding-left: 15px;
+    padding-left: 10px;
     margin-bottom: 8px;
 }
 
 .user-icon {
     width: 35px;
     height: 35px;
-    margin-right: 5px;
+    margin-right: 10px;
     border-radius: 50%;
+    border: 1px solid black;
 }
 
 .user-nickname {
     font-size: 20px;
     font-weight: bolder;
-    color: #333;
+    color: black;
 }

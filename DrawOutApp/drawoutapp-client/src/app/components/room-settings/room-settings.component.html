@@ -28,12 +28,14 @@
             </select>
         </div>
 
-        <!-- Custom Words Section as a Column -->
+        <!-- Custom Words Section -->
         <div class="setting-item-column">
             <span class="setting-label">Custom Words</span>
             <textarea *ngIf="room" [(ngModel)]="room.customWords" (ngModelChange)="updateCustomWords($event)"
                 [disabled]="!isRoomAdmin" placeholder="Separate the words by a , (comma)"
-                class="setting-textarea"></textarea>
+                class="setting-textarea">
+            </textarea> 
+            <!-- (ngModelChange)="updateCustomWords($event)" zbog ovoga se ne ispisuju reci lepo -->
         </div>
     </div>
 </div>

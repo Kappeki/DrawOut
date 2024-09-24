@@ -13,8 +13,17 @@ namespace DrawOutApp.Server.Repositories
     public class UserRepository : IUserRepo
     {
         private readonly IDatabase _database;
-        public UserRepository(IConnectionMultiplexer redis)
+
+        private readonly IMongoClient _mongoClient;
+        private readonly IMongoCollection<Nickname> _nicknamesCollection;
+        private readonly IMongoCollection<Icon> _iconsCollection;
+        public UserRepository(IMongoDBSettings mongoSettings, IMongoClient mongoClient, IConnectionMultiplexer redis)
         {
+            var database = mongoClient.GetDatabase(mongoSettings.DatabaseName);
+            _mongoClient = mongoClient;
+            _nicknamesCollection = database.GetCollection<Nickname>(mongoSettings.NicknamesCollectionName);
+            _iconsCollection = database.GetCollection<Icon>(mongoSettings.IconsCollectionName);
+
             _database = redis.GetDatabase();
         }
 
@@ -105,5 +114,20 @@ namespace DrawOutApp.Server.Repositories
             return user;
         }
 
+        public async Task<List<string>> GetAllNicknamesAsync()
+        {
+            var nicknames = await _nicknamesCollection.Find(Builders<Nickname>.Filter.Empty)
+                                                      .Project(p => p.Value)
+                                                      .ToListAsync();
+            return nicknames;
+        }
+
+        public async Task<List<string>> GetAllIconsAsync()
+        {
+            var icons = await _iconsCollection.Find(Builders<Icon>.Filter.Empty)
+                                                      .Project(p => p.ImageData)
+                                                      .ToListAsync();
+            return icons;
+        }
     }
 }

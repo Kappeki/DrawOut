@@ -10,7 +10,7 @@ import { SessionService } from '../../services/session.service';
   standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrls: ['./home.component.css', '../../app.component.css']
 })
 export class HomeComponent implements OnInit {
   nicknameText: string = '';
@@ -19,6 +19,7 @@ export class HomeComponent implements OnInit {
   roomName = '';
   password: string | null = null;
   sessionExists = false;
+  passwordInputType: string = 'password';
 
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
@@ -86,13 +87,14 @@ export class HomeComponent implements OnInit {
     }
   }
 
-
   openRoomModal() {
-    if (this.nicknameText === '') {
-      alert('Please enter a nickname first!');
-      return;
-    }
     this.isModalOpen = true;
+  }
+
+  closeModalOnOutsideClick(event: MouseEvent) {
+    if ((<HTMLElement>event.target).id === 'modal') {
+        this.closeRoomModal();
+    }
   }
 
   closeRoomModal() {
@@ -100,7 +102,29 @@ export class HomeComponent implements OnInit {
   }
 
   createRoom() {
-    this.apiService.createRoom(this.roomName, this.password!).subscribe({
+    const roomNameInput = document.getElementById('roomName');
+    
+    if (this.roomName === '') {
+        roomNameInput?.classList.add('input-error');
+        
+        const snackbar = document.getElementById('snackbar');
+        snackbar!.innerText = 'Room name must be entered!';
+        snackbar!.className = "show";
+
+        setTimeout(() => {
+            roomNameInput?.classList.remove('input-error');
+            snackbar!.className = snackbar!.className.replace("show", "");
+        }, 3000);
+        
+        return;
+    }
+
+    let passwordToSend = this.password?.trim();
+    if (passwordToSend === '') {
+        passwordToSend = undefined; //ovo je kako ne bi sifra bila prazan string nakon sto korisnik napise nesto za sifru pa nakon toga obrise
+    }
+
+    this.apiService.createRoom(this.roomName, passwordToSend).subscribe({
       next: (response: any) => {
         this.router.navigate(['/room/by-url', response.roomUrl]);
         console.log(`Room created with ${response.roomUrl}`);
@@ -113,5 +137,37 @@ export class HomeComponent implements OnInit {
       }
     });
     this.closeRoomModal();
+  }
+
+  togglePasswordVisibility() {
+    this.passwordInputType = this.passwordInputType === 'password' ? 'text' : 'password';
+  }
+
+  randomizeIcon() {
+    this.apiService.getRandomIcon().subscribe({
+      next: (response: string) => {
+        this.selectedIcon = response;
+      },
+      error: (error: any) => {
+        console.error(error);
+      },
+      complete: () => {
+        console.log('Icon randomization completed');
+      }
+    });
+  }
+
+  randomizeNickname() {
+    this.apiService.getRandomNickname().subscribe({
+      next: (response: string) => {
+        this.nicknameText = response;
+      },
+      error: (error: any) => {
+        console.error(error);
+      },
+      complete: () => {
+        console.log('Nickname randomization completed');
+      }
+    });
   }
 }

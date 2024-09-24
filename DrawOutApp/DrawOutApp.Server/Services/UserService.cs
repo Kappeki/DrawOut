@@ -158,5 +158,30 @@ namespace DrawOutApp.Server.Services
         {
             await _userRepo.DeleteUserAsync(sessionId);
         }
+
+        //dodato
+        public async Task<string> GetRandomNicknameAsync()
+        {
+            var nicknames = await _userRepo.GetAllNicknamesAsync();
+            if (nicknames == null || !nicknames.Any())
+            {
+                return string.Empty;
+            }
+            var random = new Random();
+            return nicknames[random.Next(nicknames.Count)];
+        }
+
+        public async Task<string> GetRandomIconAsync()
+        {
+            var icons = await _userRepo.GetAllIconsAsync();
+            if (icons == null || !icons.Any())
+            {
+                return string.Empty;
+            }
+            var random = new Random();
+            var randomIconData = icons[random.Next(icons.Count)];
+
+            return $"data:image/jpeg;base64,{randomIconData}";
+        }
     }
 }

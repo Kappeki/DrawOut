@@ -21,7 +21,7 @@ import { GameComponent } from '../game/game.component';
     GameComponent
   ],
   templateUrl: './room.component.html',
-  styleUrl: './room.component.css'
+  styleUrls: ['./room.component.css', '../../app.component.css']
 })
 export class RoomComponent implements OnInit, OnDestroy {
 
@@ -196,6 +196,17 @@ export class RoomComponent implements OnInit, OnDestroy {
 
   startGame() {
     if (this.isRoomAdmin) {
+
+      if (this.redTeam.length !== this.blueTeam.length) {
+        this.showSnackbar("Teams must have an equal number of players!");
+        return;
+      }
+  
+      if (this.redTeam.length < 2 || this.blueTeam.length < 2) {
+        this.showSnackbar("Each team must have 2 or more players!");
+        return;
+      }
+
       this.roomHubService.updateRoomState(this.roomURL, "InGame");
       this.apiService.startGame(this.roomId).subscribe(res => {
         console.log(res);
@@ -203,10 +214,28 @@ export class RoomComponent implements OnInit, OnDestroy {
     }
   }
 
+  showSnackbar(message: string) {
+    const snackbar = document.getElementById("snackbar");
+    snackbar!.innerText = message;
+    snackbar!.className = "show";
+    console.log(this.redTeam.length, this.blueTeam.length);
+  
+    setTimeout(() => { 
+      snackbar!.className = snackbar!.className.replace("show", ""); 
+    }, 3000);
+  }
+
   copyInviteLink() {
     const inviteLink = `${window.location.origin}/room/by-url/${this.room?.roomURL}`;
     navigator.clipboard.writeText(inviteLink).then(() => {
-      alert('Invite link copied to clipboard!');
+      const snackbar = document.getElementById("snackbar");
+      snackbar!.className = "show";
+      snackbar!.innerText = 'Invite link copied to clipboard!';
+
+      // After 3 seconds, remove the show class
+      setTimeout(() => { 
+          snackbar!.className = snackbar!.className.replace("show", ""); 
+      }, 3000);
     });
   }
 

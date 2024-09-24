@@ -1,16 +1,3 @@
-<!-- <tr>
-    <td>{{ room.roomName }}</td>
-    <td>{{ room.playerCount }}/8</td>
-    <td>{{ room.gameState }}</td>
-    <td>
-        <span *ngIf="room.hasPassword">🔒</span>
-        <span *ngIf="!room.hasPassword">🔓</span>
-    </td>
-    <td>
-        <button class="join-room-btn" (click)="onJoinRoom()">Play!</button>
-    </td>
-</tr> -->
-
 <div class="room-item">
     <div class="room-item-cell">{{ room.roomName }}</div>
     <div class="room-item-cell">{{ room.playerCount }}/8</div>
@@ -23,6 +10,3 @@
         <button class="join-room-btn" (click)="onJoinRoom()">Play!</button>
     </div>
 </div>
-
-
-<!-- Mozda da se napravi da je ceo item clickable umesto da ima btn -->

@@ -1,5 +1,6 @@
 ﻿using DrawOutApp.Server.Entities;
 using DrawOutApp.Server.Models;
+
 namespace DrawOutApp.Server.Repositories.Contracts
 {
     public interface IUserRepo
@@ -11,5 +12,7 @@ namespace DrawOutApp.Server.Repositories.Contracts
         Task AddOrUpdateUserAsync(User user, TimeSpan? expiry = null);
         Task DeleteUserAsync(string sessionId);
         Task<string> GetConnIdFromHash(string setKey, string valueKey);
+        Task<List<string>> GetAllNicknamesAsync();
+        Task<List<string>> GetAllIconsAsync();
     }
 }

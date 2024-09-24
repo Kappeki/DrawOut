@@ -1,33 +1,57 @@
 <div class="home-container">
-    <label class="welcome-label">{{"DrawOut!"}}</label>
+    <h1 class="welcome-title">
+        <span class="letter-d">D</span>
+        <span class="letter-r">r</span>
+        <span class="letter-a">a</span>
+        <span class="letter-w">w</span>
+        <span class="letter-o">O</span>
+        <span class="letter-u">u</span>
+        <span class="letter-t">t</span>
+        <span class="letter-exclaim">!</span>
+    </h1>
 
-    <div class="user-pref-container">
-        <div class="icon-selector">
-            <img *ngIf="selectedIcon" [src]="selectedIcon" alt="User Icon" class="icon-preview">
-            <input type="file" (change)="onFileSelected($event)" accept="image/*" class="icon-input">
+    <div class="user-button-container">
+        <div class="user-pref-container">
+            <div class="icon-selector">
+                <img *ngIf="selectedIcon" [src]="selectedIcon" alt="User Icon" class="icon-preview">
+                <input type="file" (change)="onFileSelected($event)" accept="image/*" class="icon-input">
+            </div>
+        
+            <img src="d20-dice-black.png" alt="Random Icon" class="dice-icon" (click)="randomizeIcon()">
+
+            <input type="text" class="nickname-text" placeholder="Enter your nickname" [(ngModel)]="nicknameText">
+
+            <img src="d20-dice-black.png" alt="Random Icon" class="dice-icon" (click)="randomizeNickname()">
         </div>
-        <input type="text" class="nickname-text" placeholder="Enter your nickname" [(ngModel)]="nicknameText">
+    
+        <div class="button-container">
+            <button class="play-btn" (click)="onPressPlay()">Play!</button>
+            <button class="create-room-btn" (click)="openRoomModal()">Create Room!</button>
+        </div>
     </div>
 
-    <div class="home-button-container">
-        <button class="play-btn" (click)="onPressPlay()">Play!</button>
-        <button class="create-room-btn" (click)="openRoomModal()">Create Room!</button>
-    </div>
-    <div class="modal-container" *ngIf="isModalOpen">
-        <div class="modal-content">
+    <div class="modal-container" id="modal" *ngIf="isModalOpen" (click)="closeModalOnOutsideClick($event)">
+        <div class="modal-content" (click)="$event.stopPropagation()">
             <span class="close" (click)="closeRoomModal()">&times;</span>
             <h2>Create Private Room</h2>
 
             <form (ngSubmit)="createRoom()">
                 <label for="roomName">Room Name</label>
-                <input type="text" id="roomName" name="roomName" placeholder="{{this.nicknameText}}'s room"
+                <input type="text" id="roomName" name="roomName" maxlength="40" placeholder="{{this.nicknameText}}'s room"
                     [(ngModel)]="roomName" required>
 
                 <label for="password">Password (optional)</label>
-                <input type="password" id="password" name="password" [(ngModel)]="password">
+                <div class="password-container">
+                    <input [type]="passwordInputType" id="password" name="password" [(ngModel)]="password">
+                    <button type="button" class="show-password-btn" (click)="togglePasswordVisibility()">
+                        <i [ngClass]="passwordInputType === 'password' ? 'fa fa-eye-slash' : 'fa fa-eye'"></i>
+                    </button>
+                </div>
 
                 <button type="submit" class="submit-btn">Create Room</button>
             </form>
+
+            <div id="snackbar"></div>
         </div>
     </div>
 

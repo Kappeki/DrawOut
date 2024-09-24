@@ -57,6 +57,7 @@ export class DrawOutAPIService {
   getAllWordPacks(): Observable<string[]> {
     return this.http.get<string[]>(`${this.API_URL}/Room/GetAllWordPacks`, { withCredentials: true });
   }
+  
   getWordsByPackName(packName: string): Observable<string[]> {
     const params = new HttpParams().set('packName', packName);
     return this.http.get<string[]>(`${this.API_URL}/Room/GetWordsByPackName`, { params });
@@ -67,4 +68,11 @@ export class DrawOutAPIService {
     return this.http.get<GameModelView>(`${this.API_URL}/Room/StartGame`, { params });
   }
 
+  getRandomNickname(): Observable<string> {
+    return this.http.get<string>(`${this.API_URL}/User/GetRandomNickname`, { withCredentials: true, responseType: 'text' as 'json' });
+  }
+  
+  getRandomIcon(): Observable<string> {
+    return this.http.get<string>(`${this.API_URL}/User/GetRandomIcon`, { withCredentials: true, responseType: 'text' as 'json' });
+  }
 }

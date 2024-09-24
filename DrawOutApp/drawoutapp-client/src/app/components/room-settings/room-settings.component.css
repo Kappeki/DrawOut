@@ -1,7 +1,8 @@
 .settings-container {
-    background-color: #585858;
+    background-color: #474747;
     color: white;
-    border-radius: 8px;
+    border-radius: 10px;
+    border: 1px solid black;
     height: 100%;
     margin-top: 0px; /* Ovo stavlja settings da bude unutar canvas okvira */ 
 }
@@ -10,8 +11,13 @@
     text-align: center;
     margin-bottom: 20px;
     margin-top: 0px;
-    font-size: 24px;
+    font-size: 34px;
     padding: 20px;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 .settings-rows {
@@ -37,36 +43,54 @@
     display: flex;
     align-items: center;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 22px;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 .setting-icon {
-    margin-right: 10px;
-    width: 45px;
-    height: 45px; 
+    margin-right: 15px;
+    width: 55px;
+    height: 55px; 
 }
 
 .setting-select, 
-.setting-textarea, 
-.setting-checkbox {
+.setting-textarea {
     padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+    border-radius: 10px;
+    border: 2px solid black;
     font-size: 16px;
     background-color: white;
     color: #333;
+    transition: border-color 0.3s;
+}
+
+.setting-select:disabled, 
+.setting-textarea:disabled {
+    background-color: rgb(182, 182, 182);
+    cursor: not-allowed;
+}
+
+.setting-select:focus, 
+.setting-textarea:focus {
+    outline: none;
+    border: 2px solid #0e16f4;
 }
 
 .setting-select {
     width: 150px;
+    cursor: pointer;
+}
+
+option {
+    font-size: 16px;
+    cursor: pointer;
 }
 
 .setting-textarea {
     height: 100px;
     resize: none; /* Prevent resizing */
-}
-
-.setting-checkbox {
-    width: 20px;
-    height: 20px;
 }

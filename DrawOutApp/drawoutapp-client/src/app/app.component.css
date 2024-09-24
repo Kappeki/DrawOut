@@ -3,3 +3,47 @@
 body {
     font-family: 'Fredoka', sans-serif;
 }
+
+#snackbar {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+    border: 1px solid black;
+    padding: 20px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+    font-size: 32px;
+}
+
+#snackbar.show {
+    visibility: visible;
+    animation: fadeIn 0.5s ease-in-out, fadeOut 0.5s ease-in-out 2.5s;
+}
+
+@keyframes fadeIn {
+    0% { 
+        top: 0;
+        opacity: 0; 
+    }
+    100% { 
+        top: 20px;
+        opacity: 1; 
+    }
+}
+
+@keyframes fadeOut {
+    0% { 
+        top: 20px; 
+        opacity: 1; 
+    }
+    100% { 
+        top: 0; 
+        opacity: 0; 
+    }
+}

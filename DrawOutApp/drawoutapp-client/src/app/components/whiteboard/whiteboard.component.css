@@ -1,5 +1,5 @@
 .selected {
-    border: 4px solid red !important;
+    border: 3px solid red !important;
 }
 
 .canvas-controls-container {
@@ -16,53 +16,72 @@
 canvas {
     width: 100%;
     height: 100%;
-    border: 2px solid #000;
-    border-radius: 8px;
+    border: 3px solid #000;
+    background-color: white;
+    border-radius: 10px;
     z-index: 20;
-}
-
-.game-controls-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-evenly;
-    width: 100%;
-    max-width: 1000px;
-    margin-top: 20px;
 }
 
 .game-paint-container {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     margin-top: 20px;
+    padding: 15px 0px;
     width: 100%;
     position: relative;
     z-index: 20;
+    background-color: rgba(212, 203, 4, 0.9);
+    border-radius: 10px;
+    border: 3px solid black;
+}
+
+.color-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.selected-color-display {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #eeeeee;
+    border-radius: 3px;
+    background-color: var(--selected-color);
+    margin-right: 10px;
 }
 
 .color-palette {
     display: grid;
-    grid-template-columns: repeat(15, 30px);
-    grid-gap: 5px;
-    width: 300px;
-    margin: 0 auto;
-    margin-left: 5px;
+    grid-template-columns: repeat(13, 25px);
+    overflow: visible;
 }
 
 .color-box {
     width: 25px;
     height: 25px;
-    border: 1px solid #000;
+    padding: 0;
+    margin: 0;
     cursor: pointer;
+    transition: transform 0.3s ease, z-index 0.3s ease;
+    position: relative;
+    border: none !important;
+}
+
+.color-box:hover,
+.brush-size:hover,
+.tool-button:hover,
+.action-button:hover {
+    transform: scale(1.2);
+    z-index: 5;
 }
 
 .brush-options {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 10px;
     cursor: pointer;
+    align-items: center;
 }
 
 .brush-size {
@@ -70,7 +89,7 @@ canvas {
     border: 2px solid #000;
     cursor: pointer;
     margin: 0 5px;
-    border-radius: 50%;
+    border-radius: 60%;
 }
 
 .tool-options,
@@ -78,37 +97,22 @@ canvas {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 10px;
     user-select: none;
 }
 
-.tool-button {
-    background-color: #fff;
+.tool-button,
+.action-button {
+    background-color: #f1f1f1;
     border: 2px solid #000;
     cursor: pointer;
     padding: 5px 10px;
-    margin-right: 5px;
+    margin-right: 2px;
     border-radius: 5px;
 }
 
-.action-button {
-    background-color: #fff;
-    cursor: pointer;
-    padding: 5px 10px;
-    border: none;
-}
-
-.tool-button:hover,
-.action-button:hover {
-    background-color: #f0f0f0;
-}
-
-.brush-options,
-.color-options,
-.undo-option {
-    display: flex;
-    align-items: center;
-    margin: 0 10px;
+img {
+    width: 25px;
+    height: 25px;
 }
 
 .disabled {

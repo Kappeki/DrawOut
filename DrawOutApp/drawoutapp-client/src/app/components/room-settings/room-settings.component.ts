@@ -55,9 +55,9 @@ export class RoomSettingsComponent {
     if (this.isRoomAdmin && this.room) {
       this.customWords = newCustomWords;
       this.settingChanged.emit({ settingName: 'CustomWords', settingValue: newCustomWords });
+      // kao u scribble, ne mora da se emituje, da svi vide custom words. Taman moze da bude kao surprise za ostale igrace
     }
   }
   //emituje se nazad room komponenti i onda se za taj game ubace reci u odabrani word pack na startGame()
   //alternativa da bude dugme save i onda se cuva u bazi
-
 }

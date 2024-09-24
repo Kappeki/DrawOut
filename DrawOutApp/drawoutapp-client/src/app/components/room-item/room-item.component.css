@@ -1,44 +1,36 @@
-/* th,
-td {
-    width: 25%;
-    border: 1px solid #ccc;
-    padding: 10px 20px;
-    text-align: center;
-    white-space: nowrap;
-}
-
-th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-.join-room-btn {
-    width: 100%;
-    padding: 8px 16px;
-    font-size: 14px;
-    cursor: pointer;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-}
-
-.join-room-btn:hover {
-    background-color: #45a049;
-} */
-
 .room-item {
     display: flex;
     width: 100%;
     text-align: center;
+    justify-content: space-between;
+    background-color: rgba(212, 203, 4, 0.95);
+    /* box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5); */
 }
 
 .room-item-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 20%;
-    border: 1px solid #ccc;
     padding: 10px 20px;
     text-align: center;
-    white-space: nowrap;
+    white-space: normal;
+    word-wrap: break-word;
+    border-top: 1px solid rgb(78, 78, 78);
+    border-bottom: 1px solid rgb(78, 78, 78);
+    border-left: 1px solid rgb(78, 78, 78);
+}
+
+.room-item-cell:last-child {
+    border-right: 1px solid rgb(78, 78, 78); 
+}
+
+.room-item:first-child .room-item-cell {
+    border-top: 1px solid rgb(78, 78, 78); 
+}
+
+.room-item:last-child .room-item-cell {
+    border-bottom: 1px solid rgb(78, 78, 78);
 }
 
 .join-room-btn {
@@ -46,12 +38,14 @@ th {
     padding: 8px 16px;
     font-size: 14px;
     cursor: pointer;
-    background-color: #4CAF50;
+    background-color: #19d620;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 22px;
 }
 
 .join-room-btn:hover {
-    background-color: #45a049;
+    background-color: #0b710f;
 }

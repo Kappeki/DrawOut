@@ -4,41 +4,36 @@
     <div class="room-name">
       <h2>{{ room?.roomName }}</h2>
     </div>
-
-    <div *ngIf="room?.roomState === 'Waiting'" class="room-status">
-      <p>Waiting for players...</p>
-    </div>
-
-    <!-- <div *ngIf="!gameStarted" class="room-round">
-      <p>Round {{ currentRound }} of {{ totalRounds }}</p>
-    </div> -->
   </div>
 
   <!-- Teams WhiteBoard Chat -->
   <div class="room-main">
     <div class="teams-canvas-chat-container">
 
+      <div id="snackbar"></div>
+
       <!-- Teams -->
       <div class="teams-container">
         <!-- Red Team -->
-        <app-user-list class="user-team-list" [users]="users" [team]="redTeam" [currentTeam]="currentTeam"
+        <app-user-list class="user-team-list red-team" [users]="users" [team]="redTeam" [currentTeam]="currentTeam"
           className="Red" (teamChange)="handleTeamJoin($event)"></app-user-list>
         <!-- Blue Team -->
-        <app-user-list class="user-team-list" [users]="users" [team]="blueTeam" [currentTeam]="currentTeam"
+        <app-user-list class="user-team-list blue-team" [users]="users" [team]="blueTeam" [currentTeam]="currentTeam"
           className="Blue" (teamChange)="handleTeamJoin($event)"></app-user-list>
       </div>
 
       <!-- *ngIf="room?.roomState === 'InGame'" -->
       <!-- Whiteboard and Settings -->
       <div class="whiteboard-container">
-        <app-game *ngIf="room?.roomState === 'InGame'" (roundChange)="handleRoundChange($event)"
+        <app-game *ngIf="room?.roomState === 'Waiting'"
+          (roundChange)="handleRoundChange($event)"
           (guessEnabledChange)="handleGuessEnabled($event)" (chatClear)="handleChatClear($event)"
           (roomStateChange)="handleGameEnd($event)" [isRoomAdmin]="isRoomAdmin" [users]="users!" [roomId]="roomId"
           [wordPack]="availableWords" [latestGuess$]="latestGuess$">
         </app-game>
 
-        <!-- Settings overlay -->
-        <div *ngIf="room?.roomState === 'Waiting'" class="settings-overlay">
+        <!-- Settings overlay === Waiting-->
+        <div *ngIf="room?.roomState === 'InGame'" class="settings-overlay">
           <app-room-settings [room]="room" [isRoomAdmin]="isRoomAdmin"
             (settingChanged)="handleSettingChange($event)"></app-room-settings>
         </div>
@@ -66,7 +61,7 @@
 
       <!-- Invite Section -->
       <div class="invite-container">
-        <p>Invite your friends!</p>
+        <p class="invite-label">Invite your friends!</p>
         <button (click)="copyInviteLink()">Copy Invite Link</button>
       </div>
 

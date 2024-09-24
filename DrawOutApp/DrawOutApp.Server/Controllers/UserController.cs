@@ -130,6 +130,33 @@ namespace DrawOutApp.Server.Controllers
             //dodati da vraca sessionId za testing
             return Ok($"User successfully updated!");
         }
+
+        //dodato
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet("GetRandomNickname")]
+        public async Task<IActionResult> GetRandomNickname()
+        {
+            var randomNickname = await _userService.GetRandomNicknameAsync();
+            if (string.IsNullOrEmpty(randomNickname))
+            {
+                return NotFound("No nicknames found.");
+            }
+            return Ok(randomNickname);
+        }
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpGet("GetRandomIcon")]
+        public async Task<IActionResult> GetRandomIcon()
+        {
+            var randomIcon = await _userService.GetRandomIconAsync();
+            if (string.IsNullOrEmpty(randomIcon))
+            {
+                return NotFound("No icons found.");
+            }
+            return Ok(randomIcon);
+        }
     }
 }
 

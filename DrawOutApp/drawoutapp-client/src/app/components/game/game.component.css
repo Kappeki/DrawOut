@@ -7,15 +7,21 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    font-size: 20;
+    font-size: 26px;
     user-select: none;
-    background-color: greenyellow;
-    border-radius: 15px;
+    background-color: rgba(212, 203, 4, 0.9);
+    border: 2px solid black;
+    border-radius: 10px;
     margin-bottom: 20px;
 }
 
 .score-container {
     margin: 10px;
+    text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 
 .score-container.redTeam {

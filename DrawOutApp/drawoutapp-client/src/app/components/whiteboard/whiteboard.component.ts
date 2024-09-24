@@ -19,12 +19,12 @@ import { throttleTime } from 'rxjs/operators';
 })
 export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
   colors: string[] = [
-    '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF',
-    '#FFFF00', '#00FFFF', '#FF00FF', '#C0C0C0', '#808080',
-    '#800000', '#808000', '#008000', '#800080', '#008080',
-    '#000080', '#FF6600', '#FFCC00', '#CCFF00', '#33FF66',
-    '#66FF33', '#CC33FF', '#6633FF', '#3366FF', '#66CCFF',
-    '#99FF33', '#FF33CC', '#FF3366', '#FF6633', '#FF9966'
+    '#ffffff', '#c1c1c1', '#ef130b', '#ff7100', '#ffe400',
+    '#00cc00', '#00ff91', '#00b2ff', '#231fd3', '#a300ba',
+    '#df69a7', '#ffac8e', '#a0522d', 
+    '#000000', '#505050', '#740b07', '#c23800', '#e8a200', 
+    '#004619', '#00785d', '#00569e', '#0e0865', '#550069', 
+    '#873554', '#cc774d', '#63300d'
   ];
   tools = ['Brush', 'Fill', 'Eraser'];
   brushSizes: number[] = [4, 8, 12, 16, 20];
@@ -243,12 +243,23 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private applyDrawingAction(action: DrawingActionView): void {
+
+    // const rect = this.canvas.nativeElement.getBoundingClientRect();
+    // const scaleX = this.canvas.nativeElement.width / rect.width;
+    // const scaleY = this.canvas.nativeElement.height / rect.height;
+
+    // const currentX = (event.clientX - rect.left) * scaleX;
+    // const currentY = (event.clientY - rect.top) * scaleY;
+
     if (action.actionType === 'Bucket') {
       this.fillCanvas(Math.floor(action.x), Math.floor(action.y), action.color!);
     } else if (action.actionType === 'Start') {
       this.ctx!.beginPath();
       this.ctx!.moveTo(action.x, action.y);
     } else if (action.actionType === 'Move') {
+      if (action.toolType === 'Eraser') {
+        this.ctx!.strokeStyle = '#FFFFFF';
+      }
       this.ctx!.lineTo(action.x, action.y);
       this.ctx!.strokeStyle = action.color!;
       this.ctx!.lineWidth = action.brushSize;
