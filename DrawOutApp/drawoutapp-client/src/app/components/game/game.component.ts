@@ -51,6 +51,9 @@ export class GameComponent implements OnInit {
   msgNotificationsUI: any[] = [];
   notificationText: string = '';
 
+  isPainter: boolean = false;
+  gameEnded: boolean = false;
+
   selectables: string[] = [];
   hint: string = '';
 
@@ -61,6 +64,8 @@ export class GameComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    this.gameEnded = false;
+
     await this.gameHubService.startConnection().then(() => {
       console.log('GameHub connection started.');
 
@@ -85,7 +90,12 @@ export class GameComponent implements OnInit {
           this.displayNotification('Steal time!');
         }
         else if (this.gameRoundView.gameState === 'RoundEnded') {
-          this.displayNotification(`${this.winningTeam} won the round!`);
+          if(this.winningTeam === '') {
+            this.displayNotification('Round ended!');
+          }
+          else {
+            this.displayNotification(`${this.winningTeam} won the round!`);
+          }
           this.whiteboard.clearCanvas();
         }
         else if (this.gameRoundView.gameState === 'WaitingForPlayers') {
@@ -93,10 +103,9 @@ export class GameComponent implements OnInit {
         }
       }));
 
-      this.subscriptions.add(this.gameHubService.wordSelected$.subscribe((wordLength: number) => {
-        console.log('Word selected with length: ' + wordLength);
-        this.blankCount = wordLength;
-        this.hint = '_'.repeat(this.blankCount);
+      this.subscriptions.add(this.gameHubService.wordSelected$.subscribe((hint: string) => {
+        console.log('Word selected with length: ' + hint.length);
+        this.hint = hint;
       }));
       this.subscriptions.add(this.gameHubService.roundWinTeam$.subscribe((teamName: string) => {
         this.winningTeam = teamName;
@@ -123,8 +132,12 @@ export class GameComponent implements OnInit {
       this.subscriptions.add(
         this.gameHubService.hubConnection.on('GameEnded', (roomState: string, team: string) => {
           if (roomState) {
-            this.displayNotification(`${team} won the game!`, 5000);
-            this.roomStateChange.emit(roomState);
+            this.gameEnded = true;
+            if(team === 'Tie') {
+              this.displayNotification('It\'s a tie!', 5000, roomState);
+            } else {
+              this.displayNotification(`${team} won the game!`, 5000, roomState);
+            }
             this.guessEnabledChange.emit(true);
           }
         }));
@@ -139,11 +152,15 @@ export class GameComponent implements OnInit {
           lastPromptTime = now;
           if (res && this.gameRoundView?.currentPainter === this.sessionService.getSessionId()) {
             this.prepareWordSelection();
-            this.showWordSelectModal();
+            setTimeout(() => {
+              this.showWordSelectModal();
+            }, 3000);
+            this.isPainter = true;
           }
           else {
             const painterNickname = this.users.find(u => u._sessionKey === this.gameRoundView?.currentPainter)?.nickname!;
             this.displayNotification(`${painterNickname} is selecting a word...`);
+            this.isPainter = false;
           }
         }));
 
@@ -152,6 +169,12 @@ export class GameComponent implements OnInit {
           if (res) {
             this.gameHubService.submitGuess(res);
           }
+        }));
+
+      this.subscriptions.add(
+        this.gameHubService.hubConnection.on('UserLeft', (timestamp: number) => {
+          this.displayNotification("A user has left the game.");
+          console.log('User left the game.' + timestamp);
         }));
     });
 
@@ -187,9 +210,13 @@ export class GameComponent implements OnInit {
     await this.gameHubService.selectWord(word);
     this.dialog.closeAll();
   }
-  private displayNotification(message: string, timeoutInterval: number = 3000): void {
+
+  private displayNotification(message: string, timeoutInterval: number = 3000, roomState: string | null = null): void {
     this.notificationText = message;
     setTimeout(() => {
+      if(this.gameEnded === true) {
+        this.roomStateChange.emit(roomState!);
+      }
       this.notificationText = '';
     }, timeoutInterval);
   }
@@ -208,10 +235,11 @@ export class GameComponent implements OnInit {
         data: { words: this.selectables },
         disableClose: true
       });
-      this.autoCloseTimeout = setTimeout(() => {
-        this.gameHubService.selectWord(this.selectables[Math.floor(Math.random() * this.selectables.length)]);
+      this.autoCloseTimeout = setTimeout(async () => { 
+        const randomWord = this.selectables[Math.floor(Math.random() * this.selectables.length)];
+        await this.gameHubService.selectWord(randomWord);
         this.dialog.closeAll();
-      }, 15000);
+      }, 14500);
     }
   }
   private showPainterSelectOverlay(nickname: string): void {

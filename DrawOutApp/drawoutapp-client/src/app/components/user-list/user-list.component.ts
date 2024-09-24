@@ -14,6 +14,7 @@ export class UserListComponent {
   @Input() team: string[] = [];
   @Input() className: 'Spectators' | 'Red' | 'Blue' = 'Spectators';
   @Input() currentTeam: string | null = null;  // Receive currentTeam from parent
+  @Input() roomState: string = 'Waiting';
   @Output() teamChange = new EventEmitter<{ oldTeam: string | null, newTeam: string }>();
 
   joinTeam() {

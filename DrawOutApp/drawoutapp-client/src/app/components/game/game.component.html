@@ -2,7 +2,7 @@
 
     <ng-template #wordSelectionModal>
         <div mat-dialog-content>
-            <h2>Select a Word</h2>
+            <p class="select-header">Select a Word</p>
             <div class="word-options">
                 <button mat-button *ngFor="let word of selectables" (click)="selectWord(word)">
                     {{ word }}
@@ -10,14 +10,6 @@
             </div>
         </div>
     </ng-template>
-
-
-    <div class="notification-overlay" *ngIf="notificationText">
-        <div class="notification-content">
-            {{ notificationText }}
-        </div>
-    </div>
-
 
     <div class="game-canvas-container">
         <div class="score-word-container">
@@ -27,7 +19,7 @@
 
             <div class="word-container">
                 <span *ngIf="this.drawEnabled && gameRoundView?.selectedWord">{{gameRoundView?.selectedWord}}</span>
-                <span *ngIf="this.drawEnabled">Guess the word! -> {{this.hint}}</span>
+                <span *ngIf="!this.drawEnabled">Guess the word! -> {{this.hint}}</span>
             </div>
 
             <div class="score-container blueTeam">
@@ -46,11 +38,17 @@
                     <span>Round {{gameRoundView?.currentRound}} of {{gameModelView?.totalRounds}}</span>
                 </div>
             </div>
-            <app-whiteboard [drawEnabled]="this.drawEnabled" [gameId]="gameModelView?._id!">
+
+            <div class="notification-overlay" *ngIf="notificationText">
+                <div class="notification-content">
+                    {{ notificationText }}
+                </div>
+            </div>
+
+            <app-whiteboard [drawEnabled]="this.drawEnabled" 
+            [gameId]="gameModelView?._id!"
+            [isPainter]="this.isPainter">
             </app-whiteboard>
         </div>
-
-        <!-- Whiteboard Component -->
     </div>
-    <!-- Mozda crtanje, boje itd da bude ovde a ne u whiteboard -->
 </div>

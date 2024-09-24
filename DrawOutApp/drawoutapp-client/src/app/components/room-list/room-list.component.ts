@@ -11,7 +11,7 @@ import { query } from '@angular/animations';
   standalone: true,
   imports: [RoomItemComponent, CommonModule],
   templateUrl: './room-list.component.html',
-  styleUrls: ['./room-list.component.css']
+  styleUrls: ['./room-list.component.css', '../../app.component.css']
 })
 export class RoomListComponent {
 
@@ -40,13 +40,22 @@ export class RoomListComponent {
   }
 
   loadRooms(): void {
+    const snackbar = document.getElementById('snackbar');
     this.apiService.getRooms(this.isAscending, this.isProtected).subscribe({
       next: (rooms: any) => {
         this.rooms = rooms;
         console.log('Rooms loaded successfully');
       },
       error: (error: any) => {
-        console.error('Error loading rooms', error);
+        snackbar!.innerText = 'No rooms available!';
+        snackbar!.className = "show";
+
+        setTimeout(() => {
+          snackbar!.className = snackbar!.className.replace("show", "");
+        }, 3000);
+
+        this.rooms = [];
+        // console.error('Error loading rooms', error);
       },
       complete: () => {
         console.log('Room loading completed');
@@ -55,13 +64,22 @@ export class RoomListComponent {
   }
 
   loadMyRooms(): void {
-    this.apiService.getMyRooms().subscribe({
+    const snackbar = document.getElementById('snackbar');
+    this.apiService.getMyRooms(this.isAscending, this.isProtected).subscribe({
       next: (rooms: any) => {
         this.myRooms = rooms;
         console.log('My rooms loaded successfully');
       },
       error: (error: any) => {
-        console.error('Error loading my rooms', error);
+        snackbar!.innerText = 'No rooms available!';
+        snackbar!.className = "show";
+
+        setTimeout(() => {
+          snackbar!.className = snackbar!.className.replace("show", "");
+        }, 3000);
+
+        this.myRooms = [];
+        // console.error('Error loading my rooms', error);
       },
       complete: () => {
         console.log('My room loading completed');
@@ -71,12 +89,14 @@ export class RoomListComponent {
 
   toggleAscending(): void {
     this.isAscending = !this.isAscending;
-    this.loadRooms();
+    if(this.activeTab === 'available') this.loadRooms();
+    if(this.activeTab === 'myrooms') this.loadMyRooms();
   }
 
   toggleProtected(): void {
     this.isProtected = !this.isProtected;
-    this.loadRooms();
+    if(this.activeTab === 'available') this.loadRooms();
+    if(this.activeTab === 'myrooms') this.loadMyRooms();
   }
 
   onRoomSelected(roomItem: RoomListItem): void {

@@ -92,9 +92,11 @@ namespace DrawOutApp.Server.Services
             var updatedModel = await _gameRepo.UpdateGameRoundAsync(gameRound);
             if (updatedModel == null) throw new Exception("Error updating game round! ERROR!");
 
+            var hint = new string(word.Select(c => c == ' ' ? ' ' : '_').ToArray());
+
             await SendGameUpdateAsync(_mapper.Map<GameRoundModel>(updatedModel));
 
-            await _hubContext.Clients.Group(gameId).SendAsync("WordSelected", updatedModel.SelectedWord!.Length);
+            await _hubContext.Clients.Group(gameId).SendAsync("WordSelected", hint);
 
             await gameTimers.StopWordSelectTimer(gameId, _hubContext.Clients);
         }
@@ -125,7 +127,7 @@ namespace DrawOutApp.Server.Services
                     await IncrementScoreAsync(gameId, winningTeam, 100);
                 }
 
-                await _hubContext.Clients.Group(gameId).SendAsync("CorrectGuess", winningTeam, guess);
+                await _hubContext.Clients.Group(gameId).SendAsync("CorrectGuess", winningTeam, true);
 
                 await gameTimers.StopRunningTimer(gameId, _hubContext.Clients);
             }
@@ -152,9 +154,9 @@ namespace DrawOutApp.Server.Services
                 if(painterConnId == null) throw new Exception("Painter connectionId not found! ERROR!");
                 //disable po default na pocetak runde da ne moze da se pogadja
                 await _hubContext.Clients.Group(gameId).SendAsync("EnableGuessing", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                await _hubContext.Clients.Group(gameId).SendAsync("EnableDrawing", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                 await _hubContext.Clients.Client(painterConnId).SendAsync("PromptWordSelect", true, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-                await _hubContext.Clients.GroupExcept(gameId, painterConnId).SendAsync("PromptWordSelect", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
-                
+                await _hubContext.Clients.GroupExcept(gameId, painterConnId).SendAsync("PromptWordSelect", false, DateTimeOffset.UtcNow.ToUnixTimeSeconds());   
             }
             catch (Exception ex)
             {
@@ -271,6 +273,8 @@ namespace DrawOutApp.Server.Services
             }
             gameModel.PainterOrder = InitializePlayerOrder(users);
             gameModel.TeamLeaders = SelectTeamLeaders(users);
+
+            gameModel.TotalRounds = gameModel.PainterOrder.Count;
 
             var gameRoundModel = new GameRoundModel
             {

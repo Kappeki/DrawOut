@@ -23,12 +23,12 @@ namespace DrawOutApp.Server.Games
 
             await _gameService.SendGameUpdateAsync(updatedModel);
 
+            await Task.Delay(3000);
+
             if(gameRound.CurrentRound < gameModel.TotalRounds)
             {
                 await _userService.RemoveRolesAsync(gameRound.CurrentPainter!, [Role.Painter]);
-                updatedModel.CurrentPainter = gameModel.PainterOrder![gameRound.CurrentRound];
-
-                _ = Task.Delay(3000);
+                updatedModel.CurrentPainter = gameModel.PainterOrder![gameRound.CurrentRound];;
 
                 await _gameService.InitNextRoundAsync(updatedModel, _gameTimers);
             }

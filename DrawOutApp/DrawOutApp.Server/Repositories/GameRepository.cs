@@ -44,7 +44,7 @@ namespace DrawOutApp.Server.Repositories
                 MainTimer = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "MainTimer").Value!),
                 StealTimer = int.Parse(hashEntries.FirstOrDefault(x => x.Name == "StealTimer").Value!)
             };
-            game.PainterOrder = (await _database.SetMembersAsync($"painter-order:{game.RoomId}")).Select(x => x.ToString()).ToList();
+            game.PainterOrder = (await _database.ListRangeAsync($"painter-order:{game.RoomId}")).Select(x => x.ToString()).ToList();
 
             return game;
         }
@@ -56,6 +56,8 @@ namespace DrawOutApp.Server.Repositories
             if(game.RoomId == null) throw new ArgumentException("RoomId must be set.", nameof(game.RoomId));
 
             game._id = $"game:{game.RoomId}";
+
+            await _database.KeyDeleteAsync($"painter-order:{game.RoomId}");
 
             // Serialize the complex properties
             
@@ -81,7 +83,7 @@ namespace DrawOutApp.Server.Repositories
 
             foreach(var painter in game.PainterOrder!)
             {
-                await _database.SetAddAsync($"painter-order:{game.RoomId}", painter);
+                await _database.ListRightPushAsync($"painter-order:{game.RoomId}", painter);
             }
 
             if (expiry.HasValue)

@@ -19,12 +19,13 @@
       </button>
       <button (click)="toggleProtected()">
         <img *ngIf="isProtected" src="padlock.png" alt="Protected Rooms Only">
-        <img *ngIf="!isProtected" src="unlocked.png" alt="Show All Rooms">
+        <img *ngIf="!isProtected" src="unlocked.png" alt="Unprotected Rooms Only">
       </button>
     </div>
   </div>
   <!-- Tabs content -->
   <div class="tab-content" id="roomTabsContent">
+    <div id="snackbar"></div>
     <div *ngIf="activeTab === 'available'" class="tab-pane fade show active">
       <table class="room-table">
         <thead>
@@ -37,7 +38,7 @@
           </tr>
         </thead>
       </table>
-      <div class="room-list-body">
+      <div class="room-list-body" *ngIf="rooms.length > 0">
         <app-room-item *ngFor="let room of rooms" [room]="room" (roomSelected)="onRoomSelected($event)"></app-room-item>
       </div>
     </div>
@@ -54,7 +55,7 @@
           </tr>
         </thead>
       </table>
-      <div class="room-list-body">
+      <div class="room-list-body" *ngIf="myRooms.length > 0">
         <app-room-item *ngFor="let room of myRooms" [room]="room"
           (roomSelected)="onRoomSelected($event)"></app-room-item>
       </div>

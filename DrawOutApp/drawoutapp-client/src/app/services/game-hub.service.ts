@@ -17,7 +17,7 @@ export class GameHubService {
   public gameModel$ = new BehaviorSubject<GameModelView | null>(null);
   public gameRound$ = new BehaviorSubject<GameRoundView | null>(null);
 
-  public wordSelected$ = new BehaviorSubject<number>(0);
+  public wordSelected$ = new BehaviorSubject<string>('');
   public roundWinTeam$ = new BehaviorSubject<string>('');
 
   public timer$ = new BehaviorSubject<number>(0);
@@ -48,7 +48,7 @@ export class GameHubService {
       .then(() => {
         this.gameModel$.next(null);
         this.gameRound$.next(null);
-        this.wordSelected$.next(0);
+        this.wordSelected$.next('');
         this.roundWinTeam$.next('');
         this.timer$.next(0);
         this.currentTimer$.next('');
@@ -106,11 +106,12 @@ export class GameHubService {
     this.hubConnection.on('UpdateGame', (gameRound: GameRoundView) => {
       this.gameRound$.next(gameRound);
     });
-    this.hubConnection.on('WordSelected', (wordLength: number) => {
-      this.wordSelected$.next(wordLength);
+    this.hubConnection.on('WordSelected', (hint: string) => {
+      this.wordSelected$.next(hint);
     });
-    this.hubConnection.on('CorrectGuess', (teamName: string) => {
-      this.roundWinTeam$.next(teamName);
+    this.hubConnection.on('CorrectGuess', (teamName: string, check: boolean) => {
+      if(check) this.roundWinTeam$.next(teamName);
+      else this.roundWinTeam$.next('');
     });
 
     //u game component check za koji timer je aktuelan

@@ -164,15 +164,20 @@ namespace DrawOutApp.Server.Hubs
         }
         public async Task ChangeRoomSettings(string roomURL, string settingName, string settingValue)
         {
+            var roomId = Context.Items["RoomId"]!.ToString();
             var roles = Context.Items["Roles"] as List<string>;
             if (roles == null || !roles.Contains("RoomAdmin"))
             {
                 throw new HubException("You do not have permission to change room settings.");
             }
+            await Clients
+                .Group(roomId!)
+                .SendAsync("RoomSettingsChanged", settingName, settingValue);
             var (isError, roomModel, error) = await _roomService.GetRoomByUrlAsync(roomURL);
             switch (settingName)
             {
                 case "CustomWords":
+                    roomModel!.CustomWords = new();
                     roomModel!.CustomWords = settingValue.Split(',').ToList();
                     break;
                 case "SelectedWordPack":
@@ -187,14 +192,7 @@ namespace DrawOutApp.Server.Hubs
                 default:
                     throw new HubException("Invalid setting name.");
             }
-
-            var roomId = Context.Items["RoomId"]!.ToString();
-
             await _roomService.UpdateRoomAsync(roomModel!);
-
-            await Clients
-                .Group(roomId!)
-                .SendAsync("RoomSettingsChanged", settingName, settingValue);
         }
         public async Task SwitchTeam(string roomUrl, string? oldTeam, string newTeam)
         {

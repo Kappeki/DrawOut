@@ -16,16 +16,16 @@
       <div class="teams-container">
         <!-- Red Team -->
         <app-user-list class="user-team-list red-team" [users]="users" [team]="redTeam" [currentTeam]="currentTeam"
-          className="Red" (teamChange)="handleTeamJoin($event)"></app-user-list>
+          [roomState]="room?.roomState!" className="Red" (teamChange)="handleTeamJoin($event)"></app-user-list>
         <!-- Blue Team -->
         <app-user-list class="user-team-list blue-team" [users]="users" [team]="blueTeam" [currentTeam]="currentTeam"
-          className="Blue" (teamChange)="handleTeamJoin($event)"></app-user-list>
+          [roomState]="room?.roomState!" className="Blue" (teamChange)="handleTeamJoin($event)"></app-user-list>
       </div>
 
       <!-- *ngIf="room?.roomState === 'InGame'" -->
       <!-- Whiteboard and Settings -->
       <div class="whiteboard-container">
-        <app-game *ngIf="room?.roomState === 'Waiting'"
+        <app-game *ngIf="room?.roomState === 'InGame'"
           (roundChange)="handleRoundChange($event)"
           (guessEnabledChange)="handleGuessEnabled($event)" (chatClear)="handleChatClear($event)"
           (roomStateChange)="handleGameEnd($event)" [isRoomAdmin]="isRoomAdmin" [users]="users!" [roomId]="roomId"
@@ -33,7 +33,7 @@
         </app-game>
 
         <!-- Settings overlay === Waiting-->
-        <div *ngIf="room?.roomState === 'InGame'" class="settings-overlay">
+        <div *ngIf="room?.roomState === 'Waiting'" class="settings-overlay">
           <app-room-settings [room]="room" [isRoomAdmin]="isRoomAdmin"
             (settingChanged)="handleSettingChange($event)"></app-room-settings>
         </div>
@@ -55,7 +55,7 @@
       </div>
 
       <!-- Start Button -->
-      <div class="start-button-container" *ngIf="!isRoomAdmin && room?.roomState === 'Waiting'">
+      <div class="start-button-container" *ngIf="isRoomAdmin && room?.roomState === 'Waiting'">
         <button (click)="startGame()" class="start-button">Start!</button>
       </div>
 

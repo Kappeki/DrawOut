@@ -47,7 +47,7 @@ namespace DrawOutApp.Server.Games
                 {
                     try
                     {
-                        _logger.LogInformation("Executing command for game {GameId} at {Time}", gameId, DateTime.UtcNow);
+                        _logger.LogInformation("Executing command {Command} for game {GameId} at {Time}", command.GetType().Name, gameId, DateTime.UtcNow);
                         await command.ExecuteAsync();
 
                         if (command is EndGameCommand)

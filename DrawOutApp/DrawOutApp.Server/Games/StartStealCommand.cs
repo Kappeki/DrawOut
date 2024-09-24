@@ -28,6 +28,10 @@ namespace DrawOutApp.Server.Games
 
             var isDone = await _gameTimers.StartStealTimer(_gameId, gameModel.StealTimer, _hubClients);
          
+            if(!isDone)
+            {
+                await _hubClients.Group(_gameId).SendAsync("CorrectGuess", "None", false);
+            }
             await _gameService.EndRoundAsync(_gameId, _gameTimers);
         }
     }

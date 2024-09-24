@@ -1,7 +1,8 @@
 <div class="user-list-container" [ngClass]="className.toLowerCase() + '-team'">
     <div class="user-list-name">
         <h3>{{className == 'Spectators' ? 'Spectators' : className + ' Team'}}</h3>
-        <button *ngIf="className !== 'Spectators'" class="join-team-btn" (click)="joinTeam()">Join</button>
+        <button *ngIf="className !== 'Spectators' && roomState === 'Waiting'" 
+            class="join-team-btn" (click)="joinTeam()">Join</button>
     </div>
 
     <ul>

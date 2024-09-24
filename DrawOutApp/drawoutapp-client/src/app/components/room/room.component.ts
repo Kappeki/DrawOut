@@ -191,6 +191,9 @@ export class RoomComponent implements OnInit, OnDestroy {
   getWordsFromPack(): void {
     this.apiService.getWordsByPackName(this.room?.selectedWordPack!).subscribe(words => {
       this.availableWords = words;
+      this.room?.customWords?.forEach(word => {
+        this.availableWords.push(word);
+      });
     });
   }
 
@@ -271,6 +274,10 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   handleGameEnd(event: string) {
+    // this.blueTeam = [];
+    // this.redTeam = [];
+    // this.users = [];
+    this.currentTeam = null;
     if (this.isRoomAdmin) {
       this.roomHubService.updateRoomState(this.roomURL, event);
     }

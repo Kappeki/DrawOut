@@ -14,7 +14,7 @@ namespace DrawOutApp.Server.Services.Contracts
         Task<Result<RoomModel?, string>> GetRoomByUrlAsync(string roomUrl);
         //ovo treba za listu svih aktivnih soba
         Task<Result<List<RoomListItem>?,string>> GetAllRoomsAsync(string sessionId, bool? isAscending = null, bool? isProtected = null);
-        Task<Result<List<RoomListItem>?, string>> GetMyRoomsAsync(string sessionId);
+        Task<Result<List<RoomListItem>?, string>> GetMyRoomsAsync(string sessionId, bool? isAscending = null, bool? isProtected = null);
         Task<Result<bool,string>> UpdateRoomAsync(RoomModel roomModel);
         Task UpdateRoomStateAsync(string roomId, RoomState roomState);
         Task<bool> OnAdminDisconnectedAsync(string roomId, string newAdminId);

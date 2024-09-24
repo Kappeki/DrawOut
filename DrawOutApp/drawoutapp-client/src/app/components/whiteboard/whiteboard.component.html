@@ -2,7 +2,6 @@
     <canvas #canvas></canvas>
 
     <div class="game-paint-container">
-
         <div class="color-container">
             <!-- Display for Selected Color -->
             <div class="selected-color-display" [style.background-color]="selectedColor"></div>
@@ -30,7 +29,8 @@
                 [class.disabled]="!drawEnabled">
                 <img src="brush.png" alt="Brush">
             </button>
-            <button (click)="drawEnabled && selectTool('Fill')" class="tool-button" [class.disabled]="!drawEnabled">
+            <button (click)="drawEnabled && selectTool('Fill')" class="tool-button" 
+                [class.disabled]="!drawEnabled">
                 <img src="fill.png" alt="Fill">
             </button>
             <button (click)="drawEnabled && selectTool('Eraser')" class="tool-button"
@@ -41,10 +41,12 @@
 
         <!-- Undo and Clear Options -->
         <div class="action-options">
-            <button (click)="drawEnabled && undoLastStroke()" class="action-button" [class.disabled]="!drawEnabled">
+            <button (click)="drawEnabled && undoLastStroke()" class="action-button" 
+                [class.disabled]="!drawEnabled">
                 <img src="undo.png" alt="Undo">
             </button>
-            <button (click)="drawEnabled && clearCanvas()" class="action-button" [class.disabled]="!drawEnabled">
+            <button (click)="drawEnabled && clearCanvas()" class="action-button" 
+                [class.disabled]="!drawEnabled">
                 <img src="trash.png" alt="Clear">
             </button>
         </div>

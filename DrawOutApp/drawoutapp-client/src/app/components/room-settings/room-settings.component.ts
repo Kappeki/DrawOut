@@ -3,6 +3,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Room } from '../../models/room';
 import { DrawOutAPIService } from '../../services/draw-out-api.service';
+import { debounceTime, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-room-settings',
@@ -23,6 +24,9 @@ export class RoomSettingsComponent {
 
   wordPacks: string[] = [];
 
+  // Add a Subject to manage the custom words input
+  private customWordsSubject = new Subject<string>();
+
   constructor(private apiService: DrawOutAPIService) { }
 
   ngOnInit(): void {
@@ -34,6 +38,12 @@ export class RoomSettingsComponent {
     }
     this.apiService.getAllWordPacks().subscribe((packs) => {
       this.wordPacks = packs;
+    });
+
+    this.customWordsSubject.pipe(
+      debounceTime(300)
+    ).subscribe((newCustomWords) => {
+      this.updateCustomWords(newCustomWords);
     });
   }
 
@@ -51,12 +61,16 @@ export class RoomSettingsComponent {
     }
   }
 
-  updateCustomWords(newCustomWords: string) {
+  // Throttled update method for custom words
+  onCustomWordsChanged(newCustomWords: string) {
     if (this.isRoomAdmin && this.room) {
-      this.customWords = newCustomWords;
-      this.settingChanged.emit({ settingName: 'CustomWords', settingValue: newCustomWords });
-      // kao u scribble, ne mora da se emituje, da svi vide custom words. Taman moze da bude kao surprise za ostale igrace
+      this.customWordsSubject.next(newCustomWords);  // Emit the value to the Subject
     }
+  }
+
+  private updateCustomWords(newCustomWords: string) {
+    this.customWords = newCustomWords;
+    this.settingChanged.emit({ settingName: 'CustomWords', settingValue: newCustomWords });
   }
   //emituje se nazad room komponenti i onda se za taj game ubace reci u odabrani word pack na startGame()
   //alternativa da bude dugme save i onda se cuva u bazi

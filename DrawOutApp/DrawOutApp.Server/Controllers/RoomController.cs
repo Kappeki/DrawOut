@@ -152,13 +152,13 @@ namespace DrawOutApp.Server.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [HttpGet("myRooms")]
-        public async Task<ActionResult> GetMyRooms()
+        public async Task<ActionResult> GetMyRooms([FromQuery] bool? isAscending, [FromQuery] bool? isProtected)
         {
             var (userIsError, user, userError) = await _userService.GetUserSessionAsync(Request);
             if (userIsError)
                 return BadRequest(userError);
             var sessionId = user!._sessionKey;
-            var (isError, rooms, error) = await _roomService.GetMyRoomsAsync(sessionId);
+            var (isError, rooms, error) = await _roomService.GetMyRoomsAsync(sessionId, isAscending, isProtected);
             if (isError)
             {
                 return NotFound($"No rooms found.\n Error : {error}");

@@ -170,14 +170,33 @@ namespace DrawOutApp.Server.Services
                 return $"Error getting all rooms. : {error}";
             }
         }
-        public async Task<Result<List<RoomListItem>?, string>> GetMyRoomsAsync(string sessionId)
+        public async Task<Result<List<RoomListItem>?, string>> GetMyRoomsAsync(string sessionId, bool? isAscending = null, bool? isProtected = null)
         {
             List<RoomListItem> roomList = [];
             try
             {
                 var filter = Builders<Room>.Filter.Eq(r => r.RoomAdminId, sessionId);
-                
-                var roomEntities = await _roomRepository.GetAllRoomsAsync(filter);
+
+                if (isProtected != null)
+                {
+                    if (isProtected == true)
+                    {
+                        filter &= Builders<Room>.Filter.Ne(r => r.Password, null);
+                    }
+                    else
+                    {
+                        filter &= Builders<Room>.Filter.Eq(r => r.Password, null);
+                    }
+                }
+
+                SortDefinition<Room>? sort = null;
+
+                if (isAscending != null)
+                {
+                    sort = isAscending == true ? Builders<Room>.Sort.Ascending(r => r.PlayerCount) : Builders<Room>.Sort.Descending(r => r.PlayerCount);
+                }
+
+                var roomEntities = await _roomRepository.GetAllRoomsAsync(filter, sort);
 
                 roomList = _mapper.Map<List<RoomListItem>>(roomEntities);
 
@@ -213,8 +232,14 @@ namespace DrawOutApp.Server.Services
 
                 if (roomModel.CustomWords != null && roomModel.CustomWords.Count != 0)
                 {
-                    if (!roomModel.CustomWords.SequenceEqual(roomEntity.CustomWords!))
+                    if (roomEntity.CustomWords == null)
+                    {
                         updates.Add(update.Set(r => r.CustomWords, roomModel.CustomWords));
+                    }
+                    else if (!roomModel.CustomWords.SequenceEqual(roomEntity.CustomWords!))
+                    {
+                        updates.Add(update.Set(r => r.CustomWords, roomModel.CustomWords));
+                    }
                 }
                 if (roomModel.SelectedWordPack != null)
                 {

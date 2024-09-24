@@ -103,11 +103,11 @@ export class HomeComponent implements OnInit {
 
   createRoom() {
     const roomNameInput = document.getElementById('roomName');
-    
+    const snackbar = document.getElementById('snackbar');
+
     if (this.roomName === '') {
         roomNameInput?.classList.add('input-error');
         
-        const snackbar = document.getElementById('snackbar');
         snackbar!.innerText = 'Room name must be entered!';
         snackbar!.className = "show";
 
@@ -128,15 +128,21 @@ export class HomeComponent implements OnInit {
       next: (response: any) => {
         this.router.navigate(['/room/by-url', response.roomUrl]);
         console.log(`Room created with ${response.roomUrl}`);
+        this.closeRoomModal();
       },
       error: (error: any) => {
+        snackbar!.innerText = 'You cannot create a room while in one!';
+        snackbar!.className = "show";
+
+        setTimeout(() => {
+            snackbar!.className = snackbar!.className.replace("show", "");
+        }, 3000);
         console.error(error);
       },
       complete: () => {
         console.log('Room creation completed');
       }
     });
-    this.closeRoomModal();
   }
 
   togglePasswordVisibility() {

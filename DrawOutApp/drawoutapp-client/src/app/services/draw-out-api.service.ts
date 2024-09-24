@@ -37,8 +37,17 @@ export class DrawOutAPIService {
     return this.http.get<RoomListItem[]>(`${this.API_URL}/Room/allRooms`, { params, withCredentials: true });
   }
 
-  getMyRooms(): Observable<RoomListItem[]> {
-    return this.http.get<RoomListItem[]>(`${this.API_URL}/Room/myRooms`, { withCredentials: true });
+  getMyRooms(isAscending?: boolean, isProtected?: boolean): Observable<RoomListItem[]> {
+    let params = new HttpParams();
+
+    if (isAscending !== undefined) {
+      params = params.append('isAscending', isAscending.toString());
+    }
+    if (isProtected !== undefined) {
+      params = params.append('isProtected', isProtected.toString());
+    }
+
+    return this.http.get<RoomListItem[]>(`${this.API_URL}/Room/myRooms`, { params, withCredentials: true });
   }
 
   createRoom(roomName: string, password?: string): Observable<string> {
@@ -65,7 +74,7 @@ export class DrawOutAPIService {
 
   startGame(roomId: string): Observable<GameModelView> {
     const params = new HttpParams().set('roomId', roomId);
-    return this.http.get<GameModelView>(`${this.API_URL}/Room/StartGame`, { params });
+    return this.http.get<GameModelView>(`${this.API_URL}/Room/StartGame`, { params, responseType: 'text' as 'json' });
   }
 
   getRandomNickname(): Observable<string> {

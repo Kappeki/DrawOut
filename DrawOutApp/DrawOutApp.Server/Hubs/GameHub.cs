@@ -127,6 +127,8 @@ namespace DrawOutApp.Server.Hubs
             {
                 await _userService.RemoveRolesAsync(seshKey, [Role.Red, Role.Blue, Role.Painter, Role.TeamLeader]);
                 await Groups.RemoveFromGroupAsync(seshKey, gameKey!);
+                await Clients.Group(gameKey!).SendAsync("UserLeft", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                await _gameService.EndGameAsync(gameKey!);
             }
             await base.OnDisconnectedAsync(exception);
         }

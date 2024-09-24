@@ -17,13 +17,14 @@
     padding: 10px 20px;
     background-color: #eeeeee;
     border-bottom: 2px solid #ccc;
-    color: white; /* mozda bolje neka druga boja */
+    color: white;
     height: 40px;
     width: 100%;
 }
 
 .room-name {
     font-size: 30px;
+    font-weight: bold;
     text-shadow:
     -1px -1px 0 #000,
     1px -1px 0 #000,
@@ -146,6 +147,7 @@
     margin-right: 2px;
     margin-left: 5px;
     border: 2px solid #ccc;
+    max-height: 120px;
 }
 
 .invite-label {

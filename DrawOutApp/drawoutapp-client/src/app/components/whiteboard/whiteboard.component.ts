@@ -34,6 +34,7 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() drawEnabled: boolean = false;
   @Input() gameId: string = '';
+  @Input() isPainter: boolean = false;
 
   @ViewChild('canvas', { static: false }) canvas!: ElementRef<HTMLCanvasElement>;
   private ctx: CanvasRenderingContext2D | null = null;
