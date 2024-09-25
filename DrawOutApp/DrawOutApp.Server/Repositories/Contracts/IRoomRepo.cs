@@ -15,14 +15,11 @@ namespace DrawOutApp.Server.Repositories.Contracts
         Task RemovePlayerFromSetAsync(string id, string sessionId);
         Task<List<string>> GetPlayerSetAsync(string id);
         Task<IEnumerable<Room>> GetAllRoomsAsync(FilterDefinition<Room>? filter = null, SortDefinition<Room>? sort = null);
-        Task UpdateRoomAsync(Expression<Func<Room, bool>> filter, UpdateDefinition<Room> update, IClientSessionHandle? sesh = null);
         Task UpdateRoomAsync(FilterDefinition<Room> filter, 
             UpdateDefinition<Room> update, 
-            IClientSessionHandle? sesh = null); // Optional based on usage
+            IClientSessionHandle? sesh = null); 
         Task DeleteRoomAsync(string roomId);
         Task DeleteManyRoomsAsync(Expression<Func<Room, bool>> filter);
-
-        // New methods based on the updated RoomRepository
    
         Task<Room?> GetRoomByFilterAsync(Expression<Func<Room, bool>> filter,
             IClientSessionHandle? sesh = null);

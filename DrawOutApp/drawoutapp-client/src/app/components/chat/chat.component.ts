@@ -15,7 +15,7 @@ export class ChatComponent implements OnDestroy {
   @Input() enableGuessing: boolean = false;
   @Output() messageSent = new EventEmitter<string>();
   @Output() guessSent = new EventEmitter<string>();
-  @ViewChild('chatMessages') private chatMessagesContainer: ElementRef | undefined;  // To reference the message container
+  @ViewChild('chatMessages') private chatMessagesContainer: ElementRef | undefined;
   charCount: number = 0;
 
   ngAfterViewChecked(): void {
@@ -46,15 +46,15 @@ export class ChatComponent implements OnDestroy {
   }
 
   formatTimestamp(timestamp: number): string {
-    const date = new Date(timestamp * 1000); // Assuming timestamp is in seconds
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); // You can customize the format as needed
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   }
 
   updateCharacterCount(): void {
     this.charCount = this.chatInput.length;
-    
+
     const charCountElement = document.querySelector('.char-count');
-    
+
     if (charCountElement) {
       if (this.charCount > 0) {
         charCountElement.classList.add('visible');
@@ -64,7 +64,7 @@ export class ChatComponent implements OnDestroy {
         charCountElement.classList.remove('visible');
       }
     }
-  }  
+  }
 
   scrollToBottom(): void {
     if (this.chatMessagesContainer) {

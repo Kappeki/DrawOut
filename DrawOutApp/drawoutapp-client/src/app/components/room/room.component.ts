@@ -42,16 +42,11 @@ export class RoomComponent implements OnInit, OnDestroy {
   currentTeam: string | null = null;
   chatInput: string = '';
 
-  //game important properties
   availableWords: string[] = [];
   users: User[] = [];
   isRoomAdmin: boolean = false;
   roomId: string = '';
   enableGuessing = true;
-
-  //imati u vidu da NECE game da se pokrene ako admin NE udje iz room liste odnosno preko URL
-  //ili da model podataka sadrzi id
-  //trebalo bi i ovo da se ispravi kasnije
 
   constructor(
     private roomHubService: RoomHubService,
@@ -204,7 +199,7 @@ export class RoomComponent implements OnInit, OnDestroy {
         this.showSnackbar("Teams must have an equal number of players!");
         return;
       }
-  
+
       if (this.redTeam.length < 2 || this.blueTeam.length < 2) {
         this.showSnackbar("Each team must have 2 or more players!");
         return;
@@ -222,9 +217,9 @@ export class RoomComponent implements OnInit, OnDestroy {
     snackbar!.innerText = message;
     snackbar!.className = "show";
     console.log(this.redTeam.length, this.blueTeam.length);
-  
-    setTimeout(() => { 
-      snackbar!.className = snackbar!.className.replace("show", ""); 
+
+    setTimeout(() => {
+      snackbar!.className = snackbar!.className.replace("show", "");
     }, 3000);
   }
 
@@ -236,8 +231,8 @@ export class RoomComponent implements OnInit, OnDestroy {
       snackbar!.innerText = 'Invite link copied to clipboard!';
 
       // After 3 seconds, remove the show class
-      setTimeout(() => { 
-          snackbar!.className = snackbar!.className.replace("show", ""); 
+      setTimeout(() => {
+        snackbar!.className = snackbar!.className.replace("show", "");
       }, 3000);
     });
   }

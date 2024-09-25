@@ -24,8 +24,6 @@ export class RoomListComponent {
 
   constructor(private apiService: DrawOutAPIService, private router: Router) { }
 
-  //fale filteri
-
   ngOnInit(): void {
     this.loadRooms();
   }
@@ -89,14 +87,14 @@ export class RoomListComponent {
 
   toggleAscending(): void {
     this.isAscending = !this.isAscending;
-    if(this.activeTab === 'available') this.loadRooms();
-    if(this.activeTab === 'myrooms') this.loadMyRooms();
+    if (this.activeTab === 'available') this.loadRooms();
+    if (this.activeTab === 'myrooms') this.loadMyRooms();
   }
 
   toggleProtected(): void {
     this.isProtected = !this.isProtected;
-    if(this.activeTab === 'available') this.loadRooms();
-    if(this.activeTab === 'myrooms') this.loadMyRooms();
+    if (this.activeTab === 'available') this.loadRooms();
+    if (this.activeTab === 'myrooms') this.loadMyRooms();
   }
 
   onRoomSelected(roomItem: RoomListItem): void {

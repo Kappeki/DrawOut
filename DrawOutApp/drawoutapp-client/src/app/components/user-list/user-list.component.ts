@@ -13,7 +13,7 @@ export class UserListComponent {
   @Input() users: User[] = [];
   @Input() team: string[] = [];
   @Input() className: 'Spectators' | 'Red' | 'Blue' = 'Spectators';
-  @Input() currentTeam: string | null = null;  // Receive currentTeam from parent
+  @Input() currentTeam: string | null = null;
   @Input() roomState: string = 'Waiting';
   @Output() teamChange = new EventEmitter<{ oldTeam: string | null, newTeam: string }>();
 

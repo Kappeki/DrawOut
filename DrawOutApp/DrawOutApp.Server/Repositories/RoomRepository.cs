@@ -30,42 +30,31 @@ namespace DrawOutApp.Server.Repositories
         {
             var indexModels = new List<CreateIndexModel<Room>>
             {
-                // Create unique index on RoomName
                 new CreateIndexModel<Room>(
                 Builders<Room>.IndexKeys.Ascending(r => r.RoomName),
                 new CreateIndexOptions { Unique = true }),
 
-                // Create unique index on RoomURL for faster search
                 new CreateIndexModel<Room>(
                 Builders<Room>.IndexKeys.Ascending(r => r.RoomURL),
                 new CreateIndexOptions { Unique = true }),
 
-                // Index on PlayerCount for filtering rooms based on number of players
                 new CreateIndexModel<Room>(
                 Builders<Room>.IndexKeys.Ascending(r => r.PlayerCount)),
 
-                // Index on RoomState for faster filtering of rooms that are not in-game
+                
                 new CreateIndexModel<Room>(
                 Builders<Room>.IndexKeys.Ascending(r => r.RoomState)),
 
-                // Index on rooms with no password for expiration logic
-                //new CreateIndexModel<Room>(
-                //Builders<Room>.IndexKeys.Ascending(r => string.IsNullOrEmpty(r.Password))),
-
-                // Index on RoomAdminId for faster retrieval in "my rooms" section
                 new CreateIndexModel<Room>(
                 Builders<Room>.IndexKeys.Ascending(r => r.RoomAdminId)),
 
-                // Create the TTL index for room expiration (initially not applied)
                 new CreateIndexModel<Room>(
                 Builders<Room>.IndexKeys.Ascending(r => r.ExpirationTime),
                 new CreateIndexOptions { ExpireAfter = TimeSpan.FromSeconds(0) })
             };
 
-            // Create all indexes in a single batch
             await _roomsCollection.Indexes.CreateManyAsync(indexModels);
         }
-
 
         public async Task<List<string>> GetAllPackNamesAsync()
         {
@@ -74,8 +63,6 @@ namespace DrawOutApp.Server.Repositories
                                                  .ToListAsync();
             return packs;
         }
-
-        // Method to retrieve words by pack name
         public async Task<List<string>> GetWordsByPackNameAsync(string packName)
         {
             var filter = Builders<WordPack>.Filter.Eq(p => p.Name, packName);
@@ -87,6 +74,7 @@ namespace DrawOutApp.Server.Repositories
         {
             return _mongoClient.StartSession();
         }
+
         public async Task AddPlayerToSetAsync(string id, string sessionId)
         {
             var objId = ObjectId.Parse(id);
@@ -122,20 +110,10 @@ namespace DrawOutApp.Server.Repositories
         }
         public async Task<IEnumerable<Room>> GetAllRoomsAsync(FilterDefinition<Room>? filter = null, SortDefinition<Room>? sort = null)
         {
-            //compound assignment bas kul 
             filter ??= Builders<Room>.Filter.Empty;
             return await _roomsCollection.Find(filter).Sort(sort).ToListAsync();
         }
 
-        public virtual async Task UpdateRoomAsync(Expression<Func<Room,bool>> filter, 
-            UpdateDefinition<Room> update, 
-            IClientSessionHandle? sesh = null)
-        {
-            if (sesh == null)
-                await _roomsCollection.UpdateOneAsync(filter, update);
-            else
-                await _roomsCollection.UpdateOneAsync(sesh, filter, update);
-        }
         public virtual async Task UpdateRoomAsync(FilterDefinition<Room> filter, 
             UpdateDefinition<Room> update, 
             IClientSessionHandle? sesh = null)

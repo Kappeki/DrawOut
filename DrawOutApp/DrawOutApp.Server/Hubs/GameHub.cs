@@ -132,6 +132,7 @@ namespace DrawOutApp.Server.Hubs
             }
             await base.OnDisconnectedAsync(exception);
         }
+        
         private bool IsAdmin()
         {
             var roles = Context.Items["Roles"] as List<string>;

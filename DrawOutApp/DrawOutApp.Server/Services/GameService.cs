@@ -45,38 +45,32 @@ namespace DrawOutApp.Server.Services
         public async Task StartGameAsync(string gameId, GameTimers gameTimers)
         {
             var command = new StartGameCommand(this, _userService, gameId, gameTimers);
-            //_invoker.EnqueueCommand(gameId, command);
             await _invoker.EnqueueCommandAsync(gameId, command);
         }
         public async Task InitNextRoundAsync(GameRoundModel gameRoundModel, GameTimers gameTimers)
         {
             var command = new InitializeNextRoundCommand(this, _userService, _hubContext.Clients, gameTimers, gameRoundModel);
-            //_invoker.EnqueueCommand(gameRoundModel._gameId, command);
             await _invoker.EnqueueCommandAsync(gameRoundModel._gameId, command);
         }
         public async Task StartRoundAsync(string gameId, GameTimers gameTimers)
         {
             var command = new StartRoundCommand(this, _hubContext.Clients, gameId, gameTimers);
-            //_invoker.EnqueueCommand(gameId, command);
             await _invoker.EnqueueCommandAsync(gameId, command);
         }
 
         public async Task StartStealAsync(string gameId, GameTimers gameTimers)
         {
             var command = new StartStealCommand(this, _hubContext.Clients, gameId, gameTimers);
-            //_invoker.EnqueueCommand(gameId, command);
             await _invoker.EnqueueCommandAsync(gameId, command);
         }
         public async Task EndRoundAsync(string gameId, GameTimers gameTimers)
         {
             var command = new EndRoundCommand(this, _userService, gameId, gameTimers);
-            //_invoker.EnqueueCommand(gameId, command);
             await _invoker.EnqueueCommandAsync(gameId, command);
         }
         public async Task EndGameAsync(string gameId)
         {
             var command = new EndGameCommand(this, _userService, gameId);
-            //_invoker.EnqueueCommand(gameId, command);
             await _invoker.EnqueueCommandAsync(gameId, command);
         }
 
@@ -86,7 +80,7 @@ namespace DrawOutApp.Server.Services
             var game = await _gameRepo.GetGameAsync(gameId);
             var gameRound = _mapper.Map<GameRoundModel>(game);
             if (game!.GameState != GameState.Standby)
-                return; // Ignore if not in word selection phase
+                return; 
 
             gameRound.SelectedWord = word;
             var updatedModel = await _gameRepo.UpdateGameRoundAsync(gameRound);
@@ -287,7 +281,7 @@ namespace DrawOutApp.Server.Services
                 SelectedWord = string.Empty
             };
 
-            await _gameRepo.SaveGameAsync(_mapper.Map<Game>(gameModel), TimeSpan.FromMinutes(45));
+            await _gameRepo.SaveGameAsync(_mapper.Map<Game>(gameModel), TimeSpan.FromMinutes(30));
             await _gameRepo.UpdateGameRoundAsync(gameRoundModel);
 
             return gameRoundModel;
@@ -314,7 +308,7 @@ namespace DrawOutApp.Server.Services
             return game.SelectedWord == guess;
         }
         
-        //helper methods for object creation
+        //helper methods for game object creation
         private List<string> InitializePlayerOrder(List<UserModel> users)
         {
             var redTeam = users.Where(user => user.Roles != null && user.Roles.Contains("Red")).ToList();

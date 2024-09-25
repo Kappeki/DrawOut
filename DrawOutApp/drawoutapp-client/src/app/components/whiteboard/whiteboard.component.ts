@@ -21,9 +21,9 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
   colors: string[] = [
     '#ffffff', '#c1c1c1', '#ef130b', '#ff7100', '#ffe400',
     '#00cc00', '#00ff91', '#00b2ff', '#231fd3', '#a300ba',
-    '#df69a7', '#ffac8e', '#a0522d', 
-    '#000000', '#505050', '#740b07', '#c23800', '#e8a200', 
-    '#004619', '#00785d', '#00569e', '#0e0865', '#550069', 
+    '#df69a7', '#ffac8e', '#a0522d',
+    '#000000', '#505050', '#740b07', '#c23800', '#e8a200',
+    '#004619', '#00785d', '#00569e', '#0e0865', '#550069',
     '#873554', '#cc774d', '#63300d'
   ];
   tools = ['Brush', 'Fill', 'Eraser'];
@@ -62,7 +62,7 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setupListeners();
 
     fromEvent<MouseEvent>(this.canvas.nativeElement, 'mousemove')
-      .pipe(throttleTime(20)) // Adjust the time as needed (in ms)
+      .pipe(throttleTime(20))
       .subscribe(event => this.onMouseMove(event));
   }
 
@@ -88,8 +88,6 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
     canvasElement.addEventListener('mousemove', this.onMouseMove.bind(this));
     canvasElement.addEventListener('mouseup', this.onMouseUp.bind(this));
     canvasElement.addEventListener('mouseout', this.onMouseOut.bind(this));
-
-    //window.addEventListener('resize', this.resizeCanvas.bind(this));
   }
 
   private resizeCanvas(): void {
@@ -259,8 +257,10 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
       if (action.toolType === 'Eraser') {
         this.ctx!.strokeStyle = '#FFFFFF';
       }
+      else {
+        this.ctx!.strokeStyle = action.color!;
+      }
       this.ctx!.lineTo(action.x, action.y);
-      this.ctx!.strokeStyle = action.color!;
       this.ctx!.lineWidth = action.brushSize;
       this.ctx!.stroke();
     } else if (action.actionType === 'End') {
@@ -332,12 +332,6 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
       }));
   }
 
-  private restoreCanvas(actions: DrawingActionView[]): void {
-    this.ctx!.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-    //actions.forEach(action => this.applyDrawingAction(action));
-    actions.map(action => this.applyDrawingAction(action));
-  }
-
   private fillCanvas(x: number, y: number, fillColor: string): void {
     const ctx = this.ctx!;
     const canvas = this.canvas.nativeElement;
@@ -367,7 +361,7 @@ export class WhiteboardComponent implements OnInit, AfterViewInit, OnDestroy {
       r: parseInt(fillColor.slice(1, 3), 16),
       g: parseInt(fillColor.slice(3, 5), 16),
       b: parseInt(fillColor.slice(5, 7), 16),
-      a: 255 // Assuming fully opaque
+      a: 255
     };
 
     if (targetColor.r === fillColorObj.r &&

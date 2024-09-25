@@ -10,9 +10,6 @@ namespace DrawOutApp.Server.Repositories.Contracts
         Task<Game?> GetGameAsync(string gameId);
         Task<Game?> UpdateGameRoundAsync(GameRoundModel gameRound, TimeSpan? expiry = null);
         Task<int> IncrementScoreAsync(string gameId, string teamName, int incrementValue);
-        Task DecrementTimerAsync(string gameId, string timerName, int decrementValue);
-        Task<bool> UpdateSelectedWordAsync(string gameId, string selectedWord);
         Task DeleteGameAsync(string gameId);
-        Task<T?> GetFromHashSet<T>(string setKey, string valueKey);
     }
 }

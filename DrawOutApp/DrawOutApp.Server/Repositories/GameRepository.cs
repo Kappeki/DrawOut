@@ -59,8 +59,6 @@ namespace DrawOutApp.Server.Repositories
 
             await _database.KeyDeleteAsync($"painter-order:{game.RoomId}");
 
-            // Serialize the complex properties
-            
             var teamLeadersSerialized = game.TeamLeaders != null ? string
                 .Join(",", game.TeamLeaders.Select(kv => $"{kv.Key}:{kv.Value}")) : string.Empty;
 
@@ -116,7 +114,6 @@ namespace DrawOutApp.Server.Repositories
             return await GetGameAsync(gameRound._gameId);
         }
 
-        //vraca score, cisto kao provera za sad, mozda nepotrebno
         public async Task<int> IncrementScoreAsync(string gameId, string teamName, int incrementValue)
         {
             if (incrementValue <= 0) throw new ArgumentException("Increment value must be positive.", nameof(incrementValue));
@@ -125,45 +122,11 @@ namespace DrawOutApp.Server.Repositories
             await _database.HashIncrementAsync(gameId, field, incrementValue);
             return int.Parse((await _database.HashGetAsync(gameId, field))!);
         }
-        public async Task DecrementTimerAsync(string gameId, string timerName, int decrementValue)
-        {
-            if (decrementValue <= 0) throw new ArgumentException("Decrement value must be positive.", nameof(decrementValue));
-
-            var field = $"{timerName}Timer";
-            var currentValue = (int)await _database.HashGetAsync(gameId, field);
-
-            // Ensure timer doesn't go below zero
-            var newValue = Math.Max(0, currentValue - decrementValue);
-            await _database.HashSetAsync(gameId, [new HashEntry(field, newValue.ToString())]);
-        }
-        public async Task<bool> UpdateSelectedWordAsync(string gameId, string selectedWord)
-        {
-            if (string.IsNullOrEmpty(gameId)) throw new ArgumentNullException(nameof(gameId));
-            if (selectedWord == null) throw new ArgumentNullException(nameof(selectedWord));
-
-            // Update the SelectedWord field in the hash
-            await _database.HashSetAsync(gameId, [new HashEntry("SelectedWord", selectedWord)]);
-
-            return true;
-        }
 
         public async Task DeleteGameAsync(string gameId)
         {
             if (!_database.KeyExists(gameId)) { throw new ArgumentException("GameSessionId does not exist"); }
             await _database.KeyDeleteAsync(gameId);
-        }
-        private async Task DeleteKeysAsync(IEnumerable<RedisKey> keys)
-        {
-            foreach (var key in keys)
-            {
-                await _database.KeyDeleteAsync(key);
-            }
-        }
-        public async Task<T?> GetFromHashSet<T>(string setKey, string valueKey)
-        {
-            var value = await _database.HashGetAsync(setKey, valueKey);
-
-            return value.IsNullOrEmpty ? default : JsonConvert.DeserializeObject<T>(value);
         }
     }
 }

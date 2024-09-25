@@ -7,6 +7,9 @@ using DrawOutApp.Server.Services.Contracts;
 
 namespace DrawOutApp.Server.Services
 {
+    /// <summary>
+    /// DEPRECETED SERVICE CLASS NOT USED
+    /// </summary>
     public class DrawingActionService : IDrawingActionService
     {
         private readonly IDrawingActionRepo _repository;

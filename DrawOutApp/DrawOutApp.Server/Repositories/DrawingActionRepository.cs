@@ -8,6 +8,10 @@ namespace DrawOutApp.Server.Repositories
 {
     public class DrawingActionRepository : IDrawingActionRepo
     {
+        /// <summary>
+        /// DEPRECATED REPOSITORY, NOT USED BECAUSE OF SERVER ISSUES
+        /// </summary>
+
         private readonly IDatabase _database;
         public DrawingActionRepository(IConnectionMultiplexer redis)
         {

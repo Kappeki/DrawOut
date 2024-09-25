@@ -24,7 +24,6 @@ export class RoomSettingsComponent {
 
   wordPacks: string[] = [];
 
-  // Add a Subject to manage the custom words input
   private customWordsSubject = new Subject<string>();
 
   constructor(private apiService: DrawOutAPIService) { }
@@ -61,7 +60,6 @@ export class RoomSettingsComponent {
     }
   }
 
-  // Throttled update method for custom words
   onCustomWordsChanged(newCustomWords: string) {
     if (this.isRoomAdmin && this.room) {
       this.customWordsSubject.next(newCustomWords);  // Emit the value to the Subject
@@ -72,6 +70,4 @@ export class RoomSettingsComponent {
     this.customWords = newCustomWords;
     this.settingChanged.emit({ settingName: 'CustomWords', settingValue: newCustomWords });
   }
-  //emituje se nazad room komponenti i onda se za taj game ubace reci u odabrani word pack na startGame()
-  //alternativa da bude dugme save i onda se cuva u bazi
 }

@@ -15,7 +15,6 @@ namespace DrawOutApp.Server.Games
             _logger = logger;
         }
 
-        // Enqueue a command into a game's channel
         public async Task EnqueueCommandAsync(string gameId, IGameCommand command)
         {
             var channel = _gameChannels.GetOrAdd(gameId, _ => Channel.CreateUnbounded<IGameCommand>());
@@ -33,7 +32,7 @@ namespace DrawOutApp.Server.Games
                     _ = ProcessGameQueueAsync(gameId, stoppingToken);
                 }
 
-                await Task.Delay(1000, stoppingToken);  // Throttle the loop to avoid CPU hogging
+                await Task.Delay(1000, stoppingToken); 
             }
 
             _logger.LogInformation("GameFlowInvoker stopped at {Time}", DateTime.UtcNow);
@@ -54,7 +53,7 @@ namespace DrawOutApp.Server.Games
                         {
                             _logger.LogInformation($"EndGameCommand processed, removing game {gameId} from queue.");
                             _gameChannels.TryRemove(gameId, out _);
-                            break; // Stop processing this game as it has ended
+                            break; 
                         }
                     }
                     catch (Exception ex)
@@ -65,6 +64,10 @@ namespace DrawOutApp.Server.Games
             }
         }
 
+
+        /// <summary>
+        ///  previous deprecated attempts
+        /// </summary>
 
         /*private readonly ConcurrentDictionary<string,
             ConcurrentQueue<IGameCommand>> _gameQueues = new();
@@ -135,73 +138,73 @@ namespace DrawOutApp.Server.Games
         }*/
 
 
-        //protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        //{
-        //    _logger.LogInformation("GameFlowInvoker started at {Time}", DateTime.UtcNow);
+        /*protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _logger.LogInformation("GameFlowInvoker started at {Time}", DateTime.UtcNow);
 
-        //    while (!stoppingToken.IsCancellationRequested)
-        //    {
-        //        var tasks = new List<Task>();
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var tasks = new List<Task>();
 
-        //        foreach (var gameId in _gameQueues.Keys)
-        //        {
-        //            if (_gameQueues.TryGetValue(gameId, out var queue) && queue.TryDequeue(out var command))
-        //            {
-        //                tasks.Add(Task.Run(async () =>
-        //                {
-        //                    try
-        //                    {
-        //                        _logger.LogInformation("Executing command for game {GameId} at {Time}", gameId, DateTime.UtcNow);
-        //                        await command.ExecuteAsync();
-        //                    }
-        //                    catch (Exception ex)
-        //                    {
-        //                        _logger.LogError(ex, "Error executing command for game {GameId}", gameId);
-        //                    }
-        //                }, stoppingToken));
-        //            }
-        //        }
+                foreach (var gameId in _gameQueues.Keys)
+                {
+                    if (_gameQueues.TryGetValue(gameId, out var queue) && queue.TryDequeue(out var command))
+                    {
+                        tasks.Add(Task.Run(async () =>
+                        {
+                            try
+                            {
+                                _logger.LogInformation("Executing command for game {GameId} at {Time}", gameId, DateTime.UtcNow);
+                                await command.ExecuteAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error executing command for game {GameId}", gameId);
+                            }
+                        }, stoppingToken));
+                    }
+                }
 
-        //        await Task.WhenAll(tasks); // Run tasks concurrently
+                await Task.WhenAll(tasks); // Run tasks concurrently
 
-        //        await Task.Delay(100, stoppingToken);
-        //    }
+                await Task.Delay(100, stoppingToken);
+            }
 
-        //    _logger.LogInformation("GameFlowInvoker stopped at {Time}", DateTime.UtcNow);
-        //}
+            _logger.LogInformation("GameFlowInvoker stopped at {Time}", DateTime.UtcNow);
+        }
 
 
-        //private readonly ConcurrentQueue<Func<Task>> _gameEvents = new ConcurrentQueue<Func<Task>>();
+        private readonly ConcurrentQueue<Func<Task>> _gameEvents = new ConcurrentQueue<Func<Task>>();
 
-        //private readonly ILogger<GameFlowInvoker> _logger;
+        private readonly ILogger<GameFlowInvoker> _logger;
 
-        //public GameFlowInvoker(ILogger<GameFlowInvoker> logger)
-        //{
-        //    _logger = logger;
-        //}
+        public GameFlowInvoker(ILogger<GameFlowInvoker> logger)
+        {
+            _logger = logger;
+        }
 
-        //public void EnqueueEvent(Func<Task> gameEvent)
-        //{
-        //    _logger.LogInformation("Event enqueued at {Time}", DateTime.UtcNow);
-        //    _gameEvents.Enqueue(gameEvent);
-        //}
+        public void EnqueueEvent(Func<Task> gameEvent)
+        {
+            _logger.LogInformation("Event enqueued at {Time}", DateTime.UtcNow);
+            _gameEvents.Enqueue(gameEvent);
+        }
 
-        //protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        //{
-        //    _logger.LogInformation("GameFlowInvoker started at {Time}", DateTime.UtcNow);
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            _logger.LogInformation("GameFlowInvoker started at {Time}", DateTime.UtcNow);
 
-        //    while (!stoppingToken.IsCancellationRequested)
-        //    {
-        //        if (_gameEvents.TryDequeue(out var gameEvent))
-        //        {
-        //            _logger.LogInformation("Processing an event at {Time}", DateTime.UtcNow);
-        //            await gameEvent();
-        //        }
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                if (_gameEvents.TryDequeue(out var gameEvent))
+                {
+                    _logger.LogInformation("Processing an event at {Time}", DateTime.UtcNow);
+                    await gameEvent();
+                }
 
-        //        await Task.Delay(100, stoppingToken);
-        //    }
+                await Task.Delay(100, stoppingToken);
+            }
 
-        //    _logger.LogInformation("GameFlowInvoker stopped at {Time}", DateTime.UtcNow);
-        //}
+            _logger.LogInformation("GameFlowInvoker stopped at {Time}", DateTime.UtcNow);
+        }*/
     }
 }

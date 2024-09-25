@@ -77,21 +77,10 @@ namespace DrawOutApp.Server.Repositories
             return value.IsNullOrEmpty ? default(T) : JsonConvert.DeserializeObject<T>(value!);
         }
 
-        public async Task<string> GetConnIdFromHash(string setKey, string valueKey)
-        {
-            var value = await _database.HashGetAsync(setKey, valueKey);
-            return value.IsNullOrEmpty ? string.Empty : value.ToString();
-        }
-
         public async Task DeleteUserAsync(string sessionKey)
         {
             if (!_database.KeyExists(sessionKey)) throw new ArgumentException($"User does not exist with ID {sessionKey}");
             await _database.KeyDeleteAsync(sessionKey);
-        }
-
-        public Task<IEnumerable<User>> GetAllUsersAsync()
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<User?> GetUserAsync(string key)

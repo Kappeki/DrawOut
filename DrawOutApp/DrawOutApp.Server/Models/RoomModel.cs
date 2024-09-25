@@ -12,9 +12,9 @@ namespace DrawOutApp.Server.Models
 
     public class RoomListItem
     {
-        public string RoomId { get; init; } = null!;  // Read-only, set during mapping
+        public string RoomId { get; init; } = null!;  
         public string RoomName { get; set; } = null!;
-        public bool HasPassword { get; set; }         // Indicates if the room has a password
+        public bool HasPassword { get; set; }        
         public string RoomState { get; set; } = null!;
         public int PlayerCount { get; set; }
     }

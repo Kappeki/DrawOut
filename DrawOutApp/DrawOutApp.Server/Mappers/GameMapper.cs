@@ -6,7 +6,6 @@ namespace DrawOutApp.Server.Mappers
 {
     public class GameMapper : Profile
     {
-        // Mapping from Game entity to GameModel
         public GameMapper()
         {
             CreateMap<Game, GameModel>()
@@ -16,7 +15,7 @@ namespace DrawOutApp.Server.Mappers
                 .ForMember(dest => dest.PainterOrder, opt => opt.MapFrom(src => src.PainterOrder))
                 .ForMember(dest => dest.TeamLeaders, opt => opt.MapFrom(src => src.TeamLeaders));
 
-            // Mapping from GameModel back to Game entity (if needed)
+            
             CreateMap<GameModel, Game>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => src._id))
                 .ForMember(dest => dest.RoomId, opt => opt.MapFrom(src => src.RoomId))
@@ -25,7 +24,6 @@ namespace DrawOutApp.Server.Mappers
                 .ForMember(dest => dest.TeamLeaders, opt => opt.MapFrom(src => src.TeamLeaders))
                 .ForMember(dest => dest.MainTimer, opt => opt.MapFrom(src => src.MainTimer))
                 .ForMember(dest => dest.StealTimer, opt => opt.MapFrom(src => src.StealTimer))
-                // The following members need to be explicitly ignored or initialized
                 .ForMember(dest => dest.GameState, opt => opt.Ignore())
                 .ForMember(dest => dest.BlueScore, opt => opt.Ignore())
                 .ForMember(dest => dest.RedScore, opt => opt.Ignore())
@@ -33,7 +31,6 @@ namespace DrawOutApp.Server.Mappers
                 .ForMember(dest => dest.CurrentPainter, opt => opt.Ignore())
                 .ForMember(dest => dest.SelectedWord, opt => opt.Ignore());
 
-            // Mapping from Game entity to GameRound
             CreateMap<Game, GameRoundModel>()
                 .ForMember(dest => dest._gameId, opt => opt.MapFrom(src => src._id))
                 .ForMember(dest => dest.GameState, opt => opt.MapFrom(src => src.GameState.ToString()))
@@ -44,7 +41,6 @@ namespace DrawOutApp.Server.Mappers
                 .ForMember(dest => dest.SelectedWord, opt => opt.MapFrom(src => src.SelectedWord));
                
 
-            // Mapping from GameRound back to Game entity (if needed)
             CreateMap<GameRoundModel, Game>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => src._gameId))
                 .ForMember(dest => dest.GameState, opt => opt.MapFrom(src => Enum.Parse<GameState>(src.GameState!)))
@@ -53,7 +49,6 @@ namespace DrawOutApp.Server.Mappers
                 .ForMember(dest => dest.CurrentRound, opt => opt.MapFrom(src => src.CurrentRound))
                 .ForMember(dest => dest.CurrentPainter, opt => opt.MapFrom(src => src.CurrentPainter))
                 .ForMember(dest => dest.SelectedWord, opt => opt.MapFrom(src => src.SelectedWord))
-                // The following members need to be explicitly ignored or initialized
                 .ForMember(dest => dest.MainTimer, opt => opt.Ignore())
                 .ForMember(dest => dest.StealTimer, opt => opt.Ignore())
                 .ForMember(dest => dest.RoomId, opt => opt.Ignore())

@@ -21,8 +21,6 @@ namespace DrawOutApp.Server.Controllers
             _gameService = gameService;
         }
 
-        //znaci na front mora se stavi samo da treba da se unese ime sobe i da se klikne na create room
-        //i moze da se postavi i password i ne mora sa checkbox 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [HttpPost]

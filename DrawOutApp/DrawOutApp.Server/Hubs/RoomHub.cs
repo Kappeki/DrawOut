@@ -28,12 +28,13 @@ namespace DrawOutApp.Server.Hubs
         {
             var seshKey = Context.Items["SeshKey"]!.ToString();
             var roles = Context.Items["Roles"] as List<string>;
-            Context.Items["RoomId"] = roomId;
             if (roles != null && roles.Count > 0)
             {
                 await Clients.Caller.SendAsync("ReceiveMessage", "Server", "You cannot join multiple rooms simultaneously.", DateTimeOffset.UtcNow.ToUnixTimeSeconds());
                 return false;
             }
+
+            Context.Items["RoomId"] = roomId;
 
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId);
             
@@ -159,6 +160,7 @@ namespace DrawOutApp.Server.Hubs
 
             await _roomService.UpdateRoomStateAsync(roomId!, Enum.Parse<RoomState>(roomState));
 
+            await _chatRepo.ClearChatAsync(roomId!);
             await SendConnectedRoomById(roomId!);
             await SendConnectedUsers(roomId!);
         }
@@ -243,6 +245,7 @@ namespace DrawOutApp.Server.Hubs
             if(!Context.Items.ContainsKey("RoomId"))
             {
                 await base.OnDisconnectedAsync(exception);
+                return;
             }
             
             var seshKey = Context.Items["SeshKey"]!.ToString();

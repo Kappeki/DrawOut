@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DrawOutApp.Server.Controllers
 {
+    /// <summary>
+    /// deprecated controller!!
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class GameController : ControllerBase
@@ -50,8 +53,6 @@ namespace DrawOutApp.Server.Controllers
 
             return Ok(game);
         }*/
-
-
 
     }
 }

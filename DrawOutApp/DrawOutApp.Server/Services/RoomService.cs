@@ -27,8 +27,6 @@ namespace DrawOutApp.Server.Services
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-
-        //najverovatnije greska u ovom delu koda
         public async Task<Result<RoomModel,string>> CreateRoomAsync(string creatingUserId, string roomName, string? password = null)
         {
             try
@@ -41,10 +39,7 @@ namespace DrawOutApp.Server.Services
                     RoomState = RoomState.Waiting,
                     RoomURL = GenerateRoomURL(roomName),
                     RoundTime = RoundTime.Medium
-                    //timeEalapsed?
                 };
-
-                //logika za game entitet mozda
 
                 if (password != null)
                 {
@@ -292,8 +287,6 @@ namespace DrawOutApp.Server.Services
             }
             return false;
         }
-
-
         public async Task DeleteRoomAsync(string roomId)
         {
             await _roomRepository.DeleteRoomAsync(roomId);
@@ -383,7 +376,6 @@ namespace DrawOutApp.Server.Services
                 return $"Error getting player id's. : {error}";
             }
         }
-
         public async Task SetRoomExpirationAsync(string roomId)
         {
             try
@@ -417,12 +409,9 @@ namespace DrawOutApp.Server.Services
         {
              return await _roomRepository.GetAllPackNamesAsync();
         }
-
         public async Task<List<string>> GetWordsByPackNameAsync(string packName)
         {
             return await _roomRepository.GetWordsByPackNameAsync(packName.ToLower());
         }
-
-
     }
 }

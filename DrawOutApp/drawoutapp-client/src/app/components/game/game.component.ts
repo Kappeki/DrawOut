@@ -90,7 +90,7 @@ export class GameComponent implements OnInit {
           this.displayNotification('Steal time!');
         }
         else if (this.gameRoundView.gameState === 'RoundEnded') {
-          if(this.winningTeam === '') {
+          if (this.winningTeam === '') {
             this.displayNotification('Round ended!');
           }
           else {
@@ -133,7 +133,7 @@ export class GameComponent implements OnInit {
         this.gameHubService.hubConnection.on('GameEnded', (roomState: string, team: string) => {
           if (roomState) {
             this.gameEnded = true;
-            if(team === 'Tie') {
+            if (team === 'Tie') {
               this.displayNotification('It\'s a tie!', 5000, roomState);
             } else {
               this.displayNotification(`${team} won the game!`, 5000, roomState);
@@ -214,7 +214,7 @@ export class GameComponent implements OnInit {
   private displayNotification(message: string, timeoutInterval: number = 3000, roomState: string | null = null): void {
     this.notificationText = message;
     setTimeout(() => {
-      if(this.gameEnded === true) {
+      if (this.gameEnded === true) {
         this.roomStateChange.emit(roomState!);
       }
       this.notificationText = '';
@@ -235,18 +235,11 @@ export class GameComponent implements OnInit {
         data: { words: this.selectables },
         disableClose: true
       });
-      this.autoCloseTimeout = setTimeout(async () => { 
+      this.autoCloseTimeout = setTimeout(async () => {
         const randomWord = this.selectables[Math.floor(Math.random() * this.selectables.length)];
         await this.gameHubService.selectWord(randomWord);
         this.dialog.closeAll();
       }, 14500);
     }
   }
-  private showPainterSelectOverlay(nickname: string): void {
-    const overlay = document.createElement('div');
-    overlay.className = 'painter-selecting-overlay';
-    overlay.innerText = `${nickname} is selecting a word...`;
-    document.querySelector('.game-container')!.appendChild(overlay);
-  }
-
 }

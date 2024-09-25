@@ -62,9 +62,9 @@ namespace DrawOutApp.Server.Controllers
                 return NotFound(error);
             }
 
+            //ne koristi se
             if (!User.HasClaim(c => c.Type == "SessionId"))
             {
-                // Add the session ID as a claim
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, sessionKey)
@@ -72,7 +72,6 @@ namespace DrawOutApp.Server.Controllers
                 var identity = new ClaimsIdentity(claims, "UserSession");
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
             }
-
 
             return Ok(user);
         }

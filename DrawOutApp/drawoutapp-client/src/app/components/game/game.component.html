@@ -12,6 +12,7 @@
     </ng-template>
 
     <div class="game-canvas-container">
+        <!-- Game Info -->
         <div class="score-word-container">
             <div class="score-container redTeam">
                 <span>Red Team - {{gameRoundView?.redScore}}</span>
@@ -45,9 +46,8 @@
                 </div>
             </div>
 
-            <app-whiteboard [drawEnabled]="this.drawEnabled" 
-            [gameId]="gameModelView?._id!"
-            [isPainter]="this.isPainter">
+            <app-whiteboard [drawEnabled]="this.drawEnabled" [gameId]="gameModelView?._id!"
+                [isPainter]="this.isPainter">
             </app-whiteboard>
         </div>
     </div>
